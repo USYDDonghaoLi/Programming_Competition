@@ -1,5 +1,5 @@
 # Programming_Competition
-Store my own codes for Programmiing Competition
+Store my own codes for Programming Competition
 
 ## Nowcoder:
 
