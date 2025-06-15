@@ -22,3 +22,26 @@ Weekly Contest for Leetcode holding on every **Sunday 10:30AM**.
 
 ### Biweekly_Contest
 Biweekly Contest for Leetcode holding on every **Saturday 10:30PM**.
+
+## CodeForces
+
+Contest for CodeForces holding on some day at **10:35 PM**.
+
+### Div.1
+
+### Div.2
+
+### Div.3
+
+### Div.4
+
+## Atcoder
+
+### ABC
+Weekly contest for Atcoder holding on every **Saturday 8:00 PM**.
+
+### ARC
+
+### AGC
+
+## Codechef
