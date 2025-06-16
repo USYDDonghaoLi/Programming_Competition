@@ -14,28 +14,11 @@ Weekly Contest for Leetcode holding on every **Sunday 10:30AM**.
 ### Biweekly_Contest
 Biweekly Contest for Leetcode holding on every **Saturday 10:30PM**.
 
-## CodeForces
-
-Contest for CodeForces holding on some day at **10:35 PM**.
-
-- A: Div.1
-
-- B: Div.2
-
-- C: Div.3
-
-- D: Div.4
-
-## Atcoder
-
-### ABC
-Weekly contest for Atcoder holding on every **Saturday 8:00 PM**.
-
-### ARC
-
-### AGC
-
 ## Nowcoder:
+
+**Link:** https://ac.nowcoder.com/
+
+**Profile:** https://ac.nowcoder.com/acm/contest/profile/402661764
 
 ### Weekly_Contest:
 Weekly Contest for Nowcoder holding on every **Sunday 7:00 PM**.
@@ -49,7 +32,41 @@ Weekly Contest for Nowcoder holding on every **Friday 7:00 PM**.
 
 - C: Grand Level
 
+## CodeForces
+
+**Link:** https://codeforces.com/
+
+**Profile:** https://codeforces.com/profile/USYDLDH
+
+Contest for CodeForces holding on some day at **10:35 PM**.
+
+- A: Div.1
+
+- B: Div.2
+
+- C: Div.3
+
+- D: Div.4
+
+## Atcoder
+
+**Link:** https://atcoder.jp/
+
+**Profile:** https://atcoder.jp/users/USYD_LDH
+
+### ABC
+Weekly contest for Atcoder holding on every **Saturday 8:00 PM**.
+
+### ARC
+
+### AGC
+
 ## Codechef
+
+**Link:** https://www.codechef.com/
+
+**Profile:** https://www.codechef.com/users/doli2821
+
 Weekly contest for Codechef holding on every **Wednesday 10:30 PM**
 
 - A: Rated for 5-Star
