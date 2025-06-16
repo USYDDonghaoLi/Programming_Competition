@@ -95,7 +95,7 @@ Find which box each ball was put into.
 
 ### Input
 Input is given from Standard Input in the following format:
-```{latex}
+```
 N Q
 X_1
 X_2
