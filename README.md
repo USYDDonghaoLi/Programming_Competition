@@ -2,8 +2,10 @@
 Store my own codes for Programming Competition
 
 
-
 ## Leetcode:
+
+**Link: ** https://leetcode.com/contest/
+**Profile: ** https://leetcode.com/u/Ldh1315109/
 
 ### Weekly_Contest:
 Weekly Contest for Leetcode holding on every **Sunday 10:30AM**.
