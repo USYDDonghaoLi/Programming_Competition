@@ -32,6 +32,8 @@ Weekly Contest for Nowcoder holding on every **Friday 7:00 PM**.
 
 - C: Grand Level
 
+### Other_Contest
+
 ## CodeForces
 
 **Link:** https://codeforces.com/
