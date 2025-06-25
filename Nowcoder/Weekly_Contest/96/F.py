@@ -139,14 +139,14 @@ class XorBase:
  
     def realBase(self):
         for i in range(self.n):
-            for j in range(i-1, -1, -1):
+            for j in range(i - 1, -1, -1):
                 if self.base[i] ^ self.base[j] < self.base[i]:
                     self.base[i] ^= self.base[j]
         return [val for val in self.base if val]
  
     def maxVal(self):
         ans = 0
-        for i in range(self.n-1, -1, -1):
+        for i in range(self.n - 1, -1, -1):
             if ans ^ self.base[i] > ans: ans ^= self.base[i]
         return ans
  
