@@ -1,0 +1,1 @@
+print('Ciallo~(yigeyanwenzi)\%Welcome to BduCPC!')
