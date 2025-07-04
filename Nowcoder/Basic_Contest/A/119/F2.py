@@ -116,6 +116,10 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+def calc(a, seg):
+    b, c = divmod(a - seg + 1, seg)
+    return c * (b + 1) * (b + 2) // 2 + (seg - c) * b * (b + 1) // 2
+
 # @TIME
 def solve(testcase):
     n, k = MI()
@@ -149,11 +153,6 @@ def solve(testcase):
     res = 0
     for a in A:
         res += a * (a + 1) // 2
-
-    @lru_cache(None)
-    def calc(a, seg):
-        b, c = divmod(a - seg + 1, seg)
-        return c * (b + 1) * (b + 2) // 2 + (seg - c) * b * (b + 1) // 2
     
     B = []
     for a in A:

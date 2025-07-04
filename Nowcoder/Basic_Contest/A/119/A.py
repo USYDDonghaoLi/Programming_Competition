@@ -121,10 +121,10 @@ def solve(testcase):
     A = LII()
     B = LII()
 
-    A.sort()
-    B.sort()
+    # A.sort()
+    # B.sort()
 
-    if sum(A) + A[-1] >= sum(B) + B[0]:
+    if sum(A) + A[0] >= sum(B) + B[-1]:
         print('YES')
     else:
         print('NO')
