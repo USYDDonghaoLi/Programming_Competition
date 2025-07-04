@@ -93,3 +93,8 @@ Weekly contest for Codechef holding on every **Wednesday 10:30 PM**
 
 - Kuangbin: Useful problem set
 
+## LanQiao
+
+**Link:** https://www.lanqiao.cn/oj-contest/
+
+**Profile:** https://www.lanqiao.cn/users/2140966/?tab=2
