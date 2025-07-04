@@ -76,3 +76,17 @@ Weekly contest for Codechef holding on every **Wednesday 10:30 PM**
 - B: Rated for 6-Star
 
 - C: Rated for 7-Star
+
+## Acwing
+
+**Link:** https://www.acwing.com/
+
+**Profile:** https://www.acwing.com/user/myspace/activity/212450/1/competition/
+
+- Activity: Codes for activity problems
+
+- Contest: Weekly contest for Atcoder holding on every **Saturday 7:00 PM**.
+
+- Kuangbin: Useful problem set
+
+

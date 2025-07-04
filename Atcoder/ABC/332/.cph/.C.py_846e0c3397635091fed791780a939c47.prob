@@ -1,0 +1,1 @@
+{"name":"Local: C","url":"p:\\Algorithm\\Atcoder\\ABC\\332\\C.py","tests":[{"id":1702209697300,"input":"6 1\n112022\n","output":""},{"id":1702210178118,"input":"3 1\n222\n","output":""},{"id":1702210181553,"input":"2 1\n01","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\Atcoder\\ABC\\332\\C.py","group":"local","local":true}

@@ -1,0 +1,1 @@
+{"name":"Local: G","url":"p:\\Algorithm\\ALGORITHM\\Atcoder\\ABC\\376\\G.py","tests":[{"id":1729666950153,"input":"3\n3\n0 0 1\n1 2 3\n5\n0 1 0 0 0\n8 6 5 1 7\n10\n0 1 1 3 3 1 4 7 5 4\n43 39 79 48 92 90 76 30 16 30\n","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\ALGORITHM\\Atcoder\\ABC\\376\\G.py","group":"local","local":true}

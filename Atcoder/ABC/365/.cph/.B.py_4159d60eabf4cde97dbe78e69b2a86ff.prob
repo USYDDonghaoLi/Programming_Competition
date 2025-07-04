@@ -1,0 +1,1 @@
+{"name":"Local: B","url":"p:\\Algorithm\\ALGORITHM\\Atcoder\\ABC\\365\\B.py","tests":[{"id":1722686270992,"input":"4\n8 2 5 1\n","output":""},{"id":1722686588458,"input":"8\n1 2 3 4 5 10 9 11\n","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\ALGORITHM\\Atcoder\\ABC\\365\\B.py","group":"local","local":true}

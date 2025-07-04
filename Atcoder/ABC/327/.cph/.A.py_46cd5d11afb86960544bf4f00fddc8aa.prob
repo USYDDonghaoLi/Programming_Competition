@@ -1,0 +1,1 @@
+{"name":"Local: A","url":"p:\\Algorithm\\Atcoder\\ABC\\327\\A.py","tests":[{"id":1699099366996,"input":"3\nabc\n","output":"Yes"},{"id":1699099451377,"input":"2\nba\n","output":"Yes"},{"id":1699099455695,"input":"7\natcoder","output":"No"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\Atcoder\\ABC\\327\\A.py","group":"local","local":true}

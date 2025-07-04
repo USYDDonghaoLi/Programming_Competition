@@ -1,0 +1,1 @@
+{"name":"Local: F","url":"d:\\Algorithm\\Atcoder\\ABC\\333\\F.py","tests":[{"id":1702912758204,"input":"2\n","output":"332748118 665496236\n"},{"id":1702915379410,"input":"5\n","output":"235530465 792768557 258531487 238597268 471060930\n"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"d:\\Algorithm\\Atcoder\\ABC\\333\\F.py","group":"local","local":true}
