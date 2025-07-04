@@ -1,0 +1,1 @@
+{"name":"Local: A","url":"d:\\Algorithm\\Codeforces\\Div. 4\\898\\A.py","tests":[{"id":1703011071840,"input":"6\nabc\nacb\nbac\nbca\ncab\ncba\n","output":"YES\nYES\nYES\nNO\nNO\nYES\n"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"d:\\Algorithm\\Codeforces\\Div. 4\\898\\A.py","group":"local","local":true}

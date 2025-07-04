@@ -50,6 +50,10 @@ Contest for CodeForces holding on some day at **10:35 PM**.
 
 - D: Div.4
 
+- E: Edu Div.2
+
+- F: Div. 1 + 2
+
 ## Atcoder
 
 **Link:** https://atcoder.jp/

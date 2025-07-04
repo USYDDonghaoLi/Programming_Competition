@@ -1,0 +1,1 @@
+{"name":"Local: A","url":"d:\\Algorithm\\Codeforces\\Div. 4\\640\\A.py","tests":[{"id":1703037659611,"input":"5\n5009\n7\n9876\n10000\n10\n","output":"2\n5000 9\n1\n7 \n4\n800 70 6 9000 \n1\n10000 \n1\n10 \n"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"d:\\Algorithm\\Codeforces\\Div. 4\\640\\A.py","group":"local","local":true}
