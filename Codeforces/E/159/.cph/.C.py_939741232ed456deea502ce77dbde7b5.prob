@@ -1,0 +1,1 @@
+{"name":"Local: C","url":"p:\\Algorithm\\Codeforces\\Edu Div.2\\159\\C.py","tests":[{"id":1702531319407,"input":"3\n3\n1 2 3\n5\n1 -19 17 -3 -15\n1\n10\n","output":"6\n27\n1\n"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\Codeforces\\Edu Div.2\\159\\C.py","group":"local","local":true}
