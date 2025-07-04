@@ -1,0 +1,1 @@
+{"name":"Local: F","url":"p:\\Algorithm\\Codeforces\\Div. 3\\894\\F.py","tests":[{"id":1692945662816,"input":"4\n2 3\n3\n2 6 7\n37 58\n1\n93\n190 90\n2\n23 97\n13 4\n4\n10 10 2 45","output":"3\n2\n1\n5"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\Codeforces\\Div. 3\\894\\F.py","group":"local","local":true}

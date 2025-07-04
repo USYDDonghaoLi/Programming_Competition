@@ -1,0 +1,1 @@
+{"name":"Local: C","url":"p:\\Algorithm\\Codeforces\\Div. 3\\894\\C.py","tests":[{"id":1692945655825,"input":"7\n5\n5 4 3 2 1\n3\n3 1 1\n3\n4 2 1\n1\n2\n5\n5 3 3 1 1\n5\n5 5 5 3 3\n2\n6 1","output":"YES\nYES\nNO\nNO\nYES\nYES\nNO"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\Codeforces\\Div. 3\\894\\C.py","group":"local","local":true}

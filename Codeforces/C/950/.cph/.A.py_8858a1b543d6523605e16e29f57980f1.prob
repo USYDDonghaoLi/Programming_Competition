@@ -1,0 +1,1 @@
+{"name":"Local: A","url":"c:\\Users\\Admin\\Desktop\\Ldh\\ALGORITHM\\Codeforces\\Div. 3\\950\\A.py","tests":[{"id":1717461067274,"input":"3\n10 1\nBGECDCBDED\n10 2\nBGECDCBDED\n9 1\nBBCDEFFGG\n","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\Users\\Admin\\Desktop\\Ldh\\ALGORITHM\\Codeforces\\Div. 3\\950\\A.py","group":"local","local":true}
