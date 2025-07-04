@@ -1,0 +1,1 @@
+{"name":"Local: B","url":"d:\\Algorithm\\LanQiao\\QiangZhe\\2\\B.py","tests":[{"id":1703325714070,"input":"10 9 4 4","output":"4"},{"id":1703329889641,"input":"10 6 0 9","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"d:\\Algorithm\\LanQiao\\QiangZhe\\2\\B.py","group":"local","local":true}

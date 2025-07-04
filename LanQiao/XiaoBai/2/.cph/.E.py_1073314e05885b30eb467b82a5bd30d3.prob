@@ -1,0 +1,1 @@
+{"name":"Local: E","url":"d:\\Algorithm\\LanQiao\\XiaoBai\\2\\E.py","tests":[{"id":1703337450340,"input":"3\n2 10\n3 10\n16 10000000000000000","output":"5\n4\n13875013875"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"d:\\Algorithm\\LanQiao\\XiaoBai\\2\\E.py","group":"local","local":true}

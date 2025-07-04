@@ -1,0 +1,1 @@
+{"name":"Local: E","url":"c:\\Users\\Admin\\Desktop\\Ldh\\ALGORITHM\\LanQiao\\Jidu\\E.py","tests":[{"id":1719656922753,"input":"8 3\n-1 2 -3 4 -5 6 -7 8\n1 2 3 4\n1 1 2 2\n1 3 5 8","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\Users\\Admin\\Desktop\\Ldh\\ALGORITHM\\LanQiao\\Jidu\\E.py","group":"local","local":true}

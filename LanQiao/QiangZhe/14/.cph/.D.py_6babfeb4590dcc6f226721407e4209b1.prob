@@ -1,0 +1,1 @@
+{"name":"Local: D","url":"c:\\Users\\Admin\\Desktop\\Ldh\\ALGORITHM\\LanQiao\\QiangZhe\\14\\D.py","tests":[{"id":1720866696870,"input":"3\n3 5\nabc \nabbbc\n1 1\na\na\n5 1\naabaa\nb","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\Users\\Admin\\Desktop\\Ldh\\ALGORITHM\\LanQiao\\QiangZhe\\14\\D.py","group":"local","local":true}

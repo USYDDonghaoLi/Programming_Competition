@@ -1,0 +1,1 @@
+{"name":"Local: F","url":"p:\\Algorithm\\LanQiao\\3\\F.py","tests":[{"id":1699699636083,"input":"5\n4 16\n4 15\n4 14\n4 13\n4 12","output":"2 1"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\LanQiao\\3\\F.py","group":"local","local":true}

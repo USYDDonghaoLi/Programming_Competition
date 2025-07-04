@@ -1,0 +1,1 @@
+{"name":"Local: E","url":"p:\\Algorithm\\LanQiao\\1\\E.py","tests":[{"id":1697782393767,"input":"5\nAbbCd\nBcDaB","output":"Yes\n2"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\LanQiao\\1\\E.py","group":"local","local":true}
