@@ -1,0 +1,1 @@
+{"name":"Local: B","url":"p:\\Algorithm\\Acwing\\Contest\\115\\B.py","tests":[{"id":1691233151251,"input":"3\n1 10\n5 5\n10 1","output":"75 110 60"},{"id":1691233459382,"input":"3\n2 1\n1 2\n2 1","output":"6 4 6"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\Acwing\\Contest\\115\\B.py","group":"local","local":true}
