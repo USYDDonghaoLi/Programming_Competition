@@ -1,0 +1,1 @@
+{"name":"Local: C","url":"c:\\Users\\Admin\\Desktop\\Ldh\\ALGORITHM\\Codechef\\Starter\\126\\C.py","tests":[{"id":1710946331274,"input":"2\n4\n1 2\n2 3\n2 4\n4\n1 2\n2 3\n3 4","output":"RBRB\nRRBB"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\Users\\Admin\\Desktop\\Ldh\\ALGORITHM\\Codechef\\Starter\\126\\C.py","group":"local","local":true}

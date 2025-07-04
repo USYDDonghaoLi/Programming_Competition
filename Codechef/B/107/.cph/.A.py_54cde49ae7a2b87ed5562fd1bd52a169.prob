@@ -1,0 +1,1 @@
+{"name":"Local: A","url":"p:\\Algorithm\\Codechef\\Starter\\107\\A.py","tests":[{"id":1699452319248,"input":"3\n3\nRRR\nSPP\n2\nRP\nSP\n3\nPSP\nSRP","output":"1\n0\n2"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\Codechef\\Starter\\107\\A.py","group":"local","local":true}

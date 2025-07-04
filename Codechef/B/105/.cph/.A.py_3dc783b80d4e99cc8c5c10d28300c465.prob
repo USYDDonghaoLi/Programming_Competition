@@ -1,0 +1,1 @@
+{"name":"Local: A","url":"p:\\Algorithm\\Codechef\\Starter\\105\\A.py","tests":[{"id":1698935753252,"input":"4 2\n5 6","output":"32"},{"id":1698935849306,"input":"5 0\n0 2","output":"0"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\Codechef\\Starter\\105\\A.py","group":"local","local":true}

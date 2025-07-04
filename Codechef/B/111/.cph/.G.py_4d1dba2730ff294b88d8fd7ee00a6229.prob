@@ -1,0 +1,1 @@
+{"name":"Local: G","url":"p:\\Algorithm\\Codechef\\Starter\\111\\G.py","tests":[{"id":1702352702205,"input":"5\n1 4 2\n5 5 3\n6 8 7\n10 20 2\n13 53 5","output":"First\nSecond\nFirst\nFirst\nSecond"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\Codechef\\Starter\\111\\G.py","group":"local","local":true}

@@ -1,0 +1,1 @@
+{"name":"Local: F","url":"p:\\Algorithm\\Codechef\\Starter\\99\\F.py","tests":[{"id":1693805936144,"input":"3\n3\n1 2 3 \n10\n2 3 10 25 12 7 10 12 1 46\n7\n10 12 15 16 17 200 132","output":"0\n3\n4"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\Codechef\\Starter\\99\\F.py","group":"local","local":true}

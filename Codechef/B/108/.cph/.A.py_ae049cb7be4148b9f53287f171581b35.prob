@@ -1,0 +1,1 @@
+{"name":"Local: A","url":"p:\\Algorithm\\Codechef\\Starter\\108\\A.py","tests":[{"id":1700058584421,"input":"1 100\n-5 -150","output":"Dominater"},{"id":1700061103359,"input":"2636 2536\n-116 -11\n","output":"Everule"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"p:\\Algorithm\\Codechef\\Starter\\108\\A.py","group":"local","local":true}
