@@ -118,85 +118,24 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    n, k = MI()
+    n = II()
     A = LII()
-    A.sort(reverse = True)
 
-    mp1, mp2 = defaultdict(int), defaultdict(int)
-    for i in range(10):
-        mp1[i] = mp2[i] = 0
+    i = 1
+    cur = A[0]
 
-    for i in range(k):
-        mp1[A[i]] += 1
-    for i in range(k, n):
-        mp2[A[i]] += 1
+    while i < 2 * n:
+
+        if cur == A[i]:
+            i += 1
+            if i == 2 * n:
+                print('Yes')
+                return
+            cur = A[i]
+        i += 1
     
-    t = 0
-    for i, v in mp1.items():
-        t += i * v
-    
-    # print('mp1', mp1)
-    # print('mp2', mp2)
-    
-    res = [-1 for _ in range(10)]
+    print('No')
 
-    if t % 3 == 0:
-        res = max(res, [mp1[i] for i in range(10)][::-1])
-    else:
-
-        '''
-        Delete one
-        '''
-        for key in mp1:
-            if mp1[key] > 0 and t % 3 == key % 3:
-                tmp = [mp1[i] for i in range(10)]
-                tmp[key] -= 1
-                res = max(res, tmp[::-1])
-        
-        '''
-        Delete one then add one
-        '''
-        for key1 in mp1:
-            for key2 in mp2:
-                if mp1[key1] > 0 and mp2[key2] > 0 and (t - key1 + key2) % 3 == 0:
-                    tmp = [mp1[i] for i in range(10)]
-                    tmp[key1] -= 1
-                    tmp[key2] += 1
-                    res = max(res, tmp[::-1])
-        
-        for key1 in mp1:
-            if mp1[key1] > 0:
-                mp1[key1] -= 1
-
-                for key2 in mp2:
-                    if mp1[key2] > 0:
-                        mp1[key2] -= 1
-
-                        if (t - key1 - key2) % 3 == 0:
-                            tmp = [mp1[i] for i in range(10)]
-                            tmp[key1] -= 1
-                            tmp[key2] -= 1
-                            res = max(res, tmp[::-1])
-
-                        mp1[key2] += 1
-
-                mp1[key1] += 1
-
-        
-    if res == [-1 for _ in range(10)]:
-        print(-1)
-        return
-    
-    B = []
-    for i, r in enumerate(res):
-        B.extend([9 - i for _ in range(r)])
-
-    B = ''.join(map(str, B)).lstrip('0')
-
-    if not B:
-        print('0')
-    else:
-        print(B)
 
 
 for testcase in range(II()):

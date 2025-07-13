@@ -116,88 +116,140 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+class Segtree:
+
+    def __init__(self, V, OP, E):
+        self.n = len(V)
+        self.op = OP
+        self.e = E
+        self.log = (self.n - 1).bit_length()
+        self.size = 1 << self.log
+        self.d = [E for _ in range(2 * self.size)]
+
+        for i in range(self.n):
+            self.d[self.size + i] = V[i]
+        for i in range(self.size - 1, 0, -1):
+            self.update(i)
+
+    def set(self, p, x):
+        assert 0 <= p and p < self.n
+        p += self.size
+        self.d[p] = x
+        for i in range(1,self.log + 1):
+            self.update(p >> i)
+
+    def get(self, p):
+        assert 0 <= p and p < self.n
+        return self.d[p + self.size]
+    
+    def prod(self, l, r):
+        assert 0 <= l and l <= r and r <= self.n
+        sml = self.e
+        smr = self.e
+        l += self.size
+        r += self.size
+        while l < r:
+            if  l & 1:
+                sml = self.op(sml, self.d[l])
+                l += 1
+            if  r & 1:
+                smr = self.op(self.d[r - 1],smr)
+                r -= 1
+            l >>= 1
+            r >>= 1
+        return self.op(sml, smr)
+    
+    def all_prod(self):
+        return self.d[1]
+    
+    def max_right(self, l, f):
+        assert 0 <= l and l <= self.n
+        assert f(self.e)
+
+        if l == self.n:
+            return self.n
+        l += self.size
+        sm = self.e
+
+        while True:
+            while l % 2 == 0:
+                l >>= 1
+            if not(f(self.op(sm, self.d[l]))):
+                while l < self.size:
+                    l = 2 * l
+                    if f(self.op(sm, self.d[l])):
+                        sm = self.op(sm,self.d[l])
+                        l += 1
+                return l - self.size
+            sm = self.op(sm, self.d[l])
+            l += 1
+            if l & -l == l:
+                break
+        return self.n
+    
+    def min_left(self, r, f):
+        assert 0 <= r and r <= self.n
+        assert f(self.e)
+
+        if r == 0:
+            return 0
+        r += self.size
+        sm = self.e
+
+        while True:
+            r -= 1
+            while r > 1 and r % 2:
+                r >>= 1
+            if not(f(self.op(self.d[r], sm))):
+                while r < self.size:
+                    r = 2 * r + 1
+                    if f(self.op(self.d[r], sm)):
+                        sm = self.op(self.d[r], sm)
+                        r -= 1
+                return r + 1 - self.size
+            sm = self.op(self.d[r], sm)
+            if r & -r == r:
+                break
+        return 0
+    
+    def update(self, k):
+        self.d[k] = self.op(self.d[2 * k], self.d[2 * k + 1])
+        
+    def __str__(self):
+        return str([self.get(i) for i in range(self.n)])
+
 # @TIME
 def solve(testcase):
-    n, k = MI()
+    n = II()
     A = LII()
-    A.sort(reverse = True)
 
-    mp1, mp2 = defaultdict(int), defaultdict(int)
-    for i in range(10):
-        mp1[i] = mp2[i] = 0
+    ps = [0]
+    for a in A:
+        ps.append(ps[-1] + a)
 
-    for i in range(k):
-        mp1[A[i]] += 1
-    for i in range(k, n):
-        mp2[A[i]] += 1
+    V = [0 for _ in range(n + n + 10)]
+
+    sg = Segtree(
+        V,
+        fmax,
+        0
+    )
+
+    last = [-1 for _ in range(n)]
+
+    for i, a in enumerate(A, 1):
+        a -= 1
+        if last[a] == -1:
+            last[a] = i
+        else:
+            prev = sg.prod(0, last[a])
+
+            now = ps[i] - ps[last[a] - 1]
+            # print('prev', i, a, prev, now)
+            print(i, prev + now)
+            sg.set(i, prev + now)
     
-    t = 0
-    for i, v in mp1.items():
-        t += i * v
-    
-    # print('mp1', mp1)
-    # print('mp2', mp2)
-    
-    res = [-1 for _ in range(10)]
+    print(sg.all_prod())
 
-    if t % 3 == 0:
-        res = max(res, [mp1[i] for i in range(10)][::-1])
-    else:
-
-        '''
-        Delete one
-        '''
-        for key in mp1:
-            if mp1[key] > 0 and t % 3 == key % 3:
-                tmp = [mp1[i] for i in range(10)]
-                tmp[key] -= 1
-                res = max(res, tmp[::-1])
-        
-        '''
-        Delete one then add one
-        '''
-        for key1 in mp1:
-            for key2 in mp2:
-                if mp1[key1] > 0 and mp2[key2] > 0 and (t - key1 + key2) % 3 == 0:
-                    tmp = [mp1[i] for i in range(10)]
-                    tmp[key1] -= 1
-                    tmp[key2] += 1
-                    res = max(res, tmp[::-1])
-        
-        for key1 in mp1:
-            if mp1[key1] > 0:
-                mp1[key1] -= 1
-
-                for key2 in mp2:
-                    if mp1[key2] > 0:
-                        mp1[key2] -= 1
-
-                        if (t - key1 - key2) % 3 == 0:
-                            tmp = [mp1[i] for i in range(10)]
-                            tmp[key1] -= 1
-                            tmp[key2] -= 1
-                            res = max(res, tmp[::-1])
-
-                        mp1[key2] += 1
-
-                mp1[key1] += 1
-
-        
-    if res == [-1 for _ in range(10)]:
-        print(-1)
-        return
-    
-    B = []
-    for i, r in enumerate(res):
-        B.extend([9 - i for _ in range(r)])
-
-    B = ''.join(map(str, B)).lstrip('0')
-
-    if not B:
-        print('0')
-    else:
-        print(B)
-
-
-for testcase in range(II()):
+for testcase in range(1):
     solve(testcase)
