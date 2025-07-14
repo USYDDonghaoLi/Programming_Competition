@@ -116,87 +116,106 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+def compare(A, B):
+    flag = True
+    for i in range(9, -1, -1):
+        if A[i] > B[i]:
+            break
+        if A[i] < B[i]:
+            flag = False
+            break
+    
+    if not flag:
+        for i in range(10):
+            A[i] = B[i]
+    
+    return A
+
 # @TIME
 def solve(testcase):
     n, k = MI()
     A = LII()
     A.sort(reverse = True)
 
-    mp1, mp2 = defaultdict(int), defaultdict(int)
-    for i in range(10):
-        mp1[i] = mp2[i] = 0
+    B = [[], [], []]
+    C = [[], [], []]
 
-    for i in range(k):
-        mp1[A[i]] += 1
-    for i in range(k, n):
-        mp2[A[i]] += 1
-    
+    cur = [0 for _ in range(10)]
+
     t = 0
-    for i, v in mp1.items():
-        t += i * v
+    for i in range(k - 1, -1, -1):
+        cur[A[i]] += 1
+        t = (t + A[i]) % 3
+        u =  A[i] % 3
+        if len(B[u]) < 2:
+            B[u].append(A[i])
     
-    # print('mp1', mp1)
-    # print('mp2', mp2)
+    for i in range(k, n):
+        u =  A[i] % 3
+        if len(C[u]) < 2:
+            C[u].append(A[i])
     
     res = [-1 for _ in range(10)]
 
-    if t % 3 == 0:
-        res = max(res, [mp1[i] for i in range(10)][::-1])
-    else:
+    B = B[0] + B[1] + B[2]
+    C = C[0] + C[1] + C[2]
 
-        '''
-        Delete one
-        '''
-        for key in mp1:
-            if mp1[key] > 0 and t % 3 == key % 3:
-                tmp = [mp1[i] for i in range(10)]
-                tmp[key] -= 1
-                res = max(res, tmp[::-1])
-        
-        '''
-        Delete one then add one
-        '''
-        for key1 in mp1:
-            for key2 in mp2:
-                if mp1[key1] > 0 and mp2[key2] > 0 and (t - key1 + key2) % 3 == 0:
-                    tmp = [mp1[i] for i in range(10)]
-                    tmp[key1] -= 1
-                    tmp[key2] += 1
-                    res = max(res, tmp[::-1])
-        
-        for key1 in mp1:
-            if mp1[key1] > 0:
-                mp1[key1] -= 1
+    
+    for k1 in range(3):
+        for k2 in range(fmin(3, k1 + 1)):
+            # print('cur', cur)
 
-                for key2 in mp2:
-                    if mp1[key2] > 0:
-                        mp1[key2] -= 1
+            for c1 in combinations(B, k1):
+                for cc1 in c1:
+                    # print('cc1', cc1, cur)
+                    cur[cc1] -= 1
+                    # print('cc1', cc1, cur)
+                    t = (t - cc1) % 3
 
-                        if (t - key1 - key2) % 3 == 0:
-                            tmp = [mp1[i] for i in range(10)]
-                            tmp[key1] -= 1
-                            tmp[key2] -= 1
-                            res = max(res, tmp[::-1])
+                for c2 in combinations(C, k2):
+                    for cc2 in c2:
+                        cur[cc2] += 1
+                        t = (t + cc2) % 3
+                    
+                    if t == 0:
+                        # print('c1c2', c1, c2, cur)
+                        res = compare(res, cur)
 
-                        mp1[key2] += 1
+                    for cc2 in c2:
+                        cur[cc2] -= 1
+                        t = (t - cc2) % 3
+                    pass
 
-                mp1[key1] += 1
+                for cc1 in c1:
+                    # print('cc1', cc1, cur)
+                    cur[cc1] += 1
+                    # print('cc1', cc1, cur)
+                    t = (t + cc1) % 3
+    
+    # print('res', res)
 
-        
     if res == [-1 for _ in range(10)]:
         print(-1)
-        return
-    
-    B = []
-    for i, r in enumerate(res):
-        B.extend([9 - i for _ in range(r)])
-
-    B = ''.join(map(str, B)).lstrip('0')
-
-    if not B:
-        print('0')
     else:
-        print(B)
+        check = 0
+        D = []
+        for i in range(10):
+            D.extend([str(i)] * res[i])
+            check += i * res[i]
+        
+        assert check % 3 == 0
+        
+        if not D:
+            print(-1)
+        else:
+            D = ''.join(D)
+            D = D[::-1]
+            D = D.lstrip('0')
+
+            if not D:
+                print('0')
+            else:
+                print(D)
 
 
 for testcase in range(II()):
