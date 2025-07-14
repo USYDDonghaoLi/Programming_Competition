@@ -118,7 +118,31 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    print('Yes' if II() % 5 == 0 else 'No')
+    n = II()
+    A = LII()
+
+    mp = defaultdict(int)
+
+    for i in range(n, 0, -1):
+        if i in mp:
+            continue
+        
+        m = 20
+        while not i >> m & 1:
+            m -= 1
+
+        sm = ((1 << m + 1) - 1) ^ i
+        
+        cur = i
+        for j in range(sm, i + 1):
+            mp[j] = cur
+            cur -= 1
+        
+    
+    res = [mp[a] for a in A]
+
+    print(*res)
+        
 
 for testcase in range(1):
     solve(testcase)
