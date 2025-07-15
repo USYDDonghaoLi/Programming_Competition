@@ -1,0 +1,1 @@
+{"name":"Local: C","url":"c:\\Users\\ADMIN\\Desktop\\Ldh\\Algorithm\\Nowcoder\\Weekly_Contest\\87\\C.py","tests":[{"id":1752508034737,"input":"2\n6\n-1 4 -6 3 2 -11\n>Z<>>Z\n4\n1 1 1 1\n>ZZ<","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\Users\\ADMIN\\Desktop\\Ldh\\Algorithm\\Nowcoder\\Weekly_Contest\\87\\C.py","group":"local","local":true}
