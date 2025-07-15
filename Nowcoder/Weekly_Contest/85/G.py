@@ -348,24 +348,28 @@ def solve(testcase):
     A = LII()
     A.sort()
 
-    ps = [0]
-    for a in A:
-        ps.append(ps[-1] + a)
+    # ps = [0]
+    # for a in A:
+    #     ps.append(ps[-1] + a)
     
     res = 0
     
     for i, a in enumerate(A):
-        lower = ps[i]
-        lower_sum = i * a - lower
-        upper = ps[n] - ps[i + 1]
-        upper_sum = upper - (n - 1 - i) * a
-
-        res += (lower_sum + upper_sum) % mod
+        res += a * (2 * i - n + 1)
         res %= mod
-    
-    res = res * F.f[n - 2] % mod * (n - 1) % mod
+        # lower = ps[i]
+        # lower_sum = i * a - lower
+        # upper = ps[n] - ps[i + 1]
+        # upper_sum = upper - (n - 1 - i) * a
 
-    print(res * F.g[n] % mod)
+        # res += (lower_sum + upper_sum) % mod
+        # res %= mod
+
+    print(2 * res * pow(n, mod - 2, mod) % mod)
+
+    # res = res * F.f[n - 2] % mod * (n - 1) % mod
+
+    # print(res * F.g[n] % mod)
 
 
 for testcase in range(1):
