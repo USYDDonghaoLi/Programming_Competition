@@ -116,78 +116,20 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+mod = 10 ** 9 + 7
+
 # @TIME
 def solve(testcase):
     n = II()
-    s = I()
-    l, r = GMI()
 
-    def calc(ss):
-        m = len(ss)
-        a, b = 0, 0
+    a, b = 1, 0
 
-        for i in range(1, m):
-            if ss[i - 1] == '0' and ss[i] == '1':
-                a += 1
-            if ss[i - 1] == '1' and ss[i] == '0':
-                b += 1
-        
-        return a, b
-
-    left = s[:l]
-    right = s[r + 1:]
-
-    if l == r:
-        la, lb = calc(left + '0')
-        ra, rb = calc('0' + right)
-
-        if la + ra == lb + rb:
-            print('Yes')
-            return
-        
-        la, lb = calc(left + '1')
-        ra, rb = calc('1' + right)
-
-        if la + ra == lb + rb:
-            print('Yes')
-            return
-        
-        print('No')
-        return
+    for _ in range(n):
+        newa = (a * a + 2 * a * b) % mod
+        newb = (a * a + b * b) % mod
+        a, b = newa, newb
     
-    else:
+    print(a, b)
 
-        la, lb = calc(left + '0')
-        ra, rb = calc('0' + right)
-
-        if la + ra == lb + rb:
-            print('Yes')
-            return
-        
-        la, lb = calc(left + '1')
-        ra, rb = calc('1' + right)
-
-        if la + ra == lb + rb:
-            print('Yes')
-            return
-        
-
-        la, lb = calc(left + '0')
-        ra, rb = calc('1' + right)
-
-        if la + ra + 1 == lb + rb:
-            print('Yes')
-            return
-        
-        la, lb = calc(left + '1')
-        ra, rb = calc('0' + right)
-
-        if la + ra == lb + rb + 1:
-            print('Yes')
-            return
-
-        print('No')
-        return
-
-for testcase in range(II()):
+for testcase in range(1):
     solve(testcase)

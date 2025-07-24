@@ -118,76 +118,57 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    n = II()
-    s = I()
-    l, r = GMI()
+    a, b = MI()
+    res = [0 for _ in range(2010)]
+    res[0] = a
 
-    def calc(ss):
-        m = len(ss)
-        a, b = 0, 0
-
-        for i in range(1, m):
-            if ss[i - 1] == '0' and ss[i] == '1':
-                a += 1
-            if ss[i - 1] == '1' and ss[i] == '0':
-                b += 1
-        
-        return a, b
-
-    left = s[:l]
-    right = s[r + 1:]
-
-    if l == r:
-        la, lb = calc(left + '0')
-        ra, rb = calc('0' + right)
-
-        if la + ra == lb + rb:
-            print('Yes')
-            return
-        
-        la, lb = calc(left + '1')
-        ra, rb = calc('1' + right)
-
-        if la + ra == lb + rb:
-            print('Yes')
-            return
-        
-        print('No')
-        return
+    for _ in range(b.bit_length() - 1):
+        for i in range(2008, -1, -1):
+            if i:
+                res[i + 1] = res[i]
+                res[i] = 0
+            else:
+                res[1] = res[0] & 1
+                res[0] >>= 1
     
-    else:
+    s = I() + 'x'
+    n = len(s)
+    t = []
+    prev = 0
 
-        la, lb = calc(left + '0')
-        ra, rb = calc('0' + right)
+    for i in range(1, n):
+        if s[i] == 'x':
+            t.append(s[prev + 1: i])
+            prev = i
+    
+    # print('t', t)
+    
 
-        if la + ra == lb + rb:
-            print('Yes')
-            return
-        
-        la, lb = calc(left + '1')
-        ra, rb = calc('1' + right)
+    ans = [0 for _ in range(2010)]
 
-        if la + ra == lb + rb:
-            print('Yes')
-            return
-        
+    for c in t:
+        if len(c) == 0:
+            ans[2] += 1
+        elif c[0] == '-':
+            if len(c) == 1:
+                ans[1] += 1
+            else:
+                assert len(c) == 3
+                ans[0] += 1
+        else:
+            ans[2 + len(c)] += 1
+    
+        # print(ans[:10])
+    
+    for i in range(2009, 0, -1):
+        ans[i - 1] += ans[i] >> 1
+        ans[i] &= 1
 
-        la, lb = calc(left + '0')
-        ra, rb = calc('1' + right)
+    # print(res[:10])
+    # print(ans[:10])
+    
+    print('ITS MY OWN INVENTION' if res != ans else "LIVE HAPPILY")
+            
 
-        if la + ra + 1 == lb + rb:
-            print('Yes')
-            return
-        
-        la, lb = calc(left + '1')
-        ra, rb = calc('0' + right)
-
-        if la + ra == lb + rb + 1:
-            print('Yes')
-            return
-
-        print('No')
-        return
-
-for testcase in range(II()):
+for testcase in range(1):
     solve(testcase)

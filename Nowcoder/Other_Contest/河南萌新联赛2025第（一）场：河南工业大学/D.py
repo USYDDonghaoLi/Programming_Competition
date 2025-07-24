@@ -118,76 +118,86 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    n = II()
-    s = I()
-    l, r = GMI()
+    n, q = MI()
+    cur = 1
+    flag = 1
 
-    def calc(ss):
-        m = len(ss)
-        a, b = 0, 0
-
-        for i in range(1, m):
-            if ss[i - 1] == '0' and ss[i] == '1':
-                a += 1
-            if ss[i - 1] == '1' and ss[i] == '0':
-                b += 1
-        
-        return a, b
-
-    left = s[:l]
-    right = s[r + 1:]
-
-    if l == r:
-        la, lb = calc(left + '0')
-        ra, rb = calc('0' + right)
-
-        if la + ra == lb + rb:
-            print('Yes')
-            return
-        
-        la, lb = calc(left + '1')
-        ra, rb = calc('1' + right)
-
-        if la + ra == lb + rb:
-            print('Yes')
-            return
-        
-        print('No')
-        return
+    uppq = []
+    downpq = []
+    stack = []
     
-    else:
+    mp = [[] for _ in range(10010)]
 
-        la, lb = calc(left + '0')
-        ra, rb = calc('0' + right)
+    for _ in range(n):
+        t, f = MI()
+        mp[t].append((1, f))
+    
+    for i in range(q):
+        t = II()
+        mp[t].append((2, i))
+    
+    res = [-1 for _ in range(q)]
+    
+    for i in range(10010):
 
-        if la + ra == lb + rb:
-            print('Yes')
-            return
+        if flag == 1:
+            if uppq:
+                cur += flag
+                while uppq and uppq[0] == cur:
+                    heappop(uppq)
+            else:
+                if downpq:
+                    flag = -1
+                    cur += flag
+                    while downpq and downpq[0] == -cur:
+                        heappop(uppq)
+                else:
+                    pass
+        else:
+            if downpq:
+                cur += flag
+                while downpq and downpq[0] == -cur:
+                    heappop(downpq)
+            else:
+                if uppq:
+                    flag = 1
+                    cur += flag
+                    while uppq and uppq[0] == cur:
+                        heappop(uppq)
+                else:
+                    pass
+
         
-        la, lb = calc(left + '1')
-        ra, rb = calc('1' + right)
+        # if i <= 14:
+        #     print('ic', i, cur)
 
-        if la + ra == lb + rb:
-            print('Yes')
-            return
-        
+        for op in mp[i]:
+            if op[0] == 1:
+                f = op[1]
 
-        la, lb = calc(left + '0')
-        ra, rb = calc('1' + right)
+                if f == cur:
+                    continue
 
-        if la + ra + 1 == lb + rb:
-            print('Yes')
-            return
-        
-        la, lb = calc(left + '1')
-        ra, rb = calc('0' + right)
+                elif f > cur:
+                    if flag == 1:
+                        heappush(uppq, f)
+                    else:
+                        if not downpq:
+                            flag = 1
+                        heappush(uppq, f)
 
-        if la + ra == lb + rb + 1:
-            print('Yes')
-            return
-
-        print('No')
-        return
+                else:
+                    if flag == -1:
+                        heappush(downpq, -f)
+                    else:
+                        if not uppq:
+                            flag = -1
+                        heappush(downpq, -f)
+            else:
+                idx = op[1]
+                res[idx] = cur
+    
+    print('\n'.join(map(str, res)))
 
 for testcase in range(II()):
     solve(testcase)
