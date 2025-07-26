@@ -1,0 +1,12 @@
+
+{% load my_tags %}
+<!-- {{"abc" | my_custom_filter:"extra "}} -->
+<!-- {% my_html "zzz" "xxx" %} -->
+
+<ul>
+    {% for v in views_list %}
+        <li>
+            {{v}}
+        </li>
+    {% endfor %}
+</ul>
