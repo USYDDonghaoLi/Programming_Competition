@@ -70,24 +70,24 @@ from time import *
 from random import *
 from math import log, gcd, sqrt, ceil
 
-# from types import GeneratorType
-# def bootstrap(f, stack=[]):
-#     def wrappedfunc(*args, **kwargs):
-#         if stack:
-#             return f(*args, **kwargs)
-#         else:
-#             to = f(*args, **kwargs)
-#             while True:
-#                 if type(to) is GeneratorType:
-#                     stack.append(to)
-#                     to = next(to)
-#                 else:
-#                     stack.pop()
-#                     if not stack:
-#                         break
-#                     to = stack[-1].send(to)
-#             return to
-#     return wrappedfunc
+from types import GeneratorType
+def bootstrap(f, stack=[]):
+    def wrappedfunc(*args, **kwargs):
+        if stack:
+            return f(*args, **kwargs)
+        else:
+            to = f(*args, **kwargs)
+            while True:
+                if type(to) is GeneratorType:
+                    stack.append(to)
+                    to = next(to)
+                else:
+                    stack.pop()
+                    if not stack:
+                        break
+                    to = stack[-1].send(to)
+            return to
+    return wrappedfunc
 
 # seed(19981220)
 # RANDOM = getrandbits(64)
@@ -116,9 +116,32 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+dp = [inf for _ in range(200010)]
+dp[0] = 0
+
+@bootstrap
+def f(n):
+    for i in range(1, 10 ** 9):
+        t = i * (i + 1) // 2
+        if t > n:
+            break
+        elif t == n:
+            dp[t] = fmin(dp[t], i)
+        else:
+            if dp[n - t] == inf:
+                yield f(n - t)
+            dp[n] = fmin(dp[n], dp[n - t] + i + 1)
+    
+    yield None
+
 # @TIME
 def solve(testcase):
-    pass
+    n = II()
+    if dp[n] == inf:
+        f(n)
+    
+    print(dp[n])
 
-for testcase in range(1):
+
+for testcase in range(II()):
     solve(testcase)

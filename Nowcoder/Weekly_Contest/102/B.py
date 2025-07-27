@@ -118,7 +118,18 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n = II()
+    s = I()
 
-for testcase in range(1):
+    A = []
+
+    for i, c in enumerate(s):
+        if c == '1':
+            A.append(i)
+    
+    assert len(A) == 3
+
+    print('Yes' if A[2] + A[0] == 2 * A[1] else 'No')
+
+for testcase in range(II()):
     solve(testcase)

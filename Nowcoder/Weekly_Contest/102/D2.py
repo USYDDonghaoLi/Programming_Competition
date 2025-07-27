@@ -119,7 +119,42 @@ fmax = lambda x, y: x if x > y else y
 # @TIME
 def solve(testcase):
     n = II()
-    print(2)
+    s = I()
+    s = [int(c) for c in s]
+    
+    '''
+    cur, tot
+    '''
+    dp = [inf for _ in range(8)]
+
+    def f(cur, tot):
+        return cur * 4 + tot
+    
+    def g(state):
+        return divmod(state, 4)
+
+    for val in range(2):
+        dp[f(val, 0)] = int(s[0] != val)
+    
+    # print('dp', dp)
+    
+    for i in range(n):
+        newdp = [inf for _ in range(8)]
+
+        for state in range(8):
+            prev, tot = g(state)
+            for newval in range(2):
+                newtot = tot + (newval != prev)
+
+                if newtot <= 3:
+                    newdp[f(newval, newtot)] = fmin(newdp[f(newval, newtot)], dp[state] + (newval != s[i]))
+
+        dp = newdp
+        # print('dp', dp)
+    
+    print(fmin(dp[3], dp[7]))
+
+
 
 for testcase in range(1):
     solve(testcase)

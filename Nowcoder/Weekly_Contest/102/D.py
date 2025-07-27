@@ -70,24 +70,24 @@ from time import *
 from random import *
 from math import log, gcd, sqrt, ceil
 
-# from types import GeneratorType
-# def bootstrap(f, stack=[]):
-#     def wrappedfunc(*args, **kwargs):
-#         if stack:
-#             return f(*args, **kwargs)
-#         else:
-#             to = f(*args, **kwargs)
-#             while True:
-#                 if type(to) is GeneratorType:
-#                     stack.append(to)
-#                     to = next(to)
-#                 else:
-#                     stack.pop()
-#                     if not stack:
-#                         break
-#                     to = stack[-1].send(to)
-#             return to
-#     return wrappedfunc
+from types import GeneratorType
+def bootstrap(f, stack=[]):
+    def wrappedfunc(*args, **kwargs):
+        if stack:
+            return f(*args, **kwargs)
+        else:
+            to = f(*args, **kwargs)
+            while True:
+                if type(to) is GeneratorType:
+                    stack.append(to)
+                    to = next(to)
+                else:
+                    stack.pop()
+                    if not stack:
+                        break
+                    to = stack[-1].send(to)
+            return to
+    return wrappedfunc
 
 # seed(19981220)
 # RANDOM = getrandbits(64)
@@ -118,7 +118,132 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n = II()
+    s = I()
+    s = [int(c) for c in s]
+    
+    dp = [[[-1 for _ in range(5)] for _ in range(3)] for _ in range(n + 1)]
+
+    @bootstrap
+    def f(idx, prev, cnt):
+        # print('ffffff', idx, prev, cnt)
+        
+        if cnt > 3:
+            dp[idx][prev][cnt] = inf
+            yield None
+        
+        if idx == n:
+            if cnt == 3:
+                dp[idx][prev][cnt] = 0
+            else:
+                dp[idx][prev][cnt] = inf
+            
+            yield None
+        
+        res = inf
+
+        if prev == 0:
+            if s[idx] == 0:
+                '''
+                Not change
+                '''
+                if dp[idx + 1][0][cnt] == -1:
+                    yield f(idx + 1, 0, cnt)
+                res = fmin(res, dp[idx + 1][0][cnt])
+
+                '''
+                Change
+                '''                
+                if dp[idx + 1][1][cnt + 1] == -1:
+                    yield f(idx + 1, 1, cnt + 1)
+                
+                res = fmin(res, dp[idx + 1][1][cnt + 1] + 1)
+            else:
+                '''
+                Not change
+                '''
+                if dp[idx + 1][1][cnt + 1] == -1:
+                    yield f(idx + 1, 1, cnt + 1)
+                
+                res = fmin(res, dp[idx + 1][1][cnt + 1])
+
+                '''
+                Change
+                '''
+                if dp[idx + 1][0][cnt] == -1:
+                    yield f(idx + 1, 0, cnt)
+                
+                res = fmin(res, dp[idx + 1][0][cnt] + 1)
+
+        elif prev == 1:
+
+            if s[idx] == 0:
+                '''
+                Not change
+                '''
+
+                if dp[idx + 1][0][cnt + 1] == -1:
+                    yield f(idx + 1, 0, cnt + 1)
+                
+                res = fmin(res, dp[idx + 1][0][cnt + 1])
+
+                '''
+                Change
+                '''
+                if dp[idx + 1][1][cnt] == -1:
+                    yield f(idx + 1, 1, cnt)
+                
+                res = fmin(res, dp[idx + 1][1][cnt] + 1)
+
+            else:
+                '''
+                Not change
+                '''
+                if dp[idx + 1][1][cnt] == -1:
+                    yield f(idx + 1, 1, cnt)
+                
+                res = fmin(res, dp[idx + 1][1][cnt])
+
+                '''
+                Change
+                '''
+                if dp[idx + 1][0][cnt + 1] == -1:
+                    yield f(idx + 1, 0, cnt + 1)
+                
+                res = fmin(res, dp[idx + 1][0][cnt + 1] + 1)
+        else:
+            # print('prev', prev)
+            if s[idx] == 0:
+                if dp[idx + 1][0][cnt] == -1:
+                    yield f(idx + 1, 0, cnt)
+            
+                res = fmin(res, dp[idx + 1][0][cnt])
+
+                if dp[idx + 1][1][cnt] == -1:
+                    yield f(idx + 1, 1, cnt)
+            
+                res = fmin(res, dp[idx + 1][1][cnt] + 1)
+            else:
+                if dp[idx + 1][0][cnt] == -1:
+                    yield f(idx + 1, 0, cnt)
+            
+                res = fmin(res, dp[idx + 1][0][cnt] + 1)
+
+                if dp[idx + 1][1][cnt] == -1:
+                    yield f(idx + 1, 1, cnt)
+            
+                res = fmin(res, dp[idx + 1][1][cnt])
+        
+        # print('f_res', idx, prev, cnt, res)
+        dp[idx][prev][cnt] = res
+
+        yield None
+    
+    f(0, 2, 0)
+
+    print(dp[0][2][0])
+
+                
 
 for testcase in range(1):
     solve(testcase)

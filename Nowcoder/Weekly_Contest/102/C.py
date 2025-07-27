@@ -118,7 +118,43 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n = II()
+    s = I()
+    s = [int(c) for c in s]
 
-for testcase in range(1):
+    A = []
+    B = []
+
+    for i in range(n):
+        if i & 1:
+            A.append(1)
+            B.append(0)
+        else:
+            A.append(0)
+            B.append(1)
+    
+    def calc(s, t):
+        ans = 0
+        ss = s[:]
+    
+        for i in range(n - 1):
+            while ss[i] != t[i]:
+                ans += 1
+                ss[i] ^= 1
+                ss[i + 1] ^= 1
+        
+        if ss == t:
+            return ans
+        else:
+            return inf
+    
+    res = fmin(calc(s, A), calc(s, B))
+
+    if res == inf:
+        print(-1)
+    else:
+        print(res)
+
+
+for testcase in range(II()):
     solve(testcase)
