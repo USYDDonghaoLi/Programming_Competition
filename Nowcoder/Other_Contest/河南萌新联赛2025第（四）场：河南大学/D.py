@@ -143,7 +143,7 @@ def solve(testcase):
 
     while pq:
         distance, p = heappop(pq)
-        print('dp', distance, p)
+        # print('dp', distance, p)
         if dist[p] != distance:
             continue
 
@@ -155,22 +155,22 @@ def solve(testcase):
             else:
                 print('NO')
 
-            print('dist', dist)
+            # print('dist', dist)
             return
 
         for key in d:
             if key == A[x][y]:
                 dx, dy = d[key]
                 nx, ny = x + dx, y + dy
-                if 0 <= nx < n and 0 <= ny < m and dist[f(nx, ny)] > p:
-                    dist[f(nx, ny)] = p
-                    heappush(pq, (p, f(nx, ny)))
+                if 0 <= nx < n and 0 <= ny < m and dist[f(nx, ny)] > distance:
+                    dist[f(nx, ny)] = distance
+                    heappush(pq, (distance, f(nx, ny)))
             else:
                 dx, dy = d[key]
                 nx, ny = x + dx, y + dy
-                if 0 <= nx < n and 0 <= ny < m and dist[f(nx, ny)] > p + 1:
-                    dist[f(nx, ny)] = p + 1
-                    heappush(pq, (p + 1, f(nx, ny)))
+                if 0 <= nx < n and 0 <= ny < m and dist[f(nx, ny)] > distance + 1:
+                    dist[f(nx, ny)] = distance + 1
+                    heappush(pq, (distance + 1, f(nx, ny)))
     
 
 for testcase in range(II()):
