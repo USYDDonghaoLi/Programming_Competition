@@ -185,7 +185,6 @@ class LCA:
 # @TIME
 def solve(testcase):
     n = II()
-    adj = [[] for _ in range(n)]
 
     lca = LCA(n)
     for _ in range(n - 1):
