@@ -352,38 +352,44 @@ class SortedList:
 
 # @TIME
 def solve(testcase):
-    n, m = MI()
+    n = II()
     A = LII()
 
-    mp = defaultdict(list)
+    S = sorted(list(set(A)))
 
+    d = {v: i for i, v in enumerate(S)}
+    A = [d[a] for a in A]
+
+    mp = defaultdict(list)
     for i, a in enumerate(A):
         mp[a].append(i)
     
     st = SortedList()
+    for v in range(len(S)):
+        if v in mp:
+            for i in mp[v]:
+                idx = st.bisect_left((i, i))
+                l, r = i, i
+                try:
+                    if idx - 1 >= 0 and st[idx - 1][1] + 1 == l:
+                        ll, rr = st.pop(idx - 1)
+                        ll = fmin(ll, l)
+                        rr = fmax(rr, r)
+                except:
+                    pass
 
-    idx = defaultdict(int)
+                try:
+                    if idx < len(st) and st[idx][0] - 1 == r:
+                        ll, rr = st.pop(idx)
+                        ll = fmin(ll, l)
+                        rr = fmax(rr, r)
+                except:
+                    pass
 
-    for key in mp:
-        idx[key] = 0
-        st.add(mp[key][0])
-    
-    res = 0
 
-    for i, a in enumerate(A):
-        # print('st', st)
-        if len(st) != m:
-            break
-        res += n - st[-1]
-        ID = idx[a]
-        st.remove(mp[a][ID])
-        if ID + 1 < len(mp[a]):
-            idx[a] += 1
-            st.add(mp[a][ID + 1])
-        else:
-            break
 
-    print(res)
+            
 
-for testcase in range(1):
+
+for testcase in range(II()):
     solve(testcase)
