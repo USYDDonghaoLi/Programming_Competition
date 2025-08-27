@@ -203,18 +203,6 @@ def solve(testcase):
     lca.bfs(0)
 
     res = [A[i] for i in range(n)]
-    # res[0] = A[0]
-
-    # q = deque()
-    # q.append((0, -1))
-
-    # while q:
-    #     cur, fa = q.popleft()
-    #     for nxt in adj[cur]:
-    #         if nxt == fa:
-    #             continue
-    #         res[nxt] = A[nxt] + res[cur]
-    #         q.append((nxt, cur))
     
     ts = [0 for _ in range(n)]
     t = 0

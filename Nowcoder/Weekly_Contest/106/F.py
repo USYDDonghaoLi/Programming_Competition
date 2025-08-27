@@ -355,41 +355,37 @@ def solve(testcase):
     n = II()
     A = LII()
 
-    S = sorted(list(set(A)))
+    res = 0
 
-    d = {v: i for i, v in enumerate(S)}
-    A = [d[a] for a in A]
+    stk = [inf]
 
-    mp = defaultdict(list)
-    for i, a in enumerate(A):
-        mp[a].append(i)
+    for a in A:
+        while stk and stk[-1] < a:
+            stk.pop()
+        
+        if stk[-1] != inf and stk[-1] != a:
+            res += 1
+        
+        stk.append(a)
     
-    st = SortedList()
-    for v in range(len(S)):
-        if v in mp:
-            for i in mp[v]:
-                idx = st.bisect_left((i, i))
-                l, r = i, i
-                try:
-                    if idx - 1 >= 0 and st[idx - 1][1] + 1 == l:
-                        ll, rr = st.pop(idx - 1)
-                        ll = fmin(ll, l)
-                        rr = fmax(rr, r)
-                except:
-                    pass
+    A.reverse()
 
-                try:
-                    if idx < len(st) and st[idx][0] - 1 == r:
-                        ll, rr = st.pop(idx)
-                        ll = fmin(ll, l)
-                        rr = fmax(rr, r)
-                except:
-                    pass
+    stk = [inf]
 
-
-
-            
-
+    for a in A:
+        while stk and stk[-1] < a:
+            stk.pop()
+        
+        if stk[-1] != inf and stk[-1] != a:
+            res += 1
+        
+        stk.append(a)
+    
+    for i in range(1, n):
+        if A[i - 1] != A[i]:
+            res -= 1
+    
+    print(res)
 
 for testcase in range(II()):
     solve(testcase)
