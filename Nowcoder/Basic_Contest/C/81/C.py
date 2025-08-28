@@ -243,10 +243,12 @@ def solve(testcase):
 
         while l > 0 and len(lc) < K:
             lc.append(l)
+            print('l1', l)
             l = sg.min_left(
                 l,
                 lambda e: e <= A[i]
             )
+            print('l2', l)
             l -= 1
         lc.append(l)
 
