@@ -118,8 +118,21 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    n, q = MI()
-    A = LII()
+    n = II()
+    A = [LI() for _ in range(n)]
+
+    M = 0
+    res = 0
+
+    for a, b in A:
+        if a == 'sensei':
+            M = int(b)
+    
+    for a, b in A:
+        if int(b) < M:
+            res += int(b)
+    
+    print(res + M)
 
 for testcase in range(1):
     solve(testcase)

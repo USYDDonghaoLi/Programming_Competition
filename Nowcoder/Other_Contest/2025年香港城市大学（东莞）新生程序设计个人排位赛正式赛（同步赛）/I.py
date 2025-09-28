@@ -118,8 +118,18 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    n, q = MI()
+    n = II()
     A = LII()
+
+    a, b = 0, 0
+
+    for x in A:
+        if x < 0:
+            a += 1
+        if x > 0:
+            b += 1
+    
+    print('Yes' if a == n or b == 2 else 'No')
 
 for testcase in range(1):
     solve(testcase)

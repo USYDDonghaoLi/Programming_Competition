@@ -116,10 +116,33 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+available = {0: [0, 3, 5, 6], 3: [0, 5, 6], 5: [0, 3, 6], 6: [0, 3, 5]}
+
 # @TIME
 def solve(testcase):
-    n, q = MI()
-    A = LII()
+    n = II()
+    A = I()
+    B = I()
+    C = I()
+    D = [A, B, C]
 
-for testcase in range(1):
+    dp = [[0 for _ in range(8)] for _ in range(n + 1)]
+
+    for idx in range(1, n + 1):
+        for newstate in available:
+            flag = True
+            for bit in range(3):
+                if newstate >> bit & 1 and D[bit][idx - 1] == '0':
+                    flag = False
+                    break
+            if flag:
+                for prevstate in available[newstate]:
+                    dp[idx][newstate] = fmax(dp[idx][newstate], dp[idx - 1][prevstate] + int(newstate != 0))
+    
+    print(max(dp[n]))
+
+
+
+
+for testcase in range(II()):
     solve(testcase)

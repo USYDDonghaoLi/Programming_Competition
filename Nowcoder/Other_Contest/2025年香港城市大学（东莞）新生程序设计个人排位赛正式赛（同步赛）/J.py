@@ -116,10 +116,103 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+def manacher(string):
+    new_string =['', '$']
+
+    for s in string:
+        new_string.append(s)
+        new_string.append('$')
+    n = len(new_string)
+
+    # print('new_string', new_string)
+
+    D = [0 for _ in range(n)]
+    l, r = 0, 0
+
+    for i in range(n):
+        if i > r:
+            while i - D[i] >= 0 and i + D[i] <n and (new_string[i - D[i]] == new_string[i + D[i]] or new_string[i - D[i]] == '*' or new_string[i - D[i]] == '*'):
+                D[i] += 1
+            l, r = i - D[i] + 1, i + D[i] - 1
+
+        else:
+            j = l + r - i
+            if j - D[j] >= l:
+                D[i] = D[j]
+            else:
+                D[i] = j - l + 1
+                while i - D[i] >= 0 and i + D[i] < n and (new_string[i - D[i]] == new_string[i + D[i]] or new_string[i - D[i]] == '*' or new_string[i - D[i]] == '*'):
+                    D[i] += 1
+                l, r = i - D[i] + 1, i + D[i] - 1
+    
+    '''
+    if i & 1:
+        LEN = (v + 1 >> 1) * 2 - 1
+    else:
+        LEN = v >> 1 << 1    
+    '''
+
+    return new_string, D
+
 # @TIME
 def solve(testcase):
-    n, q = MI()
-    A = LII()
+    n, m = MI()
+    s = list(I())
+    S = set(s)
+    ls = len(S)
 
-for testcase in range(1):
+    if m == 0:
+        stack = []
+        for c in s:
+            if stack and stack[-1] == c:
+                stack.pop()
+            else:
+                stack.append(c)
+        print(len(stack))
+    else:
+        if ls == 1:
+            print(n % 2)
+        elif ls == 2:
+            print(n % 2)
+        else:
+            assert ls == 3
+            if m >= 2:
+                print(n % 2)
+            else:
+                res = inf
+                for a in 'CJP':
+                    ns = []
+                    for c in s:
+                        if c == a:
+                            ns.append('*')
+                        else:
+                            ns.append(c)
+                    
+                    # print(ns)
+                    
+                    ns, MC = manacher(ns)
+                    # print(ns, MC)
+
+                    dp = [0 for _ in range(n + 10)]
+
+                    for i, v in enumerate(ns):
+                        if v == '$':
+                            affect = MC[i] >> 1
+                            if not affect:
+                                continue
+                            idx = i >> 1
+                            left = idx - affect + 1
+                            right = idx + affect
+                            # print(MC[i], idx, left, right, affect)
+                            if left < right:
+                                dp[right + 1] = fmax(dp[left - 1] + right - left + 1, dp[right + 1])
+                    
+                    # print('dp', dp)
+
+                    res = fmin(res, n - max(dp))
+                
+                print(res)
+
+
+for testcase in range(II()):
     solve(testcase)

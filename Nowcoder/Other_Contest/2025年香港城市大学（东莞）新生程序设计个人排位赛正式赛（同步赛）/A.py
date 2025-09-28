@@ -116,10 +116,87 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+d = {'U': (0, 1), 'D': (0, -1), 'L': (-1, 0), 'R': (1, 0)}
+dd = {'U': 0, 'D': 1, 'L': 2, 'R': 3}
+
 # @TIME
 def solve(testcase):
     n, q = MI()
-    A = LII()
+    s = I()
+
+    pos = [[0 for _ in range(2)] for _ in range(n + 1)]
+
+    for i in range(1, n + 1):
+        v = d[s[i - 1]]
+        pos[i][0] = pos[i - 1][0] + v[0]
+        pos[i][1] = pos[i - 1][1] + v[1]
+    
+    mp = defaultdict(int)
+    mp2 = defaultdict(int)
+
+    for i in range(1, n + 1):
+        p = pos[i]
+        if p not in mp:
+            mp[p] = i
+        mp2[p] = i
+    
+    A = [[] for _ in range(4)]
+
+    for j in range(1, n + 1):
+        A[dd[s[j - 1]]].append(j)
+    
+    cnt = [0 for _ in range(4)]
+
+    for c in s:
+        cnt[dd[c]] += 1
+    
+    dx = cnt[3] - cnt[2]
+    dy = cnt[0] - cnt[1]
+
+    has_h = cnt[2] + cnt[3] > 0
+    has_v = cnt[0] + cnt[1] > 0
+
+    for i in range(q):
+        px, py = MI()
+
+        if (px, py) not in mp:
+            print(0)
+            continue
+        
+        k_min = mp[(px, py)]
+
+        flag = False
+
+        if not has_v:
+            if py:
+                flag = False
+            else:
+                flag = (px > 0 and dx >= px) or (px < 0 and dx <= px)
+        elif not has_h:
+            if px:
+                flag = False
+            else:
+                flag = (py > 0 and dy >= py) or (py < 0 and dy <= py)
+        else:
+            flag = px == dx and py == dy
+        
+        if not flag:
+            print(1)
+            continue
+            
+        
+        flag2 = False
+
+        for oc in 'UDLR':
+            for nc in 'UDLR':
+                if oc != nc:
+                    dv = d[nc]
+                    ov = d[oc]
+                    delta = (dv[0] - ov[0], dv[1] - ov[1])
+                    t = (px - delta[0], py - delta[1])
+
+                    last = 0
+                    
 
 for testcase in range(1):
     solve(testcase)

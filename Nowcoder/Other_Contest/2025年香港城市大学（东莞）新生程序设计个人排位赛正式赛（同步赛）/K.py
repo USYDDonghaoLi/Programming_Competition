@@ -116,10 +116,34 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+from math import acos, sin, pi
+
 # @TIME
 def solve(testcase):
-    n, q = MI()
-    A = LII()
+    a, b, x1, y1, x2, y2 = MI()
+    aa = abs(a)
+    bb = abs(b)
+    dx = x2 - x1
+    dy = y2 - y1
 
-for testcase in range(1):
+    cross = abs(x1 * y2 - x2 * y1)
+    tmp = sqrt(dx / aa * dx / aa + dy / bb * dy / bb)
+
+    if tmp == 0:
+        print(-1)
+        return
+    
+    d = cross / (aa * bb * tmp)
+
+    if d >= 1 - 1e-9:
+        print(-1)
+        return
+
+    c = 2 * acos(d)
+    sc = sin(c)
+    S = (c - sc) / 2
+    larger = pi - S
+    print(S / larger)
+
+for testcase in range(II()):
     solve(testcase)

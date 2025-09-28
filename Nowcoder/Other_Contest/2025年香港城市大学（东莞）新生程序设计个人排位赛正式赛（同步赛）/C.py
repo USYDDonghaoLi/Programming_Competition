@@ -118,8 +118,22 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    n, q = MI()
-    A = LII()
+    n = II()
+    # A = []
+
+    M1, M2, m1, m2 = 0, 0, 0, 0
+
+    for _ in range(n):
+        a, b = MI()
+        # A.append((a, b))
+        M1 = fmax(M1, a + b)
+        m1 = fmin(m1, a + b)
+        M2 = fmax(M2, a - b)
+        m2 = fmin(m2, a - b)
+
+        # print(M1, M2, m1, m2)
+
+        print(fmax(M1 - m1, M2 - m2))
 
 for testcase in range(1):
     solve(testcase)

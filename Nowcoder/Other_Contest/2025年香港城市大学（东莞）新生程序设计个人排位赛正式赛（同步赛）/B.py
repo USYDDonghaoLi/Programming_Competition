@@ -118,8 +118,13 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    n, q = MI()
-    A = LII()
+    a, b = I().split('.')
+    a = int(a)
+
+    if b and b[0] >= '5':
+        a += 1
+    
+    print(a)
 
 for testcase in range(1):
     solve(testcase)
