@@ -229,6 +229,14 @@ def solve(testcase):
         out.append(' '.join(map(str, res)))
         cs, ct, cc = pcs, pct, pcc
     
+    def check(out):
+        prev = 0
+        for res in out:
+            for r in res:
+                r = int(r) - 1
+                if C[r - 1] == 2:
+                    needstate = 1 << B[r] - 1
+
     print(len(out))
     assert len(out) == k
     print('\n'.join(reversed(out)))
