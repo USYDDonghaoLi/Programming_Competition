@@ -70,24 +70,24 @@ from time import *
 from random import *
 from math import log, gcd, sqrt, ceil
 
-# from types import GeneratorType
-# def bootstrap(f, stack=[]):
-#     def wrappedfunc(*args, **kwargs):
-#         if stack:
-#             return f(*args, **kwargs)
-#         else:
-#             to = f(*args, **kwargs)
-#             while True:
-#                 if type(to) is GeneratorType:
-#                     stack.append(to)
-#                     to = next(to)
-#                 else:
-#                     stack.pop()
-#                     if not stack:
-#                         break
-#                     to = stack[-1].send(to)
-#             return to
-#     return wrappedfunc
+from types import GeneratorType
+def bootstrap(f, stack=[]):
+    def wrappedfunc(*args, **kwargs):
+        if stack:
+            return f(*args, **kwargs)
+        else:
+            to = f(*args, **kwargs)
+            while True:
+                if type(to) is GeneratorType:
+                    stack.append(to)
+                    to = next(to)
+                else:
+                    stack.pop()
+                    if not stack:
+                        break
+                    to = stack[-1].send(to)
+            return to
+    return wrappedfunc
 
 # seed(19981220)
 # RANDOM = getrandbits(64)
@@ -124,10 +124,10 @@ DX = (
         (0, 0), (0, 1), (0, -1), (-1, 0)
     ),
     (
-        (0, 0), (-4, 0), (4, 0), (0, -1)
+        (0, 0), (-1, 0), (1, 0), (0, -1)
     ),
     (
-        (0, 0), (-4, 0), (4, 0), (0, 1)
+        (0, 0), (-1, 0), (1, 0), (0, 1)
     )
 )
 
@@ -142,13 +142,13 @@ DY = (
         (0, 0), (0, 1), (0, 2), (1, 0)
     ),
     (
-        (0, 0), (0, -1), (0, -2), (-1, 0)
+        (0, 0), (0, -1), (0, -2), (1, 0)
     ),
     (
         (0, 0), (-1, 0), (-2, 0), (0, 1)
     ),
     (
-        (0, 0), (-1, 0), (-2, 0), (0, 1)
+        (0, 0), (-1, 0), (-2, 0), (0, -1)
     ),
     (
         (0, 0), (1, 0), (2, 0), (0, -1)
@@ -178,7 +178,102 @@ def solve(testcase):
                         flag = True
                         for dx, dy in d:
                             nx, ny = x + dx, y + dy
-                            
+                            if 0 <= nx < 4 and 0 <= ny < 4 and not A[nx][ny]:
+                                pass
+                            else:
+                                flag = False
+                                break
+                        if flag:
+                            points = []
+                            for dx, dy in d:
+                                nx, ny = x + dx, y + dy
+                                points.append((nx, ny))
+                            res.append(points)
+        
+        return res
+    
+    @lru_cache(None)
+    def checky(state):
+        A = [[0 for _ in range(4)] for _ in range(4)]
+        for bit in range(16):
+            if state >> bit & 1:
+                r, c = divmod(bit, 4)
+                A[r][c] = 1
+        
+        res = []
+        for x in range(4):
+            for y in range(4):
+                if not A[x][y]:
+                    for k, d in enumerate(DY):
+                        flag = True
+                        for dx, dy in d:
+                            nx, ny = x + dx, y + dy
+                            if 0 <= nx < 4 and 0 <= ny < 4 and not A[nx][ny]:
+                                pass
+                            else:
+                                flag = False
+                                break
+                        if flag:
+                            points = []
+                            for dx, dy in d:
+                                nx, ny = x + dx, y + dy
+                                points.append((nx, ny))
+                            res.append(points)
+
+        return res
+    
+    res = [[[None for _ in range(1 << 16)] for _ in range(y + 1)] for _ in range(x + 1)]
+
+    @bootstrap
+    def dfs(x_left, y_left, state):
+        available_x = checkx(state)
+        available_y = checky(state)
+        # print(available_x, 'xx')
+        # print(available_y, 'yy')
+
+        if not available_x and not available_y:
+            res[x_left][y_left][state] = False
+            yield None
+        else:
+            if x_left:
+                for points in available_x:
+                    newstate = state
+                    for x, y in points:
+                        t = x * 4 + y
+                        assert state >> t & 1 == 0
+                        newstate |= 1 << t
+                    if res[x_left - 1][y_left][newstate] is None:
+                        yield dfs(x_left - 1, y_left, newstate)
+                    if res[x_left - 1][y_left][newstate] == False:
+                        res[x_left][y_left][state] = True
+                        yield None
+
+            if y_left:
+                for points in available_y:
+                    newstate = state
+                    for x, y in points:
+                        t = x * 4 + y
+                        assert state >> t & 1 == 0
+                        newstate |= 1 << t
+                    if res[x_left][y_left - 1][newstate] is None:
+                        yield dfs(x_left, y_left - 1, newstate)
+                    if res[x_left][y_left - 1][newstate] == False:
+                        res[x_left][y_left][state] = True
+                        yield None
+
+            res[x_left][y_left][state] = False
+            yield None
+
+    dfs(x, y, 0)
+
+    # for i in range(x + 1):
+    #     for j in range(y + 1):
+    #         for k in range(1 << 16):
+    #             if res[i][j][k] != None:
+    #                 print(i, j, k, res[i][j][k])
+
+    print('Alice' if res[x][y][0] else 'Bob')
+
 
 for testcase in range(1):
     solve(testcase)
