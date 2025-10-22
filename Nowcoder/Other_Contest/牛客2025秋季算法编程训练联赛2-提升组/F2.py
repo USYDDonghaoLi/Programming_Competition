@@ -221,38 +221,32 @@ class SegTree:
     def __str__(self):
         return str([self.get(i) for i in range(self.n)])
 
+mod = 10 ** 9 + 7
+
 # @TIME
 def solve(testcase):
-    n, k = MI()
+    n, m = MI()
     A = LII()
-
-    if k == 1:
-        print(0)
-        return
-    
-    if k == n:
-        print(A[-1] - A[0])
-        return
-    
-    B = [inf for _ in range(n + 1)]
-    B[0] = -A[0]
+    B = LII()
 
     sg = SegTree(
-        B,
-        fmin,
-        inf
+        [(a, b) for a, b in zip(A, B)],
+        lambda x, y: (
+            x[0] * y[0] % mod,
+            (y[0] * x[1] + y[1]) % mod
+        ),
+        (1, 0)
     )
 
-    for i in range(k, n + 1):
-        m = sg.prod(0, i - k + 1)
-        ans = m + A[i - 1]
-        # print('ans', ans)
-        if i != n:
-            sg.set(i, ans - A[i])
+    for _ in range(m):
+        ops = LII()
+        if ops[0] == 1:
+            i, k, b = ops[1] - 1, ops[2], ops[3]
+            sg.set(i, (k, b))
         else:
-            print(ans)
-            return
-        # print('sg', sg)
+            l, r = ops[1] - 1, ops[2] - 1
+            a, b = sg.prod(l, r + 1)
+            print((a + b) % mod)
 
 for testcase in range(1):
     solve(testcase)
