@@ -118,18 +118,8 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    n = II()
-    A = []
-
-    for _ in range(n):
-        p, l, r = MI()
-        A.append((p - l, p + r))
-    
-    idxs = sorted(range(n), key = lambda x: A[x][0])
-
-    
-    
-    print(len(B))
+    n, m = MI()
+    print("akai" if (n * m) & 1 else "yukari")
 
 for testcase in range(1):
     solve(testcase)

@@ -116,20 +116,54 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+eps = 1e-12
+
 # @TIME
 def solve(testcase):
-    n = II()
-    A = []
+    r, x, y, s, x0, y0 = MI()
 
-    for _ in range(n):
-        p, l, r = MI()
-        A.append((p - l, p + r))
-    
-    idxs = sorted(range(n), key = lambda x: A[x][0])
+    dist = (x - x0) ** 2 + (y - y0) ** 2
+    dist = sqrt(dist)
 
+    def f(mid):
+        return sqrt(r * r - mid * mid) * (mid + r)
+
+    L, R = 0, dist
+    while R - L > eps:
+        mid1 = L + (R - L) / 3
+        mid2 = R - (R - L) / 3
+
+        if f(mid1) < f(mid2):
+            L = mid1
+        else:
+            R = mid2
+        
     
-    
-    print(len(B))
+    S = f(L)
+
+    if S > s - eps:
+        dx, dy = -1, -1
+        if dist < eps:
+            dx, dy = 1, 0
+        else:
+            dx, dy = (x0 - x) / dist, (y0 - y) / dist
+        
+        LEN = 2 * sqrt(r * r - L * L)
+        x2 = x + dx * L
+        y2 = y + dy * L
+
+        tx2, ty2 = dy * LEN / 2, -dx * LEN / 2
+        px1, py1 = x2 + tx2, y2 + ty2
+
+        tx3, ty3 = -dy * LEN / 2, dx * LEN / 2
+        px2, py2 = x2 + tx3, y2 + ty3
+
+        tx4, ty4 = -dx * r, -dy * r
+        px3, py3 = x + tx4, y + ty4
+
+        print(px1, py1, px2, py2, px3, py3)
+    else:
+        print(-1)
 
 for testcase in range(1):
     solve(testcase)

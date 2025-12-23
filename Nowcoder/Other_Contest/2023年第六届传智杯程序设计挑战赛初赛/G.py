@@ -70,24 +70,24 @@ from time import *
 from random import *
 from math import log, gcd, sqrt, ceil
 
-# from types import GeneratorType
-# def bootstrap(f, stack=[]):
-#     def wrappedfunc(*args, **kwargs):
-#         if stack:
-#             return f(*args, **kwargs)
-#         else:
-#             to = f(*args, **kwargs)
-#             while True:
-#                 if type(to) is GeneratorType:
-#                     stack.append(to)
-#                     to = next(to)
-#                 else:
-#                     stack.pop()
-#                     if not stack:
-#                         break
-#                     to = stack[-1].send(to)
-#             return to
-#     return wrappedfunc
+from types import GeneratorType
+def bootstrap(f, stack=[]):
+    def wrappedfunc(*args, **kwargs):
+        if stack:
+            return f(*args, **kwargs)
+        else:
+            to = f(*args, **kwargs)
+            while True:
+                if type(to) is GeneratorType:
+                    stack.append(to)
+                    to = next(to)
+                else:
+                    stack.pop()
+                    if not stack:
+                        break
+                    to = stack[-1].send(to)
+            return to
+    return wrappedfunc
 
 # seed(19981220)
 # RANDOM = getrandbits(64)
@@ -119,17 +119,49 @@ fmax = lambda x, y: x if x > y else y
 # @TIME
 def solve(testcase):
     n = II()
-    A = []
+    g = [[] for _ in range(n+1)]
+    match = [0] * (n+1)
+    col = [0] * (n+1)
 
-    for _ in range(n):
-        p, l, r = MI()
-        A.append((p - l, p + r))
-    
-    idxs = sorted(range(n), key = lambda x: A[x][0])
+    for _ in range(n-1):
+        x, y = MI()
+        g[x].append(y)
+        g[y].append(x)
 
+    @bootstrap
+    def dfs1(x: int, fa: int):
+        for y in g[x]:
+            if y == fa:
+                continue
+            yield dfs1(y, x)
+            if not match[x] and not match[y]:
+                match[x] = y
+                match[y] = x
+        yield
+    dfs1(1, 0)
+
+    if any(m == 0 for m in match[1:]):
+        print(-1)
+        return
     
-    
-    print(len(B))
+    @bootstrap
+    def dfs2(x: int, fa: int):
+        for y in g[x]:
+            if y == fa:
+                continue
+            if match[x] == y:
+                col[y] = col[x]
+            else:
+                col[y] = col[x] ^ 1
+            yield dfs2(y, x)
+        yield
+    dfs2(1, 0)
+ 
+    ans = ''
+    for c in col[1:]:
+        ans += 'R' if c else 'B'
+    print(ans)
+    return
 
 for testcase in range(1):
     solve(testcase)

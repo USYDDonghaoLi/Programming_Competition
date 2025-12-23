@@ -119,17 +119,19 @@ fmax = lambda x, y: x if x > y else y
 # @TIME
 def solve(testcase):
     n = II()
-    A = []
+    s = [ord(c) - 97 for c in I()]
 
-    for _ in range(n):
-        p, l, r = MI()
-        A.append((p - l, p + r))
-    
-    idxs = sorted(range(n), key = lambda x: A[x][0])
+    A = [0 for _ in range(26)]
+    B = [0 for _ in range(26)]
+    res = 0
 
+    for i, c in enumerate(s):
+        res += B[c]
+        other = i - A[c]
+        B[c] += other
+        A[c] += 1
     
-    
-    print(len(B))
+    print(res)
 
 for testcase in range(1):
     solve(testcase)
