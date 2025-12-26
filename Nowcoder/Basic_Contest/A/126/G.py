@@ -231,7 +231,6 @@ def solve(testcase):
     
     for i in range(1, n + 21):
         A[i] += A[i - 1]
-
     
     print("AA", A)
     print(B[0])
