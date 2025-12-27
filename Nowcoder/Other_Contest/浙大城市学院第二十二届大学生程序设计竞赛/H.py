@@ -70,24 +70,24 @@ from time import *
 from random import *
 from math import log, gcd, sqrt, ceil
 
-# from types import GeneratorType
-# def bootstrap(f, stack=[]):
-#     def wrappedfunc(*args, **kwargs):
-#         if stack:
-#             return f(*args, **kwargs)
-#         else:
-#             to = f(*args, **kwargs)
-#             while True:
-#                 if type(to) is GeneratorType:
-#                     stack.append(to)
-#                     to = next(to)
-#                 else:
-#                     stack.pop()
-#                     if not stack:
-#                         break
-#                     to = stack[-1].send(to)
-#             return to
-#     return wrappedfunc
+from types import GeneratorType
+def bootstrap(f, stack=[]):
+    def wrappedfunc(*args, **kwargs):
+        if stack:
+            return f(*args, **kwargs)
+        else:
+            to = f(*args, **kwargs)
+            while True:
+                if type(to) is GeneratorType:
+                    stack.append(to)
+                    to = next(to)
+                else:
+                    stack.pop()
+                    if not stack:
+                        break
+                    to = stack[-1].send(to)
+            return to
+    return wrappedfunc
 
 # seed(19981220)
 # RANDOM = getrandbits(64)
@@ -116,9 +116,80 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+d = ((1, 0), (-1, 0), (0, 1), (0, -1))
+
 # @TIME
 def solve(testcase):
-    pass
+    n, m = MI()
+    A = [I() for _ in range(n)]
 
-for testcase in range(II()):
+    pos = []
+    sx, sy = -1, -1
+
+
+    for i in range(n):
+        for j in range(m):
+            if A[i][j] == '*':
+                pos.append((i, j))
+            if A[i][j] == 'S':
+                sx, sy = i, j
+ 
+    if len(pos) == 0:
+        print(0)
+        return
+    
+    def f(x, y):
+        dist = [[inf for _ in range(m)] for _ in range(n)]
+        q = deque()
+        q.append((x, y))
+        dist[x][y] = 0
+
+        while q:
+            x, y = q.popleft()
+            for dx, dy in d:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < n and 0 <= ny < m and A[nx][ny] != '#' and dist[nx][ny] > dist[x][y] + 1:
+                    dist[nx][ny] = dist[x][y] + 1
+                    q.append((nx, ny))
+        
+        return dist
+
+    mp = defaultdict(list)
+
+    mp[(sx, sy)] = f(sx, sy)
+    for x, y in pos:
+        mp[(x, y)] = f(x, y)
+    
+    k = len(pos)
+    
+    FINAL = (1 << k + 1) - 1
+
+    B = [[inf for _ in range(k + 1)] for _ in range(1 << k + 1)]
+
+    
+    @bootstrap
+    def g(state, last):
+        x, y = pos[last - 1]
+        if state == FINAL:
+            B[state][last] = mp[(x, y)][sx][sy]
+        else:
+            for i in range(1, k + 1):
+                if not state >> i & 1:
+                    nx, ny = pos[i - 1]
+                    newstate = state | (1 << i)
+                    yield g(newstate, i)
+                    if last:
+                        B[state][last] = fmin(B[state][last], B[newstate][i] + mp[(x, y)][nx][ny])
+                    else:
+                        B[state][last] = fmin(B[state][last], B[newstate][i] + mp[(sx, sy)][nx][ny])
+        yield None
+    
+    g(1, 0)
+
+    res = B[1][0]
+
+    print(-1 if res == inf else res)
+
+
+for testcase in range(1):
     solve(testcase)

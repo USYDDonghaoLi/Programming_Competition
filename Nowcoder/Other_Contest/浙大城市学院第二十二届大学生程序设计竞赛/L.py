@@ -118,7 +118,34 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n, m = MI()
+    A = LII()
 
-for testcase in range(II()):
+    def f(mid):
+        B = [0]
+
+        for a in A:
+            B.append(B[-1] + a - mid)
+        
+        for i in range(m, n + 1):
+            p = i - m
+            if p:
+                B[p] = fmin(B[p], B[p - 1])
+
+            if B[i] - B[p] >= 0:
+                return True
+            
+        return False
+
+    r, l = 10 ** 9 + 10, -(10 ** 9 + 10)
+    while r - l > 1e-7:
+        mid = (l + r) / 2
+        if f(mid):
+            l = mid
+        else:
+            r = mid
+    
+    print(l)
+
+for testcase in range(1):
     solve(testcase)

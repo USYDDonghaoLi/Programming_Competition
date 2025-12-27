@@ -1,124 +1,140 @@
-'''
-Hala Madrid!
-https://github.com/USYDDonghaoLi/Programming_Competition
-'''
-
 import sys
-import os
-from io import BytesIO, IOBase
-BUFSIZE = 8192
-class FastIO(IOBase):
-    newlines = 0
-    def __init__(self, file):
-        self._fd = file.fileno()
-        self.buffer = BytesIO()
-        self.writable = "x" in file.mode or "r" not in file.mode
-        self.write = self.buffer.write if self.writable else None
-    def read(self):
-        while True:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            if not b:
-                break
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines = 0
-        return self.buffer.read()
-    def readline(self):
-        while self.newlines == 0:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            self.newlines = b.count(b"\n") + (not b)
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines -= 1
-        return self.buffer.readline()
-    def flush(self):
-        if self.writable:
-            os.write(self._fd, self.buffer.getvalue())
-            self.buffer.truncate(0), self.buffer.seek(0)
-class IOWrapper(IOBase):
-    def __init__(self, file):
-        self.buffer = FastIO(file)
-        self.flush = self.buffer.flush
-        self.writable = self.buffer.writable
-        self.write = lambda s: self.buffer.write(s.encode("ascii"))
-        self.read = lambda: self.buffer.read().decode("ascii")
-        self.readline = lambda: self.buffer.readline().decode("ascii")
-sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
-input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-def I():
-    return input()
-def II():
-    return int(input())
-def MI():
-    return map(int, input().split())
-def LI():
-    return list(input().split())
-def LII():
-    return list(map(int, input().split()))
-def GMI():
-    return map(lambda x: int(x) - 1, input().split())
+MAXN = 4000010
+nodes = []
+node_cnt = 0
+vis = [0] * MAXN
+timestamp = 0
 
-#------------------------------FastIO---------------------------------
+def create():
+    global node_cnt
+    nodes.append({'len': 0, 'link': -1, 'trans': [None] * 26, 'count': 0})
+    ret = node_cnt
+    node_cnt += 1
+    return ret
 
-from bisect import *
-from heapq import *
-from collections import *
-from functools import *
-from itertools import *
-from time import *
-from random import *
-from math import log, gcd, sqrt, ceil
+def insert_to_sam(str_):
+    terminals = []
+    last = root
+    for ch in str_:
+        c = ord(ch) - ord('a')
+        p = last
+        if nodes[p]['trans'][c] is not None:
+            q = nodes[p]['trans'][c]
+            if nodes[q]['len'] == nodes[p]['len'] + 1:
+                last = q
+            else:
+                clone = create()
+                nodes[clone]['len'] = nodes[p]['len'] + 1
+                nodes[clone]['link'] = nodes[q]['link']
+                nodes[clone]['trans'] = nodes[q]['trans'][:]
+                nodes[clone]['count'] = nodes[q]['count']
+                nodes[q]['link'] = clone
+                last = clone
+                while p != -1 and nodes[p]['trans'][c] == q:
+                    nodes[p]['trans'][c] = clone
+                    p = nodes[p]['link']
+        else:
+            u = create()
+            nodes[u]['len'] = nodes[p]['len'] + 1
+            last = u
+            pp = p
+            while pp != -1 and nodes[pp]['trans'][c] is None:
+                nodes[pp]['trans'][c] = u
+                pp = nodes[pp]['link']
+            if pp == -1:
+                nodes[u]['link'] = root
+            else:
+                q = nodes[pp]['trans'][c]
+                if nodes[pp]['len'] + 1 == nodes[q]['len']:
+                    nodes[u]['link'] = q
+                else:
+                    clone = create()
+                    nodes[clone]['len'] = nodes[pp]['len'] + 1
+                    nodes[clone]['trans'] = nodes[q]['trans'][:]
+                    nodes[clone]['link'] = nodes[q]['link']
+                    nodes[clone]['count'] = nodes[q]['count']
+                    nodes[q]['link'] = clone
+                    nodes[u]['link'] = clone
+                    while pp != -1 and nodes[pp]['trans'][c] == q:
+                        nodes[pp]['trans'][c] = clone
+                        pp = nodes[pp]['link']
+        terminals.append(last)
+    return terminals
 
-# from types import GeneratorType
-# def bootstrap(f, stack=[]):
-#     def wrappedfunc(*args, **kwargs):
-#         if stack:
-#             return f(*args, **kwargs)
-#         else:
-#             to = f(*args, **kwargs)
-#             while True:
-#                 if type(to) is GeneratorType:
-#                     stack.append(to)
-#                     to = next(to)
-#                 else:
-#                     stack.pop()
-#                     if not stack:
-#                         break
-#                     to = stack[-1].send(to)
-#             return to
-#     return wrappedfunc
+data = sys.stdin.read().split()
+idx = 0
+init_str = data[idx]
+idx += 1
+q = int(data[idx])
+idx += 1
 
-# seed(19981220)
-# RANDOM = getrandbits(64)
- 
-# class Wrapper(int):
-#     def __init__(self, x):
-#         int.__init__(x)
+S = list(init_str)
+root = create()
 
-#     def __hash__(self):
-#         return super(Wrapper, self).__hash__() ^ RANDOM
+total_versions = 0
+answer = 0
 
-# def TIME(f):
+terminals = insert_to_sam(S)
+old_total = total_versions
+total_versions += 1
+new_answer = 0
+timestamp += 1
+for t in terminals:
+    p = t
+    while p != -1 and vis[p] != timestamp:
+        vis[p] = timestamp
+        if nodes[p]['count'] == old_total:
+            llink = nodes[p]['link']
+            prev_len = 0 if llink == -1 else nodes[llink]['len']
+            new_answer += nodes[p]['len'] - prev_len
+        nodes[p]['count'] += 1
+        p = nodes[p]['link']
+answer = new_answer
 
-#     def wrap(*args, **kwargs):
-#         s = perf_counter()
-#         ret = f(*args, **kwargs)
-#         e = perf_counter()
-
-#         print(e - s, 'sec')
-#         return ret
-    
-#     return wrap
-
-inf = float('inf')
-
-fmin = lambda x, y: x if x < y else y
-fmax = lambda x, y: x if x > y else y
-
-# @TIME
-def solve(testcase):
-    pass
-
-for testcase in range(II()):
-    solve(testcase)
+for _ in range(q):
+    op = data[idx]
+    idx += 1
+    if op == 'I':
+        i = int(data[idx])
+        c = data[idx + 1]
+        idx += 2
+        S.insert(i, c)
+        terminals = insert_to_sam(S)
+        old_total = total_versions
+        total_versions += 1
+        new_answer = 0
+        timestamp += 1
+        for t in terminals:
+            p = t
+            while p != -1 and vis[p] != timestamp:
+                vis[p] = timestamp
+                if nodes[p]['count'] == old_total:
+                    llink = nodes[p]['link']
+                    prev_len = 0 if llink == -1 else nodes[llink]['len']
+                    new_answer += nodes[p]['len'] - prev_len
+                nodes[p]['count'] += 1
+                p = nodes[p]['link']
+        answer = new_answer
+    elif op == 'D':
+        i = int(data[idx])
+        idx += 1
+        del S[i]
+        terminals = insert_to_sam(S)
+        old_total = total_versions
+        total_versions += 1
+        new_answer = 0
+        timestamp += 1
+        for t in terminals:
+            p = t
+            while p != -1 and vis[p] != timestamp:
+                vis[p] = timestamp
+                if nodes[p]['count'] == old_total:
+                    llink = nodes[p]['link']
+                    prev_len = 0 if llink == -1 else nodes[llink]['len']
+                    new_answer += nodes[p]['len'] - prev_len
+                nodes[p]['count'] += 1
+                p = nodes[p]['link']
+        answer = new_answer
+    elif op == 'Q':
+        print(answer)

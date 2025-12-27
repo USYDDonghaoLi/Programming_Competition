@@ -68,7 +68,7 @@ from functools import *
 from itertools import *
 from time import *
 from random import *
-from math import log, gcd, sqrt, ceil
+from math import log, gcd, sqrt, ceil, pi
 
 # from types import GeneratorType
 # def bootstrap(f, stack=[]):
@@ -116,52 +116,43 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
-'''
-1, 2, 4, 3
-12, 4, 3
-12, 43
-1243
-1, 243
-1, 2, 43
-'''
-
-mod = 998244353
-
 # @TIME
 def solve(testcase):
     n = II()
-    A = LII()
-    ps = [0]
-    cur = 0
-    mpa = defaultdict(list)
-    mpb = defaultdict(list)
+    A = []
 
-    dp = [0 for _ in range(n + 1)]
-    dp[0] = 1
+    for _ in range(n):
+        x, y, z, d = MI()
+        A.append((x, y, z, d))
     
-    for i, v in enumerate(A):
-        cur += v
-        ps.append(v)
-
-        dp[i + 1] += dp[i]
-        a, b = v + i, v - i
-        for j in mpa[a]:
-            print("ij1", i, j)
-            LEN = i - j + 1
-            if cur - ps[j] == (v + v + LEN - 1) * LEN // 2:
-                dp[i + 1] += dp[j]
-        for j in mpb[b]:
-            LEN = i - j + 1
-            print("ij2", v, i, j, cur, ps[j], (v + v - LEN + 1) * LEN // 2)
-            if cur - ps[j] == (v + v - LEN + 1) * LEN // 2:
-                dp[i + 1] += dp[j]
-        dp[i + 1] %= mod
-        mpa[a].append(i)
-        mpb[a].append(i)
+    res = 0.0
+    for i in range(n):
+        for j in range(i + 1, n):
+            x1, y1, z1, d1 = A[i]
+            x2, y2, z2, d2 = A[j]
+            d_min = fmin(d1, d2)
+            dd = d_min ** 2
+            dist_sq = float((x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2)
+            
+            if dist_sq == 0:
+                continue
+            if dist_sq > 4.0 * dd:
+                continue
+            
+            LIM = (8.0 / 3.0) * dd
+            if dist_sq <= LIM:
+                r_sq = (2.0 / 3.0) * dd
+                h_sq = dd - r_sq
+                h = sqrt(h_sq)
+                vol = pi * r_sq * h / 3.0
+            else:
+                r_sq = dist_sq / 4.0
+                h_sq = dd - r_sq
+                h = sqrt(h_sq)
+                vol = pi * r_sq * h / 3.0
+            res = fmax(res, vol)
     
-        print('dp', dp)
-    
-    print(dp[n])
+    print('%.9f' % res if res > 0 else '0.000000000')
 
 for testcase in range(1):
     solve(testcase)

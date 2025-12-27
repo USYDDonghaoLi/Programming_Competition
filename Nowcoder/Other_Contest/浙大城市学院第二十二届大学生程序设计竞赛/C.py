@@ -118,7 +118,65 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n = II()
+    A = LII()
 
-for testcase in range(II()):
+    B = [[] for _ in range(20)]
+
+    for a in A:
+        for bit in range(20):
+            if a >> bit & 1:
+                B[bit].append(a)
+    
+    C = []
+    for b in range(20):
+        if B[b]:
+            B[b].sort()
+            C.append(b)
+        
+    C.sort(key = lambda x: B[x])
+
+    D = []
+    i = 0
+    while i < len(C):
+        j = i
+        cs = B[C[i]]
+        sz = len(cs)
+
+        while j < len(C) and B[C[j]] == cs:
+            j += 1
+        if sz < n:
+            D.append([cs, sz])
+        i = j
+
+    def f(arr1, arr2):
+        if len(arr1) > len(arr2):
+            return False
+        i = 0
+        for val in arr1:
+            while i < len(arr2) and arr2[i] < val:
+                i += 1
+            if i >= len(arr2) or arr2[i] != val:
+                return False
+            i += 1
+        return True
+
+    m = len(D)
+    E = []
+    for i in range(m):
+        for j in range(m):
+            if i != j and f(D[i][0], D[j][0]):
+                E.append((i, j))
+    
+    res = 0
+    for state in range(1 << m):
+        for i, j in E:
+            if state >> i & 1 and not state >> j & 1:
+                break
+        else:
+            res += 1
+    
+    print(res)
+
+for testcase in range(1):
     solve(testcase)

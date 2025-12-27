@@ -118,7 +118,24 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n, k, q = MI()
+    A = [I() for _ in range(n)]
 
-for testcase in range(II()):
+    for _ in range(q):
+        x, y = MI()
+        routes = []
+        for _ in range(k):
+            xx, a = divmod(x, n)
+            yy, b = divmod(y, n)
+            routes.append((a, b))
+            x, y = xx, yy
+        
+        for x, y in reversed(routes):
+            if A[x][y] == "1":
+                print(1)
+                break
+        else:
+            print(0)
+
+for testcase in range(1):
     solve(testcase)
