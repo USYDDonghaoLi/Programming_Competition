@@ -116,11 +116,79 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+mod = 10 ** 9 + 7
+
 # @TIME
 def solve(testcase):
     n = II()
 
-    A = []
+    '''
+    '', r, re, red, redr, redre, redred
+    '''
+    A = [1, 0, 0, 0, 0, 0, 0]
+
+    for _ in range(1, n + 1):
+        B = [0 for _ in range(7)]
+
+        '''
+        state 0 -> 1 r
+        state 0 -> 0 other
+        '''
+        B[0] += A[0] * 25
+        B[1] += A[0]
+
+        '''
+        state 1 -> 1 r
+        state 1 -> 2 e
+        state 1 -> 0 other
+        '''
+        B[0] += A[1] * 24
+        B[1] += A[1]
+        B[2] += A[1]
+        
+        '''
+        state 2 -> 3 d
+        state 2 -> 1 r
+        state 2 -> 0 other
+        '''
+        B[0] += A[2] * 24
+        B[1] += A[2]
+        B[3] += A[2]
+
+        '''
+        state 3 -> 4 r
+        state 3 -> 3 other
+        '''
+        B[3] += A[3] * 25
+        B[4] += A[3]
+
+        '''
+        state 4 -> 5 e
+        state 4 -> 4 r
+        state 4 -> 3 other
+        '''
+        B[3] += A[4] * 24
+        B[4] += A[4]
+        B[5] += A[4]
+
+        '''
+        state 5 -> 6 d
+        state 5 -> 4 r
+        state 5 -> 3 other
+        '''
+        B[3] += A[5] * 24
+        B[4] += A[5]
+        B[6] += A[5]
+
+        '''
+        state 6 -> 6 all
+        '''
+        B[6] += A[6] * 26
+
+        for i in range(7):
+            A[i] = B[i] % mod
+    
+    print(A[6])
 
 for testcase in range(1):
     solve(testcase)
