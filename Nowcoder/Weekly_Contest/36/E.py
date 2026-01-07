@@ -116,9 +116,64 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+'''
+a b b
+a c c
+b c a
+'''
+
+A = [
+    [
+        "a", "b", "b"
+    ],
+    [
+        "a", "c", "c"
+    ],
+    [
+        "b", "c", "a"
+    ]
+]
+
+d = ((1, 0), (-1, 0), (0, 1), (0, -1))
+
 # @TIME
 def solve(testcase):
-    pass
+    n, m = MI()
+    res = [['' for _ in range(m)] for _ in range(n)]
 
-for testcase in range(II()):
+    for i in range(3):
+        for j in range(3):
+            res[i][j] = A[i][j]
+    
+    cur = 0
+    for i in range(n):
+        for j in range(m):
+            if not res[i][j]:
+                res[i][j] = chr(97 + cur + 3)
+                cur = (cur + 1) % 23
+    
+    for r in res:
+        print(''.join(r))
+
+    dist = [[inf for _ in range(m)] for _ in range(n)]
+    vis = [[False for _ in range(m)] for _ in range(n)]
+
+    q = deque()
+    q.append((0, 0))
+    vis[0][0] = True
+    dist[0][0] = 0
+
+    while q:
+        x, y = q.popleft()
+        for dx, dy in d:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < n and 0 <= ny < m and not vis[nx][ny] and res[nx][ny] != res[x][y]:
+                dist[nx][ny] = dist[x][y] + 1
+                vis[nx][ny] = True
+                q.append((nx, ny))
+    
+    final = dist[n - 1][m - 1]
+    assert final != inf
+
+for testcase in range(1):
     solve(testcase)

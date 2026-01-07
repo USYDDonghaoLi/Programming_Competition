@@ -118,7 +118,39 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n, m, x = MI()
+    A = [LII() for _ in range(n)]
 
-for testcase in range(II()):
+    s = 0
+    for i in range(n):
+        for j in range(m):
+            s += A[i][j]
+    
+    if s != x:
+        print("wrong answer")
+        return
+
+    target = 0
+    for j in range(m):
+        target ^= A[0][j]
+
+    for i in range(n):
+        c = 0
+        for j in range(m):
+            c ^= A[i][j]
+        if c != target:
+            print("wrong answer")
+            return
+    
+    for j in range(m):
+        c = 0
+        for i in range(n):
+            c ^= A[i][j]
+        if c != target:
+            print("wrong answer")
+            return
+    
+    print("accepted")
+
+for testcase in range(1):
     solve(testcase)

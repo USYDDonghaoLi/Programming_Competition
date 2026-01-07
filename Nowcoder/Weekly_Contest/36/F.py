@@ -116,9 +116,97 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+class FenwickTree:
+    def __init__(self, n):
+        self.n = n
+        self.tree = [0] * (n + 1)  # Index 0 is unused; tree[1] to tree[n] for positions 1 to n
+    
+    def fill(self, a):
+        # Assumes a is 1-based list: a[0] unused or ignored, a[1] to a[n]
+        for i in range(1, self.n + 1):
+            self.update(i, a[i])
+
+    def lowbit(self, x):
+        return x & (-x)
+
+    def update(self, pos, x):
+        # pos is 1-based (1 to n)
+        while pos <= self.n:
+            self.tree[pos] += x
+            pos += self.lowbit(pos)
+
+    def query(self, pos):
+        # Prefix sum from 1 to pos (inclusive)
+        to_ret = 0
+        while pos > 0:
+            to_ret += self.tree[pos]
+            pos -= self.lowbit(pos)
+        return to_ret
+
+    def query_sum(self, l, r):
+        if l > r:
+            return 0
+        # Range sum from l to r (inclusive, 1-based)
+        return self.query(r) - self.query(l - 1)
+
+    def lower_bound(self, val):
+        # Find the smallest index (1-based) where prefix sum >= val
+        ret, su = 0, 0
+        for i in reversed(range((self.n + 1).bit_length())):
+            ix = ret + (1 << i)
+            if ix <= self.n and su + self.tree[ix] < val:
+                su += self.tree[ix]
+                ret += 1 << i
+        return ret + 1  # Adjust to 1-based if ret is 0-based internally
+    
+    def upper_bound(self, val):
+        # Find the smallest index (1-based) where prefix sum > val
+        ret, su = 0, 0
+        for i in reversed(range((self.n + 1).bit_length())):
+            ix = ret + (1 << i)
+            if ix <= self.n and su + self.tree[ix] <= val:
+                su += self.tree[ix]
+                ret += 1 << i
+        return ret + 1  # Adjust to 1-based
+
+STRINGS = [
+    "",
+    "red",
+    "rde",
+    "dre",
+    "der",
+    "erd",
+    "edr"
+]
+
 # @TIME
 def solve(testcase):
-    pass
+    n, q = MI()
+    s = list(" " + I())
 
-for testcase in range(II()):
+    FS = [FenwickTree(n + 10) for _ in range(7)]
+
+    for i in range(1, n + 1):
+        for j in range(1, 7):
+            FS[j].update(i, s[i] != STRINGS[j][i % 3])
+    
+    for _ in range(q):
+        ops = LI()
+        op = ops[0]
+
+        if op == "1":
+            x, c = int(ops[1]), ops[2]
+            for j in range(1, 7):
+                FS[j].update(x, -(s[x] != STRINGS[j][x % 3]))
+            s[x] = c
+            for j in range(1, 7):
+                FS[j].update(x, s[x] != STRINGS[j][x % 3])
+        else:
+            l, r = int(ops[1]), int(ops[2])
+            res = inf
+            for j in range(1, 7):
+                res = fmin(res, FS[j].query_sum(l, r))
+            print(res)
+
+for testcase in range(1):
     solve(testcase)

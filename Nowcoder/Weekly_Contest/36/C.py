@@ -118,7 +118,37 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    s = I()
+    n = len(s)
 
-for testcase in range(II()):
+    intervals = []
+    l, r = 0, 0
+
+    while r < n:
+        if s[r].isupper():
+            r += 1
+        
+        while r < n and s[r].islower():
+            r += 1
+        intervals.append((l, r))
+        l = r
+
+    # print("intervals", intervals)
+
+    m = len(intervals)
+    dp = [[0 for _ in range(2)] for _ in range(m)]
+    dp[0][0] = 0
+    dp[0][1] = intervals[0][1] - intervals[0][0]
+
+    for i in range(1, m):
+        l, r = intervals[i][0], intervals[i][1]
+        LEN = r - l
+
+        dp[i][0] = fmax(dp[i - 1][0], dp[i - 1][1])
+        dp[i][1] = fmax(dp[i - 1][0] + LEN, dp[i - 1][1] + LEN - 1)
+    
+    # print("dp", dp)
+    print(n - fmax(dp[m - 1][0], dp[m - 1][1]))
+
+for testcase in range(1):
     solve(testcase)

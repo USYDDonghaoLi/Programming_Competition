@@ -116,9 +116,32 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+d = ((1, 0), (-1, 0), (0, 1), (0, -1))
+
 # @TIME
 def solve(testcase):
-    pass
+    n, m = MI()
+    A = [I() for _ in range(n)]
+    dist = [[inf for _ in range(m)] for _ in range(n)]
+    vis = [[False for _ in range(m)] for _ in range(n)]
 
-for testcase in range(II()):
+    q = deque()
+    q.append((0, 0))
+    vis[0][0] = True
+    dist[0][0] = 0
+
+    while q:
+        x, y = q.popleft()
+        for dx, dy in d:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < n and 0 <= ny < m and not vis[nx][ny] and A[nx][ny] != A[x][y]:
+                dist[nx][ny] = dist[x][y] + 1
+                vis[nx][ny] = True
+                q.append((nx, ny))
+    
+    res = dist[n - 1][m - 1]
+    print(-1 if res == inf else res)
+
+
+for testcase in range(1):
     solve(testcase)
