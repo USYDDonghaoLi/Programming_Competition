@@ -116,9 +116,37 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+mod = 998244353
+
 # @TIME
 def solve(testcase):
-    pass
+    n, l, r = MI()
+    LEN = r - l + 1
+    s = I()
 
-for testcase in range(II()):
+    idx = (l - 1) % n
+    s = s[idx:] + s[:idx]
+    r -= l
+    l = 0
+
+    A = [0]
+    for c in s:
+        A.append(
+            (A[-1] * 10 + int(c)) % mod
+        )
+    tot = A[-1]
+    
+    q = pow(10, n, mod)
+    a, b = divmod(LEN, n)
+
+    if q == 1:
+        res = a
+        res = (res * pow(10, b, mod) + A[b]) % mod
+        print(res)
+    else:
+        res = tot * (pow(q, a, mod) - 1) % mod * pow(q - 1, mod - 2, mod) % mod
+        res = (res * pow(10, b, mod) + A[b]) % mod
+        print(res)
+
+for testcase in range(1):
     solve(testcase)
