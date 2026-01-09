@@ -116,90 +116,31 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
-class XorBase:
-    n = 26
-    def __init__(self):
-        self.base = [0] * self.n
- 
-    def add(self, num):
-        for i in range(num.bit_length() - 1, -1, -1):
-            if (num >> i) & 1:
-                if self.base[i] == 0:
-                    self.base[i] = num
-                    return
-                else:
-                    num ^= self.base[i]
- 
-    def check(self, num):
-        for i in range(num.bit_length() - 1, -1, -1):
-            if (num >> i) & 1:
-                if self.base[i] == 0: return False
-                num ^= self.base[i]
-        return True
- 
-    def realBase(self):
-        for i in range(self.n):
-            for j in range(i-1, -1, -1):
-                if self.base[i] ^ self.base[j] < self.base[i]:
-                    self.base[i] ^= self.base[j]
-        return [val for val in self.base if val]
- 
-    def maxVal(self):
-        ans = 0
-        for i in range(self.n-1, -1, -1):
-            if ans ^ self.base[i] > ans: ans ^= self.base[i]
-        return ans
- 
-    def merge(base1, base2):
-        res = XorBase()
-        for val in base1.base:
-            if val: res.add(val)
-        for val in base2.base:
-            if val: res.add(val)
-        return res
+mod = 998244353
 
 # @TIME
 def solve(testcase):
     n = II()
-    n, q = MI()
-
-    A = [0 for _ in range(101)]
-
-    for i in range(101):
-        x = i
-        for j in range(100, 0, -1):
-            if i % (j * j) == 0:
-                x //= j * j
-        A[i] = x
+    s = I()
     
-    masks = [0 for _ in range(101)]
-    x = 0
-
-    for i in range(1, 101):
-        if A[i] > 1:
-            for j in range(2, i):
-                if i % j == 0:
-                    masks[i] = masks[j] ^ masks[i // j]
-                    break
-            else:
-                masks[i] = 1 << x
-                x += 1
+    mp = defaultdict(int)
+    for c in s:
+        mp[c] += 1
     
-    for _ in range(q):
-        l, r = GMI()
+    vals = list(mp.keys())
+    m = len(vals)
+    res = 0
 
-        if r - l >= 62:
-            print("Yes")
-        else:
-            XB = XorBase()
-            flag = False
+    for i in range(m):
+        a = mp[vals[i]]
+        for j in range(i + 1, m):
+            b = mp[vals[j]]
+            for k in range(j + 1, m):
+                c = mp[vals[k]]
+                res += a * b % mod * c % mod * 6 % mod
+                res %= mod
+    
+    print(res)
 
-            for x in range(l, r + 1):
-                if XB.add(masks[A[x]]):
-                    continue
-                flag = True
-            
-            print("Yes" if flag else "No")
-
-for testcase in range(II()):
+for testcase in range(1):
     solve(testcase)

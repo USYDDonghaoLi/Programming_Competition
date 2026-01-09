@@ -116,90 +116,67 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
-class XorBase:
-    n = 26
-    def __init__(self):
-        self.base = [0] * self.n
- 
-    def add(self, num):
-        for i in range(num.bit_length() - 1, -1, -1):
-            if (num >> i) & 1:
-                if self.base[i] == 0:
-                    self.base[i] = num
-                    return
-                else:
-                    num ^= self.base[i]
- 
-    def check(self, num):
-        for i in range(num.bit_length() - 1, -1, -1):
-            if (num >> i) & 1:
-                if self.base[i] == 0: return False
-                num ^= self.base[i]
-        return True
- 
-    def realBase(self):
-        for i in range(self.n):
-            for j in range(i-1, -1, -1):
-                if self.base[i] ^ self.base[j] < self.base[i]:
-                    self.base[i] ^= self.base[j]
-        return [val for val in self.base if val]
- 
-    def maxVal(self):
-        ans = 0
-        for i in range(self.n-1, -1, -1):
-            if ans ^ self.base[i] > ans: ans ^= self.base[i]
-        return ans
- 
-    def merge(base1, base2):
-        res = XorBase()
-        for val in base1.base:
-            if val: res.add(val)
-        for val in base2.base:
-            if val: res.add(val)
-        return res
+d = ((1, 0), (0, 1), (-1, 0), (0, -1))
 
 # @TIME
 def solve(testcase):
-    n = II()
-    n, q = MI()
-
-    A = [0 for _ in range(101)]
-
-    for i in range(101):
-        x = i
-        for j in range(100, 0, -1):
-            if i % (j * j) == 0:
-                x //= j * j
-        A[i] = x
+    n, m, k = MI()
+    A = [[False for _ in range(m)] for _ in range(n)]
+    B = [[False for _ in range(m)] for _ in range(n)]
+    for _ in range(k):
+        x1, y1, x2, y2 = GMI()
+        A[x1][y1] = True
+        B[x2][y2] = True
     
-    masks = [0 for _ in range(101)]
-    x = 0
-
-    for i in range(1, 101):
-        if A[i] > 1:
-            for j in range(2, i):
-                if i % j == 0:
-                    masks[i] = masks[j] ^ masks[i // j]
-                    break
-            else:
-                masks[i] = 1 << x
-                x += 1
+    # if A[0][0]:
+    #     print(-1)
+    #     return
     
-    for _ in range(q):
-        l, r = GMI()
+    dist = [[[inf for _ in range(m)] for _ in range(n)] for _ in range(2)]
+    dist[0][0][0] = 0
+    q = deque()
+    q.append((0, 0, 0, True))
 
-        if r - l >= 62:
-            print("Yes")
+    while q:
+        x, y, c, flag = q.popleft()
+        if flag:
+            for dx, dy in d:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < n and 0 <= ny < m and not B[nx][ny] and dist[c][nx][ny] > dist[c][x][y] + 1:
+                    dist[c][nx][ny] = dist[c][x][y] + 1
+                    q.append((nx, ny, c, not flag))
+                
+            if not c:
+                for dx, dy in d:
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < n and 0 <= ny < m and not B[nx][ny]:
+                        for ddx, ddy in d:
+                            nnx, nny = nx + ddx, ny + ddy
+                            if 0 <= nnx < n and 0 <= nny < m and not B[nnx][nny] and dist[c + 1][nnx][nny] > dist[c][x][y] + 2:
+                                dist[c + 1][nnx][nny] = dist[c][x][y] + 2
+                                q.append((nnx, nny, c + 1, flag))
         else:
-            XB = XorBase()
-            flag = False
+            for dx, dy in d:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < n and 0 <= ny < m and not A[nx][ny] and dist[c][nx][ny] > dist[c][x][y] + 1:
+                    dist[c][nx][ny] = dist[c][x][y] + 1
+                    q.append((nx, ny, c, not flag))
+                
+            if not c:
+                for dx, dy in d:
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < n and 0 <= ny < m and not A[nx][ny]:
+                        for ddx, ddy in d:
+                            nnx, nny = nx + ddx, ny + ddy
+                            
+                            if 0 <= nnx < n and 0 <= nny < m and not A[nnx][nny] and dist[c + 1][nnx][nny] > dist[c][x][y] + 2:
+                                dist[c + 1][nnx][nny] = dist[c][x][y] + 2
+                                q.append((nnx, nny, c + 1, flag))
+    
+    # print("dist", dist)
+    
+    res = fmin(dist[0][n - 1][m - 1], dist[1][n - 1][m - 1])
+    print(-1 if res == inf else res)
 
-            for x in range(l, r + 1):
-                if XB.add(masks[A[x]]):
-                    continue
-                flag = True
-            
-            print("Yes" if flag else "No")
-
-for testcase in range(II()):
+for testcase in range(1):
     solve(testcase)
