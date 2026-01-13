@@ -119,7 +119,10 @@ fmax = lambda x, y: x if x > y else y
 # @TIME
 def solve(testcase):
     n, m = MI()
-    print((n + 1 >> 1) * (m + 1 >> 1) + 1 >> 1)
+    if n <= 2 or m <= 2:
+        print(1)
+    else:
+        print(((n + 1 >> 1) * (m + 1 >> 1)) + 1 >> 1)
 
 for testcase in range(II()):
     solve(testcase)

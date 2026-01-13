@@ -118,11 +118,7 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    n = II()
-    A = LII()
-    m, M = min(A), max(A)
-    
-    print(fmin(sum(A), M + m * n))
+    pass
 
 for testcase in range(II()):
     solve(testcase)

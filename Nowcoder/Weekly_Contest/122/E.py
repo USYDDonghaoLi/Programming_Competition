@@ -116,13 +116,29 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+
 # @TIME
 def solve(testcase):
     n = II()
     A = LII()
-    m, M = min(A), max(A)
-    
-    print(fmin(sum(A), M + m * n))
+
+    dp = [0 for _ in range(n + 1)]
+
+    l, r = 0, 0
+    while r < n:
+        while r < n and A[r] == A[l]:
+            r += 1
+        LEN = r - l
+        val = A[l]
+
+        if val < LEN:
+            l = r
+            continue
+        
+        for i in range(1, LEN + 1):
+            a, b = divmod(i, val)
+            dp[l + i] = dp[l + b - 1]
+
 
 for testcase in range(II()):
     solve(testcase)

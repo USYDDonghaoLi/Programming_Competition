@@ -120,9 +120,21 @@ fmax = lambda x, y: x if x > y else y
 def solve(testcase):
     n = II()
     A = LII()
-    m, M = min(A), max(A)
+    A.sort()
+
+    res = 0
+    mex = 1
+    for a in A:
+        if a == 0:
+            res += 1
+            continue
+        
+        if a > mex:
+            res += 1
+        else:
+            mex += a
     
-    print(fmin(sum(A), M + m * n))
+    print(res)
 
 for testcase in range(II()):
     solve(testcase)
