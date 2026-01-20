@@ -116,9 +116,57 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+class SparseTable:
+    def __init__(self, A, merge_func=max):
+        N = len(A)
+ 
+        self.merge_func = merge_func
+ 
+        self.lg = [0] * (N + 1)
+        for i in range(2, N + 1):
+            self.lg[i] = self.lg[i >> 1] + 1
+        self.pow_2 = [pow(2, i) for i in range(20)]
+ 
+        self.table = [None] * (self.lg[N] + 1)
+        st0 = self.table[0] = [a for a in A]
+        b = 1
+        for i in range(self.lg[N]):
+            st0 = self.table[i + 1] = [self.merge_func(u, v) for u, v in zip(st0, st0[b:])]
+            b <<= 1
+ 
+    # 查询闭区间 [s,t]
+    def query(self, s, t):
+        b = t - s + 1
+        m = self.lg[b]
+        return self.merge_func(self.table[m][s], self.table[m][t - self.pow_2[m] + 1])
+
 # @TIME
 def solve(testcase):
-    pass
+    n, k = MI()
+    A = LII()
+
+    tb = SparseTable([(A[i], -i) for i in range(n)])
+ 
+    i = 0
+    while i < n:
+        if k == 0: break
+        t = min(n - 1, i + k)
+        mxv, mxi = tb.query(i, t)
+        mxi = -mxi
+        if i > 0 and A[i - 1] > mxv:
+            mxv = A[i - 1]
+            t = min(n - 1, i - 1 + k)
+            k -= t - i + 1
+        elif mxi == i:
+            i += 1
+            continue
+        else:
+            t = mxi
+            k -= t - i
+        for j in range(i, t + 1):
+            A[j] = mxv
+        i = t + 1
+    print(*A)
 
 for testcase in range(II()):
     solve(testcase)

@@ -122,7 +122,7 @@ def solve(testcase):
     n = II()
     A = LII()
 
-    dp = [0 for _ in range(n + 1)]
+    dp = [0 for _ in range(n)]
 
     l, r = 0, 0
     while r < n:
@@ -131,13 +131,18 @@ def solve(testcase):
         LEN = r - l
         val = A[l]
 
-        if val < LEN:
+
+        if val > LEN:
             l = r
             continue
         
-        for i in range(1, LEN + 1):
-            a, b = divmod(i, val)
-            dp[l + i] = dp[l + b - 1]
+        for i in range(val, LEN + 1):
+
+            dp[l + i - 1] = dp[l + i - 1 - val] + 1
+
+        l = r
+
+    print(sum(dp))
 
 
 for testcase in range(II()):
