@@ -376,6 +376,59 @@ class TopSort_Tree:
                     q.append((e, cur))
         return graphlist[::-1]
                 
+def shortest_cycle(G, r):
+        n = len(G)
+        dist = [float('inf') for _ in range(n)]
+        p = [-1 for _ in range(n)]
+        g = [0 for _ in range(n)]
+        seen = [False for _ in range(n)]
+        dist[r] = 0
+        g[r] = r
+
+        for t in range(n):
+            mn = float('inf')
+            pos = -1
+            for i in range(n):
+                if not seen[i] and dist[i] < mn:
+                    mn = dist[i]
+                    pos = i
+
+            seen[pos] = True
+            for i in range(n):
+                if dist[i] > dist[pos] + G[pos][i]:
+                    dist[i] = dist[pos] + G[pos][i]
+                    p[i] = pos
+                    g[i] = i if pos == r else g[pos]
+        
+        mn = float('inf')
+        for i in range(n):
+            for j in range(i + 1, n):
+                if p[i] == j or p[j] == i:
+                    continue
+                if g[i] == g[j]:
+                    continue
+                mn = min(mn, dist[i] + dist[j] + G[i][j])
+                # print('mn', mn, i, j)
+        
+        for i in range(n):
+            for j in range(i + 1, n):
+                if p[i] == j or p[j] == i:
+                    continue
+                if g[i] == g[j]:
+                    continue
+                if mn != dist[i] + dist[j] + G[i][j]:
+                    continue
+                res = []
+                a, b = i, j
+                while a != r:
+                    res.append(a)
+                    a = p[a]
+                res.append(a)
+                res = res[::-1]
+                while b != r:
+                    res.append(b)
+                    b = p[b]
+                return mn, res
 
 def solve():
     pass
