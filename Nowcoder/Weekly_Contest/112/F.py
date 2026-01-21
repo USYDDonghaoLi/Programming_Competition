@@ -135,7 +135,7 @@ def solve(testcase):
                 now += 1
             else:
                 now -= 1
-            mn[i] = min(mn[i], now)
+            mn[i] = fmin(mn[i], now)
         last[i] = now
  
     for i in range(1, M):
