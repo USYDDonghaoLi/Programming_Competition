@@ -118,7 +118,16 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    s = I()
+    n = len(s)
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            if s[i] < s[j]:
+                print("YES")
+                return
+    
+    print("NO")
 
 for testcase in range(II()):
     solve(testcase)

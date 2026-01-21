@@ -118,7 +118,18 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n, k = MI()
+    if k == 1:
+        print(1)
+        return
+    
+    else:
+        res = []
+        while n:
+            a, b = divmod(n, k)
+            res.append(b)
+            n = a
+        print(max(res))
 
 for testcase in range(II()):
     solve(testcase)

@@ -118,7 +118,17 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    x, y = MI()
+    if x < 0 or y < 0:
+        print("PING")
+    else:
+        t = abs(x - y)
+        if t == 0:
+            print("NO")
+        elif t == 1:
+            print("YES")
+        else:
+            print("PING")
 
 for testcase in range(II()):
     solve(testcase)

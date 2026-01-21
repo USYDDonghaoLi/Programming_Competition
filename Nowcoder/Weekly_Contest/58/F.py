@@ -116,9 +116,69 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+def LGMI():
+    return list(map(lambda x: int(x) - 1, input().split()))
+
+mod = 10 ** 9 + 7
+
 # @TIME
 def solve(testcase):
-    pass
+    n, m = MI()
+    A = LGMI()
+
+    B = []
+    for _ in range(m):
+        l, r, k = MI()
+        B.append((l - 1, r, k))
+    
+    C = [0 for _ in range(n + 1)]
+    left, right = 0, n - 1
+    while left <= right:
+        mid = left + right >> 1
+        for i in range(n):
+            C[i + 1] = C[i]
+            if A[i] <= mid:
+                C[i + 1] += 1
+
+        flag = True
+        for l, r, k in B:
+            if C[r] - C[l] > k:
+                flag = False
+        
+        if flag:
+            left = mid + 1
+        else:
+            right = mid - 1
+    
+    M = right
+
+    left, right = 0, n - 1
+    while left <= right:
+        mid = left + right >> 1
+        for i in range(n):
+            C[i + 1] = C[i]
+            if A[i] <= mid:
+                C[i + 1] += 1
+        
+        flag = True
+        for l, r, k in B:
+            if C[r] - C[l] < k:
+                flag = False
+        
+        if not flag:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    if left == M:
+        print(1, M + 1)
+    else:
+        print(pow(
+            M - left + 1,
+            mod - 2,
+            mod
+        ))
+
 
 for testcase in range(II()):
     solve(testcase)

@@ -118,7 +118,68 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n, q = MI()
+    edges = []
+    A = [[] for _ in range(n + 1)]
+    B = [[] for _ in range(n + 1)]
+
+    for _ in range(q):
+        l, r, k = MI()
+        l -= 1
+        kk = r - l - k
+
+        A[l].append(k * (n + 1) + r)
+        A[r].append(-k * (n + 1) + l)
+
+        B[l].append(kk * (n + 1) + r)
+        B[r].append(-kk * (n + 1) + l)
+    
+    dist = [n + 1 for _ in range(n + 1)]
+    dist[0] = 0
+    pq = [0]
+
+    while pq:
+        d, u = divmod(heappop(pq), n + 1)
+        if dist[u] == d:
+            for msk in A[u]:
+                nd, v = divmod(msk, n + 1)
+                if dist[v] > dist[u] + nd:
+                    dist[v] = dist[u] + nd
+                    heappush(pq, dist[v] * (n + 1) + v)
+             
+            if u < n and dist[u + 1] > dist[u] + 1:
+                dist[u + 1] = dist[u] + 1
+                heappush(pq, dist[u + 1] * (n + 1) + u + 1)
+             
+            if u and dist[u - 1] > dist[u]:
+                dist[u - 1] = dist[u]
+                heappush(pq, dist[u - 1] * (n + 1) + u - 1)
+    
+    right = dist[n]
+
+    dist = [n + 1] * (n + 1)
+    dist[0] = 0
+    pq = [0]
+    while pq:
+        d, u = divmod(heappop(pq), n + 1)
+        if dist[u] == d:
+            for msk in B[u]:
+                nd, v = divmod(msk, n + 1)
+                if dist[v] > dist[u] + nd:
+                    dist[v] = dist[u] + nd
+                    heappush(pq, dist[v] * (n + 1) + v)
+             
+            if u < n and dist[u + 1] > dist[u] + 1:
+                dist[u + 1] = dist[u] + 1
+                heappush(pq, dist[u + 1] * (n + 1) + u + 1)
+             
+            if u and dist[u - 1] > dist[u]:
+                dist[u - 1] = dist[u]
+                heappush(pq, dist[u - 1] * (n + 1) + u - 1)
+
+    left = n - dist[n]
+
+    print(' '.join(map(str, range(max(1, left), right + 1))))
 
 for testcase in range(II()):
     solve(testcase)

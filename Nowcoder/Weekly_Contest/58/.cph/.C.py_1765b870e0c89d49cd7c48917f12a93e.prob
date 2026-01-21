@@ -1,0 +1,1 @@
+{"name":"Local: C","url":"/Users/wangzhinuo/Desktop/Ldh/Programming_Competition/Nowcoder/Weekly_Contest/58/C.py","tests":[{"id":1768976249916,"input":"3\n1 1\n1 0\n-1 -1","output":"NO\nYES\nPING"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"/Users/wangzhinuo/Desktop/Ldh/Programming_Competition/Nowcoder/Weekly_Contest/58/C.py","group":"local","local":true}
