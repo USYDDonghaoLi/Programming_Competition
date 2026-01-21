@@ -116,54 +116,32 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
-class Mobius:
-
-    def __init__(self, n) -> None:
-        self.mu = [0 for _ in range(n + 1)]
-        self.primes = []
-        self.vis = [False for _ in range(n + 1)]
-        self.mu[1] = 1
-        for i in range(2, n + 1):
-            if not self.vis[i]:
-                self.primes.append(i)
-                self.mu[i] = -1
-            j = 1
-            while j < len(self.primes) and i * self.primes[j] <= n:
-                self.vis[i * self.primes[j]] = True
-                if i % self.primes[j] == 0:
-                    self.mu[i * self.primes[j]] = 0
-                    break
-                self.mu[i * self.primes[j]] = self.mu[i * self.primes[j]] - self.mu[i]
-                j += 1
-
 mod = 998244353
+pw = [1 for _ in range(200010)]
+for i in range(1, 200010):
+    pw[i] = pw[i - 1] * 2 % mod
 
 # @TIME
 def solve(testcase):
     n = II()
     A = LII()
-    M = Mobius(n)
-
-    mp = [0 for _ in range(n + 1)]
+    B = [0 for _ in range(n + 1)]
 
     for a in A:
-        mp[a] += 1
+        B[a] += 1
     
     res = 0
-
     for i in range(1, n + 1):
-        sig = M.mu[i]
-        if sig:
-            cnt = 0
-            for j in range(i, n + 1, i):
-                cnt += mp[j]
-            
-            res += sig * (pow(2, cnt, mod) - 1)
-            res %= mod
+        a, b = B[i], 0
+        for j in range(i, n + 1, i):
+            b += B[j]
+
+        if not a:
+            continue        
+        res += (pw[a] - 1) * pw[b - a] % mod
+        res %= mod
     
-    print(res)
-        
-        
+    print((pw[n] - 1 - res) % mod)
 
 for testcase in range(II()):
     solve(testcase)

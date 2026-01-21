@@ -116,19 +116,42 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+mod = 10 ** 9 + 7
+
 # @TIME
 def solve(testcase):
-    n, m = MI()
-    g = (n + 9) // 10
+    n = II()
+    ls = [I() for _ in range(n)]
+    M = 1 << n
+ 
+    mn, last = [0] * n, [0] * n
+    dp, P = [0] * M, [0] * M
+    dp[0] = 1
+ 
+    for i, s in enumerate(ls):
+        now = 0
+        for c in s:
+            if c == '(':
+                now += 1
+            else:
+                now -= 1
+            mn[i] = min(mn[i], now)
+        last[i] = now
+ 
+    for i in range(1, M):
+        for j in range(n):
+            nxt = i ^ (1 << j)
+            if nxt > i:
+                continue
+             
+            P[i] = P[nxt] + last[j]
+            if P[nxt] + mn[j] < 0:
+                continue
+             
+            dp[i] = (dp[i] + dp[nxt]) % mod
+ 
+    print(dp[-1] if P[-1] == 0 else 0)
 
-    if m <= g:
-        print("Gold Medal")
-    elif m <= 3 * g:
-        print("Silver Medal")
-    elif m <= 6 * g:
-        print("Bronze Medal")
-    else:
-        print("Da Tie")
 
-for testcase in range(1):
+for testcase in range(II()):
     solve(testcase)
