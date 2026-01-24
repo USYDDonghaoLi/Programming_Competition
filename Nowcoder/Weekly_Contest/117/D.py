@@ -119,42 +119,14 @@ fmax = lambda x, y: x if x > y else y
 # @TIME
 def solve(testcase):
     n = II()
-    adj = [[] for _ in range(n)]
+    deg = [0 for _ in range(n)]
 
     for _ in range(n - 1):
         u, v = GMI()
-        adj[u].append(v)
-        adj[v].append(u)
+        deg[u] += 1
+        deg[v] += 1
     
-    dist = [inf for _ in range(n)]
-    q = deque()
-    q.append(0)
-    dist[0] = 0
-
-    while q:
-        u = q.popleft()
-        for v in adj[u]:
-            if dist[v] > dist[u] + 1:
-                dist[v] = dist[u] + 1
-                q.append(v)
-    
-    where = dist.index(max(dist))
-
-    dist = [inf for _ in range(n)]
-    q = deque()
-    q.append(where)
-    dist[where] = 0
-
-    while q:
-        u = q.popleft()
-        for v in adj[u]:
-            if dist[v] > dist[u] + 1:
-                dist[v] = dist[u] + 1
-                q.append(v)
-    
-    M = max(dist)
-
-    print(n - M - 1)
+    print(deg.count(1) - 2)
 
 for testcase in range(1):
     solve(testcase)

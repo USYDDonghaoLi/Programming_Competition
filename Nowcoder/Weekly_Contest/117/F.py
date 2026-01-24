@@ -1,6 +1,6 @@
 '''
 Hala Madrid!
-https://github.com/USYDDonghaoLi/Programming_Competition
+https://www.zhihu.com/people/li-dong-hao-78-74
 '''
 
 import sys
@@ -58,6 +58,8 @@ def LII():
     return list(map(int, input().split()))
 def GMI():
     return map(lambda x: int(x) - 1, input().split())
+def LGMI():
+    return list(map(lambda x: int(x) - 1, input().split()))
 
 #------------------------------FastIO---------------------------------
 
@@ -118,17 +120,26 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    a, b = MI()
+    n = II()
+    m = (n).bit_length()
 
-    if a == 1:
-        print('L', end = '')
-    else:
-        print('R', end = '')
+    A = LII()
+    B = [-1 for _ in range(1 << m)]
+    B[0] = 0
+
+    for a in A:
+        B[a] = a
     
-    if b == 1:
-        print('U', end = '')
-    else:
-        print('D', end = '')
+    for i in range((1 << m) - 1, -1, -1):
+        for j in range(m):
+            B[i] &= B[i | (1 << j)]
+    
+    for i in range(1 << m):
+        if B[i] != i:
+            print(i)
+            return
+    
+    print(1 << m)
 
-for testcase in range(1):
+for testcase in range(II()):
     solve(testcase)

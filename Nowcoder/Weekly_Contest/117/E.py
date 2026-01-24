@@ -118,7 +118,15 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n = II()
+    deg = [0 for _ in range(n)]
 
-for testcase in range(II()):
+    for _ in range(n - 1):
+        u, v = GMI()
+        deg[u] += 1
+        deg[v] += 1
+    
+    print(deg.count(1) - 2)
+
+for testcase in range(1):
     solve(testcase)
