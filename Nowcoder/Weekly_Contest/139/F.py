@@ -72,119 +72,52 @@ from time import *
 from random import *
 from math import log, gcd, sqrt, ceil
 
-# from types import GeneratorType
-# def bootstrap(f, stack=[]):
-#     def wrappedfunc(*args, **kwargs):
-#         if stack:
-#             return f(*args, **kwargs)
-#         else:
-#             to = f(*args, **kwargs)
-#             while True:
-#                 if type(to) is GeneratorType:
-#                     stack.append(to)
-#                     to = next(to)
-#                 else:
-#                     stack.pop()
-#                     if not stack:
-#                         break
-#                     to = stack[-1].send(to)
-#             return to
-#     return wrappedfunc
-
-# seed(19981220)
-# RANDOM = getrandbits(64)
- 
-# class Wrapper(int):
-#     def __init__(self, x):
-#         int.__init__(x)
-
-#     def __hash__(self):
-#         return super(Wrapper, self).__hash__() ^ RANDOM
-
-# def TIME(f):
-
-#     def wrap(*args, **kwargs):
-#         s = perf_counter()
-#         ret = f(*args, **kwargs)
-#         e = perf_counter()
-
-#         print(e - s, 'sec')
-#         return ret
-    
-#     return wrap
-
 inf = float('inf')
 
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
-from bisect import *
-from heapq import *
-from collections import *
-from functools import *
-from itertools import *
-
-class UnionFind:
-    def __init__(self, n: int):
-        self.parent = [x for x in range(n)]
-        self.size = [1 for _ in range(n)]
-        self.n = n
-        self.setCount = n
-    
-    def Find(self, a: int) -> int:
-        a = self.parent[a]
-        acopy = a
-        while a != self.parent[a]:
-            a = self.parent[a]
-        while acopy != a:
-            self.parent[acopy], acopy = a, self.parent[acopy]
-        return a
-    
-    def Union(self, x: int, y: int) -> bool:
-        root_x = self.Find(x)
-        root_y = self.Find(y)
-        if root_x == root_y:
-            return False
-        if self.size[root_x] > self.size[root_y]:
-            root_x, root_y = root_y, root_x
-        self.parent[root_x] = root_y
-        self.size[root_y] += self.size[root_x]
-        self.setCount -= 1
-        return True
-
-    def connected(self, x: int, y: int) -> bool:
-        return self.Find(x) == self.Find(y)
-
-    def members(self, x):
-        root = self.Find(x)
-        return [i for i in range(self.n) if self.Find(i) == root]
-    
-    def roots(self):
-        return [i for i, x in enumerate(self.parent) if i == x]
-    
-    def group_count(self):
-        return len(self.roots())
-    
-    def all_group_members(self):
-        mp = defaultdict(list)
-        for member in range(self.n):
-            mp[self.Find(member)].append(member)
-        return mp
-
-mod = 998244353
-
-# @TIME
 def solve(testcase):
     n = II()
-    A = LII()
-
-    uf = UnionFind(n)
+    to_ = LGMI()
+    deg = [0] * n
+    for x in to_:
+        deg[x] += 1
+    sz = [1] * n
+    q = deque()
     for i in range(n):
-        uf.Union(i, A[i] - 1)
-    
-    m = uf.setCount
-
-    print(pow(26, m, mod) * pow(25, n - m, mod) % mod)
+        if deg[i] == 0:
+            q.append(i)
+    c = [True] * n
+    while q:
+        u = q.popleft()
+        c[u] = False
+        v = to_[u]
+        sz[v] += sz[u]
+        deg[v] -= 1
+        if deg[v] == 0:
+            q.append(v)
+    MOD = 998244353
+    pow25 = [1] * (n + 1)
+    for i in range(1, n + 1):
+        pow25[i] = pow25[i - 1] * 25 % MOD
+    vis = [False] * n
+    ans = 1
+    for i in range(n):
+        if c[i] and not vis[i]:
+            cycle = []
+            cur = i
+            while not vis[cur]:
+                vis[cur] = True
+                cycle.append(cur)
+                cur = to_[cur]
+            num = len(cycle)
+            x = 1
+            for e in cycle:
+                x = x * pow25[sz[e] - 1] % MOD
+            y = (pow25[num] + (MOD - 25 if num & 1 else 25)) % MOD
+            ans = ans * x % MOD * y % MOD
+    print(ans)
 
 for testcase in range(1):
     solve(testcase)
