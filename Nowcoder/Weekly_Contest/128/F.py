@@ -120,7 +120,29 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    s = list(I())
+    n = len(s)
+    cnt = s.count('1')
+
+    l = []
+    for i in range(1, n):
+        if s[i] == '0':
+            left = i - 1
+            while left >= 0 and s[left] == '1':
+                l.append(left)
+                left -= 1
+         
+    r = n - 1
+    for x in l:
+        while r >= 0 and s[r] != '1':
+            r -= 1
+        if x >= r:
+            break
+        s[x] = '3'
+        s[r] = '2'
+        r -= 1
+        
+    return ''.join(x for x in s if x != '3')
 
 for testcase in range(II()):
     solve(testcase)

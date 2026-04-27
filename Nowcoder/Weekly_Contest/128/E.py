@@ -123,50 +123,29 @@ def solve(testcase):
     s = I()
     s = list(s)
     n = len(s)
+ 
+    idxs = [i for i, c in enumerate(s) if c == '1']
+    k = len(idxs)
+    k2 = k // 2
+    for i in idxs[-k2:]:
+        s[i] = '2'
 
-    q0 = deque()
-    q2 = deque()
-
-    l, r = 0, 0
-    while r < n and s[r] != '1':
-        r += 1
-    l = r
-
-    while r < n:
-        while r < n and s[r] == '1':
-            r += 1
-        if r == n or s[r] == '2':
-            for i in range(l, r):
-                q2.append(i)
+    if k % 2 == 1:
+        pd = False
+        for idx in idxs[:k - k2]:
+            if idx + 1 < n and s[idx + 1] == '2':
+                s[idx] = '4'
+                pd = True
+                break
+        if not pd:
+            s[idxs[k - k2 - 1]] = '4'
+ 
+    for idx in idxs[:k - k2]:
+        if s[idx] != '4':
+            s[idx] = ''
         else:
-            for i in range(l, r):
-                q0.append(i)
-        l = r
+            s[idx] = '1'
 
-        while r < n and s[r] != '1':
-            r += 1
-        l = r
-    
-    # print('q0', q0)
-    # print('q2', q2)
-    
-    while q0 and q2:
-        u = q0.popleft()
-        v = q2.pop()
-
-        s[u] = ''
-        s[v] = '2'
-    
-    while len(q0) >= 2:
-        u, v = q0.popleft(), q0.pop()
-        s[u] = ''
-        s[v] = '2'
-    
-    while len(q2) >= 2:
-        u, v = q2.pop(), q2.pop()
-        s[u] = ''
-        s[v] = '2'
-    
     print(''.join(s))
 
 for testcase in range(1):
