@@ -118,7 +118,21 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n, k = MI()
+    A = LII()
+
+    dp = [-inf for _ in range(n + 1)]
+    dp[0] = 0
+
+    for i in range(1, k + 1):
+        ndp = [-inf for _ in range(n + 1)]
+        for j in range(6 * i, i - 1, -1):
+            for d in range(1, 7):
+                ndp[j] = fmax(ndp[j], dp[j - d] + A[j - 1])
+        dp = ndp
+    
+    print(max(dp))
+    
 
 for testcase in range(1):
     solve(testcase)

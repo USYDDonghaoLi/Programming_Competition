@@ -116,9 +116,78 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+'''
+#include<bits/stdc++.h>
+#define int long long int
+using namespace std;
+const int N=1e3+20;
+string mp[N];
+int vis[N][N][2];
+int n,m,h,ans=1e18;
+struct node{
+	int x,y,tim,zt; //zt:0:竖直 1:水平 
+	bool operator<(const node& y) const{
+        return y.tim < tim;
+    }
+};
+priority_queue<node>que;
+
+void BFS(){
+	while(!que.empty()){
+		node tmp=que.top();
+		que.pop();
+		if(tmp.x<0 || tmp.y<0 || tmp.x>=n || tmp.y>=m || vis[tmp.x][tmp.y][tmp.zt]) continue;
+		vis[tmp.x][tmp.y][tmp.zt]=1;
+		if(mp[tmp.x][tmp.y]=='%'){
+			ans=tmp.tim;
+			return ;
+		}
+		if(tmp.x+1<n && mp[tmp.x+1][tmp.y]=='#'){
+			if(tmp.y-1>=0 && mp[tmp.x][tmp.y-1]!='#') que.push(node{tmp.x,tmp.y-1,tmp.tim+1,1});
+			if(tmp.y+1<m && mp[tmp.x][tmp.y+1]!='#') que.push(node{tmp.x,tmp.y+1,tmp.tim+1,1});
+			if(tmp.zt==0) que.push(node{tmp.x+1,tmp.y,tmp.tim+h+1,0});
+		}else{
+			que.push(node{tmp.x+1,tmp.y,tmp.tim+1,0});
+		}
+	}
+}
+'''
+
 # @TIME
 def solve(testcase):
-    pass
+    n, m, h = MI()
+    A = [I() for _ in range(n)]
+
+    vis = [[[False for _ in range(2)] for _ in range(m)] for _ in range(n)]
+
+    pq = []
+
+    for i in range(n):
+        for j in range(m):
+            if A[i][j] == '*':
+                heappush(pq, (0, i, j, 0))
+
+                while pq:
+                    t, x, y, state = heappop(pq)
+                    if 0 <= x < n and 0 <= y < m and not vis[x][y][state]:
+                        vis[x][y][state] = True
+
+                        if A[x][y] == '%':
+                            print(t)
+                            return
+                        
+                        if x + 1 < n and A[x + 1][y] == '#':
+                            if y - 1 >= 0 and A[x][y - 1] != '#':
+                                heappush(pq, (t + 1, x, y - 1, 1))
+                            if y + 1 < n and A[x][y + 1] != '#':
+                                heappush(pq, (t + 1, x, y + 1, 1))
+                            if state == 0:
+                                heappush(pq, (t + h + 1, x + 1, y, 0))
+                        else:
+                            heappush(pq, (t + 1, x + 1, y, 0))
+
+                print(-1)
+
 
 for testcase in range(1):
     solve(testcase)
