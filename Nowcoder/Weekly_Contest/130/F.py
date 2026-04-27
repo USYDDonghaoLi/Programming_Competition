@@ -182,9 +182,13 @@ def solve(testcase):
         uf.Union(i, v - 1)
     
     res = 0 
+    for i in range(n):
+        if uf.Find(i) == i:
+            res += uf.size[i] - 1
+
     for i in range(n - 1):
         if uf.connected(i, i + 1):
-            print(res)
+            print(res - 1)
             return
     
     print(res + 1)
