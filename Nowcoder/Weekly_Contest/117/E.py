@@ -116,17 +116,74 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+d = ((2, 1), (-2, -1), (2, -1), (-2, 1), (1, 2), (-1, -2), (1, -2), (-1, 2))
+
 # @TIME
 def solve(testcase):
-    n = II()
-    deg = [0 for _ in range(n)]
+    n, m, k = MI()
+    x1, y1, x2, y2 = GMI()
+    q = deque()
+    vis = [[[False for _ in range(2)] for _ in range(m)] for _ in range(n)]
+    prev = [[[None for _ in range(2)] for _ in range(m)] for _ in range(n)]
 
-    for _ in range(n - 1):
-        u, v = GMI()
-        deg[u] += 1
-        deg[v] += 1
+    q.append((x1, y1, 0))
+    vis[x1][y1][0] = True
+
+    while q:
+        x, y, state = q.popleft()
+        for dx, dy in d:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < n and 0 <= ny < m and not vis[nx][ny][state ^ 1]:
+                vis[nx][ny][state ^ 1] = True
+                prev[nx][ny][state ^ 1] = (x, y, state)
+                q.append((nx, ny, state ^ 1))
     
-    print(deg.count(1) - 2)
+    # print('prev', prev)
+    
+    if not vis[x2][y2][k & 1]:
+        print("No")
+        return
+    
+    res = [(x2, y2)]
+    x, y, s = x2, y2, k & 1
+    while x != x1 or y != y1 or s:
+        # print(x, y, s, prev[x][y][s])
+        # if not prev[x][y][s]:
+        #     break
+        x, y, s = prev[x][y][s]
+        res.append((x, y))
+    
+    # print("res", res)
+
+    if len(res) - 1 > k:
+        print("No")
+        return
+
+    res = res[::-1]
+    if k & 1 == len(res) & 1:
+        print("No")
+        return
+    
+    m2 = k - len(res) + 1 >> 1
+    xx, yy = -1, -1
+    for dx, dy in d:
+        nx, ny = x2 + dx, y2 + dy
+        if 0 <= nx < n and 0 <= ny < m:
+            xx, yy = dx, dy
+            break
+    
+    if xx == -1:
+        print("No")
+        return
+    
+    for _ in range(m2):
+        nx, ny = x2 + xx, y2 + yy
+        res.append((nx, ny))
+        res.append((x2, y2))
+    
+    print("Yes")
+    for x, y in res[1:]:
+        print(x + 1, y + 1)
 
 for testcase in range(1):
     solve(testcase)
