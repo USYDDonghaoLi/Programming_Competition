@@ -118,28 +118,76 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+from bisect import *
+from heapq import *
+from collections import *
+from functools import *
+from itertools import *
+
+class UnionFind:
+    def __init__(self, n: int):
+        self.parent = [x for x in range(n)]
+        self.size = [1 for _ in range(n)]
+        self.n = n
+        self.setCount = n
+    
+    def Find(self, a: int) -> int:
+        a = self.parent[a]
+        acopy = a
+        while a != self.parent[a]:
+            a = self.parent[a]
+        while acopy != a:
+            self.parent[acopy], acopy = a, self.parent[acopy]
+        return a
+    
+    def Union(self, x: int, y: int) -> bool:
+        root_x = self.Find(x)
+        root_y = self.Find(y)
+        if root_x == root_y:
+            return False
+        if self.size[root_x] > self.size[root_y]:
+            root_x, root_y = root_y, root_x
+        self.parent[root_x] = root_y
+        self.size[root_y] += self.size[root_x]
+        self.setCount -= 1
+        return True
+
+    def connected(self, x: int, y: int) -> bool:
+        return self.Find(x) == self.Find(y)
+
+    def members(self, x):
+        root = self.Find(x)
+        return [i for i in range(self.n) if self.Find(i) == root]
+    
+    def roots(self):
+        return [i for i, x in enumerate(self.parent) if i == x]
+    
+    def group_count(self):
+        return len(self.roots())
+    
+    def all_group_members(self):
+        mp = defaultdict(list)
+        for member in range(self.n):
+            mp[self.Find(member)].append(member)
+        return mp
+
 # @TIME
 def solve(testcase):
     n = II()
     A = LII()
 
-    cnt = 0
-    for i, v in enumerate(A, 1):
-        if i != v:
-            cnt += 1
-    
-    res = inf
-    
-    for i in range(n - 1):
-        tmp = cnt
-        tmp -= A[i] != i + 1
-        tmp -= A[i + 1] != i + 2
-        tmp += A[i] != i + 2
-        tmp += A[i + 1] != i + 1
+    uf = UnionFind(n)
 
-        res = fmin(res, tmp + 1 >> 1)
+    for i, v in enumerate(A):
+        uf.Union(i, v - 1)
     
-    print(res)
+    res = 0 
+    for i in range(n - 1):
+        if uf.connected(i, i + 1):
+            print(res)
+            return
+    
+    print(res + 1)
 
 for testcase in range(II()):
     solve(testcase)
