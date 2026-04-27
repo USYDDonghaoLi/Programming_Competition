@@ -120,7 +120,26 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n = II()
+    A = LII()
+
+    ps = [0]
+    for a in A:
+        ps.append(ps[-1] + a)
+    
+    s = ps[-1]
+
+    dp = [[inf for _ in range(s + 1)] for _ in range(n + 1)]
+    dp[0][0] = 0
+
+    for k in range(101):
+        for i in range(1, n + 1):
+            for j in range(k * k, s + 1):
+                dp[i][j] = fmin(dp[i][j], dp[i - 1][j - k * k] + abs(ps[i] - j))
+    
+    res = dp[-1][-1]
+
+    print(-1 if res == inf else res)
 
 for testcase in range(II()):
     solve(testcase)
