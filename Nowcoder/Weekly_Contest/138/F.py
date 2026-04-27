@@ -118,77 +118,150 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
-class Hash:
-    def __init__(self, arr) -> None:
-        if arr[0].isalpha():
-            self.arr = [ord(c) for c in arr]
-        else:
-            self.arr = arr
-        self.mul = 131
-        self.mod = 10 ** 9 + 7
-        self.n = len(arr)
-        self.mulpw = [1 for _ in range(self.n + 1)]
-        for i in range(1, self.n + 1):
-            self.mulpw[i] = self.mulpw[i - 1] * self.mul % self.mod
+class SegTree:
 
-        self.HASH = [0]
-        for c in self.arr:
-            self.HASH.append((self.HASH[-1] * self.mul + c) % self.mod)
+    __slots__ = {'n', 'op', 'e', 'log', 'size', 'd'}
 
-    #[l, r)
-    def GetHash(self, l, r):
-        return (self.HASH[r] - self.HASH[l] * self.mulpw[r - l]) % self.mod
+    def __init__(self, V, OP, E):
+        '''
+        V: 原始数组
+        OP: 维护的运算(min, max, sum...)
+        E: 线段树初值
+        '''
+        self.n = len(V)
+        self.op = OP
+        self.e = E
+        self.log = (self.n - 1).bit_length()
+        self.size = 1 << self.log
+        self.d=[E for _ in range(2*self.size)]
+        for i in range(self.n):
+            self.d[self.size + i] = V[i]
+        for i in range(self.size - 1, 0, -1):
+            self.update(i)
 
-    #[l, r]
-    def CheckEqual(self, start, end, sz):
-        pattern = self.GetHash(0, sz)
-        for i in range(start, end - sz + 2, sz):
-            if self.GetHash(i, i + sz) != pattern:
-                return False
-        return True
-    
-    #[l, r)
-    def Check(self, ls, le, rs, re):
-        return self.GetHash(ls, le) == self.GetHash(rs, re)
-    
-    @staticmethod
-    def calc(arr):
-        if arr[0].isalpha():
-            arr = [ord(c) for c in arr]
-        else:
-            pass
-        mul = 131
-        mod = 10 ** 9 + 7
-        n = len(arr)
-        res = 0
+    def set(self, p, x):
+        assert 0 <= p and p < self.n
+        p += self.size
+        self.d[p] = x
+        for i in range(1, self.log + 1):
+            self.update(p >> i)
+
+    def get(self, p):
+        assert 0 <= p and p <self.n
+        return self.d[p + self.size]
+
+    def prod(self, l ,r):
+        #[l, r)
+        assert 0 <= l and l <= r and r <= self.n
+        sml = self.e
+        smr = self.e
+        l += self.size
+        r += self.size
+
+        while(l < r):
+            if (l & 1):
+                sml = self.op(sml, self.d[l])
+                l += 1
+            if (r & 1):
+                smr = self.op(self.d[r - 1], smr)
+                r -= 1
+            l >>= 1
+            r >>= 1
+        return self.op(sml, smr)
+
+    def all_prod(self):
+        return self.d[1]
+
+    def max_right(self, l, f):
+        assert 0 <= l and l <= self.n
+        assert f(self.e)
+        if l == self.n:
+            return self.n
+        l += self.size
+        sm = self.e
+        while(1):
+            while(l % 2 == 0):
+                l >>= 1
+            if not(f(self.op(sm, self.d[l]))):
+                while(l < self.size):
+                    l = 2 * l
+                    if f(self.op(sm, self.d[l])):
+                        sm = self.op(sm, self.d[l])
+                        l += 1
+                return l - self.size
+            sm = self.op(sm,self.d[l])
+            l += 1
+            if (l & -l) == l:
+                break
+        return self.n
+    def min_left(self, r, f):
+        assert 0 <= r and r < self.n
+        assert f(self.e)
+        if r == 0:
+            return 0
+        r += self.size
+        sm = self.e
+        while(1):
+            r -= 1
+            while(r > 1 and (r % 2)):
+                r >>= 1
+            if not(f(self.op(self.d[r], sm))):
+                while(r < self.size):
+                    r = (2 * r + 1)
+                    if f(self.op(self.d[r], sm)):
+                        sm=self.op(self.d[r], sm)
+                        r -= 1
+                return r + 1 - self.size
+            sm = self.op(self.d[r] ,sm)
+            if (r & -r) == r:
+                break
+        return 0
+
+    def update(self, k):
+        self.d[k] = self.op(self.d[2 * k], self.d[2 * k + 1])
         
-        for c in arr:
-            res = (res * mul + c) % mod
-        
-        return res
-
-mod = 998244353
+    def __str__(self):
+        return str([self.get(i) for i in range(self.n)])
 
 # @TIME
 def solve(testcase):
     n = II()
-    s = I()
+    A = LII()
 
-    H1 = Hash(s)
-    H2 = Hash(s[::-1])
+    mp = defaultdict(list)
+    for i in range(n):
+        for j in range(i, n):
+            mp[A[i] + A[j]].append((i, j))
 
-    A = [0 for _ in range(n + 1)]
-    B = [0 for _ in range(n + 1)]
-    B[0] = 1
+    res = 0
 
-    for r in range(n):
-        for l in range(r, -1, -1):
-            if H1.GetHash(l, r + 1) == H2.GetHash(n - r - 1, n - l):
-                LEN = r - l + 1
-                A[r + 1] = (A[r + 1] + A[l] + B[l] * LEN * LEN) % mod
-                B[r + 1] = (B[r + 1] + B[l]) % mod
+    for val in mp:
+        mp[val].sort(key = lambda x: (x[0], x[1]))
 
-    print(A[n]) 
+        rs = set()
+        for l, r in mp[val]:
+            rs.add(r)
+        rl = sorted(list(rs))
+        d = {v: i for i, v in enumerate(rl)}
+        # d2 = {i: v for i, v in enumerate(rl)}
+        m = len(d)
+
+        sg = SegTree(
+            [0 for _ in range(m + 5)],
+            fmax,
+            0
+        )
+
+        # print('val', val, mp[val])
+        # print('d', d)
+
+        for l, r in mp[val]:
+            sg.set(d[r], fmax(sg.get(d[r]), sg.prod(d[r] + 1, m + 5) + 1 + (l != r)))
+            # print('sg', sg, sg.all_prod())
+        
+        res = fmax(res, sg.all_prod())
+    
+    print(res)
 
 for testcase in range(II()):
     solve(testcase)
