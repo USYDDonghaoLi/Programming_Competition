@@ -121,6 +121,67 @@ def solve(testcase):
     n = II()
     A = LII()
     
+    B = [0]
+    for a in A:
+        B.append(B[-1] + a)
+    
+    C = [-inf]
+    D = [inf]
+    for a in A:
+        C.append(fmax(C[-1], a))
+        D.append(fmin(D[-1], a))
+    
+    E = [-inf]
+    F = [inf]
+
+    for i in range(n - 1, -1, -1):
+        a = A[i]
+        E.append(fmax(E[-1], a))
+        F.append(fmin(F[-1], a))
+    
+    E.reverse()
+    F.reverse()
+
+    # print('B', B)
+    # print('C', C)
+    # print('D', D)
+    # print('E', E)
+    # print('F', F)
+    
+    res = [0 for _ in range(n)]
+
+    for i in range(n):
+        for j in range(n):
+            if i + j >= n:
+                break
+            s = B[i + j + 1] - B[j]
+            pM = C[j]
+            pm = D[j]
+            sM = E[i + j + 1]
+            sm = F[i + j + 1]
+
+            M = fmax(pM, sM)
+            m = fmin(pm, sm)
+
+            # print(i, j, s, M, m, pM, pm, sM, sm)
+
+            res[i] = fmax(res[i], fmax(M, s) - fmin(m, s))
+    
+    tmp = [0 for _ in range(n)]
+    for i in range(n):
+        if i >= 1:
+            tmp[i - 1] = fmax(tmp[i - 1], B[i] - A[i])
+        if n - 2 - i >= 0:
+            tmp[n - 2 - i] = fmax(tmp[n - 2 - i], B[n] - B[i + 1] - A[i])
+    
+    for i in range(1, n - 2):
+        tmp[i] = fmax(tmp[i], tmp[i - 1])
+    
+    for i in range(n):
+        res[i] = fmax(res[i], tmp[i])
+    
+    print(*res)
+
 
 for testcase in range(II()):
     solve(testcase)
