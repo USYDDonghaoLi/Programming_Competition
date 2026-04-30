@@ -145,19 +145,39 @@ def solve(testcase):
             vis[new] = True
             prev = new
             
+    not_r = []
+    idx = 0
+    while idx < len(A) and A[idx] != new:
+        not_r.append(A[idx])
+        idx += 1
+    
+    r = []
+    while idx < len(A):
+        r.append(A[idx])
+        idx += 1
+    
+    m1 = len(not_r)
     B = [0]
-    for a in A:
-        B.append((B[-1] + a) % mod)
+    for nr in not_r:
+        B.append((B[-1] + nr) % mod)
     
-    s = B[-1]
-    q = II()
-    m = len(A)
-    
-    for _ in range(q):
-        k = II()
-        a, b = divmod(k, m)
+    m2 = len(r)
+    C = [0]
+    for rr in r:
+        C.append((C[-1] + rr) % mod)
+    s = C[-1]
 
-        print((a * s + B[b]) % mod)
+    for _ in range(II()):
+        k = II()
+        if k <= m1:
+            print(B[k])
+        else:
+            res = B[-1]
+            k -= m1
+            a, b = divmod(k, m2)
+            res += a * s + C[b]
+            res %= mod
+            print(res)
     
 
 for testcase in range(1):
