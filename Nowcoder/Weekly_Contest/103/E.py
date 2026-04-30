@@ -116,14 +116,46 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+
 # @TIME
 def solve(testcase):
-    n, q = MI()
-    s = [int(c) for c in s]
+    n, Q = MI()
+    s = list(map(int, list(I())))
+    A = [[] for _ in range(n)]
+
+    for _ in range(n - 1):
+        u, v = GMI()
+        A[u].append(v)
+        A[v].append(u)
     
-    vis = [False for _ in range((1 << 20) + 1)]
+    FA = [0 for _ in range(n)]
+    FA[0] = -1
 
+    q = deque()
+    q.append((0, -1))
 
+    while q:
+        u, fa = q.popleft()
+        for v in A[u]:
+            if v != fa:
+                q.append((v, u))
+                FA[v] = u
+    
+    S = set()
+    for u in range(n):
+        a, b = 0, 0
+        cur = u
+        for i in range(20):
+            if cur == -1:
+                break
+            a = a << 1 | s[cur]
+            b = b | (1 << i)
+            cur = FA[cur]
+            S.add(a)
+            S.add(b)
+        
+    for _ in range(Q):
+        print("YES" if II() in S else "NO")
 
 for testcase in range(1):
     solve(testcase)

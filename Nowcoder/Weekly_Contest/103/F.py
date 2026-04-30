@@ -116,17 +116,82 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
-mul = 131
-mod = 998244353
+class Hash:
+    def __init__(self, arr) -> None:
+        self.arr = arr
+        self.n = len(arr)
+        # === 双哈希参数 ===
+        self.mul1 = 1331
+        self.mod1 = 10**9 + 7
+        self.mul2 = 131
+        self.mod2 = 10**9 + 9
+        
+        self.mulpw1 = [1] * (self.n + 1)
+        self.mulpw2 = [1] * (self.n + 1)
+        for i in range(1, self.n + 1):
+            self.mulpw1[i] = self.mulpw1[i - 1] * self.mul1 % self.mod1
+            self.mulpw2[i] = self.mulpw2[i - 1] * self.mul2 % self.mod2
 
-pw = [1 for _ in range(500010)]
+        self.HASH1 = [0]
+        self.HASH2 = [0]
+        for c in self.arr:
+            self.HASH1.append((self.HASH1[-1] * self.mul1 + c) % self.mod1)
+            self.HASH2.append((self.HASH2[-1] * self.mul2 + c) % self.mod2)
 
-for i in range(1, 500010):
-    pw[i] = pw[i - 1] * mul % mod
+    # 返回 (h1, h2) 元组，[l, r)
+    def GetHash(self, l, r):
+        h1 = (self.HASH1[r] - self.HASH1[l] * self.mulpw1[r - l]) % self.mod1
+        h2 = (self.HASH2[r] - self.HASH2[l] * self.mulpw2[r - l]) % self.mod2
+        return (h1 + self.mod1) % self.mod1, (h2 + self.mod2) % self.mod2   # 确保非负
 
-# @TIME
-def solve(testcase):
-    pass
 
-for testcase in range(II()):
-    solve(testcase)
+# 在 solve() 里替换原来哈希相关部分
+def solve():
+    n, m = MI()
+    s = I()
+    s = [ord(c) for c in s]
+    H = Hash(s)          # 现在是双哈希
+
+    mp = defaultdict(int)   # key 变成 tuple (h1,h2)
+    B = []
+
+    for _ in range(m):
+        t = I()
+        t = [ord(c) for c in t]
+        hval1 = hval2 = 0
+        C = [ (0, 0) ] 
+        for c in t:
+            hval1 = (hval1 * H.mul1 + c) % H.mod1
+            hval2 = (hval2 * H.mul2 + c) % H.mod2
+            mp[(hval1, hval2)] += 1
+            C.append( (hval1, hval2) )
+        B.append(C)
+
+    vis = set()
+    for C in B:
+        k = len(C)
+        for i in range(1, k):
+            pc = C[i - 1]
+            c = C[i]
+            if c in vis:
+                continue
+            vis.add(c)
+            mp[c] = mp[c] + mp[pc]
+
+    res = 0
+    for i in range(n):
+        l, r = i, n
+        while l < r:
+            mid = (l + r) >> 1
+            h = H.GetHash(i, mid + 1)
+            if h in mp:
+                l = mid + 1
+            else:
+                r = mid
+        h = H.GetHash(i, l)
+        res = fmax(res, mp[h])
+
+    print(res)
+
+for _ in range(II()):
+    solve()
