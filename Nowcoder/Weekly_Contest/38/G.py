@@ -1,6 +1,6 @@
 '''
 Hala Madrid!
-https://github.com/USYDDonghaoLi/Programming_Competition
+https://www.zhihu.com/people/li-dong-hao-78-74
 '''
 
 import sys
@@ -58,6 +58,8 @@ def LII():
     return list(map(int, input().split()))
 def GMI():
     return map(lambda x: int(x) - 1, input().split())
+def LGMI():
+    return list(map(lambda x: int(x) - 1, input().split()))
 
 #------------------------------FastIO---------------------------------
 
@@ -116,90 +118,115 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
-class XorBase:
-    n = 26
-    def __init__(self):
-        self.base = [0] * self.n
- 
-    def add(self, num):
-        for i in range(num.bit_length() - 1, -1, -1):
-            if (num >> i) & 1:
-                if self.base[i] == 0:
-                    self.base[i] = num
-                    return
-                else:
-                    num ^= self.base[i]
- 
-    def check(self, num):
-        for i in range(num.bit_length() - 1, -1, -1):
-            if (num >> i) & 1:
-                if self.base[i] == 0: return False
-                num ^= self.base[i]
-        return True
- 
-    def realBase(self):
+class FenwickTree:
+    def __init__(self, n):
+        self.n = n
+        self.tree = [0 for _ in range(n)]
+    
+    def fill(self, a):
         for i in range(self.n):
-            for j in range(i-1, -1, -1):
-                if self.base[i] ^ self.base[j] < self.base[i]:
-                    self.base[i] ^= self.base[j]
-        return [val for val in self.base if val]
- 
-    def maxVal(self):
-        ans = 0
-        for i in range(self.n-1, -1, -1):
-            if ans ^ self.base[i] > ans: ans ^= self.base[i]
-        return ans
- 
-    def merge(base1, base2):
-        res = XorBase()
-        for val in base1.base:
-            if val: res.add(val)
-        for val in base2.base:
-            if val: res.add(val)
-        return res
+            self.update(i, a[i])
+
+    def lowbit(self, x):
+        return x & (-x)
+
+    def update(self, pos, x):
+        while pos < self.n:
+            self.tree[pos] += x
+            pos += self.lowbit(pos)
+
+    def query(self, pos):
+        to_ret = 0
+        while pos:
+            to_ret += self.tree[pos]
+            pos -= self.lowbit(pos)
+        return to_ret
+
+    def query_sum(self, l, r):
+        return self.query(r) - self.query(l - 1)
+
+    def lower_bound(self, val):
+        ret, su = 0, 0
+        for i in reversed(range(self.n.bit_length())):
+            ix = ret + (1 << i)
+            if ix < self.n and su + self.tree[ix] < val:
+                su += self.tree[ix]
+                ret += 1 << i
+        return ret
+    
+    def upper_bound(self, val):
+        ret, su = 0, 0
+        for i in reversed(range(self.n.bit_length())):
+            ix = ret + (1 << i)
+            if ix < self.n and su + self.tree[ix] <= val:
+                su += self.tree[ix]
+                ret += 1 << i
+        return ret
 
 # @TIME
 def solve(testcase):
-    n = II()
-    n, q = MI()
+    n, k = MI()
+    A = LII()
 
-    A = [0 for _ in range(101)]
+    S = set()
+    for a in A:
+        S.add(a)
+    D = sorted(list(S))
 
-    for i in range(101):
-        x = i
-        for j in range(100, 0, -1):
-            if i % (j * j) == 0:
-                x //= j * j
-        A[i] = x
+    d = {v: i + 1 for i, v in enumerate(D)}
+    m = len(d)
+
+    for i in range(n):
+        A[i] = d[A[i]]
     
-    masks = [0 for _ in range(101)]
-    x = 0
+    BIT1 = FenwickTree(m + 10)
+    BIT2 = FenwickTree(m + 10)
 
-    for i in range(1, 101):
-        if A[i] > 1:
-            for j in range(2, i):
-                if i % j == 0:
-                    masks[i] = masks[j] ^ masks[i // j]
+    res = 0
+
+    for a in A:
+        res += BIT2.query_sum(a + 1, m + 5)
+        BIT2.update(a, 1)
+    
+    # print('res', res)
+    r = 0
+    ret = 0
+    if res >= k:
+        ret += 1
+    else:
+        print(0)
+        return
+
+    for l in range(n):
+        if l:
+            val = A[l - 1]
+            res += BIT1.query_sum(val + 1, m + 5)
+            if val > 1:
+                res += BIT2.query_sum(1, val - 1)
+            BIT1.update(val, 1)
+        
+        if res >= k:
+
+            while r < n:
+                val = A[r]
+                BIT2.update(val, -1)
+                tmp = BIT1.query_sum(val + 1, m + 5)
+                if val > 1:
+                    tmp += BIT2.query_sum(1, val - 1)
+                if res - tmp >= k:
+                    res -= tmp
+                    r += 1
+                else:
+                    BIT2.update(val, 1)
                     break
-            else:
-                masks[i] = 1 << x
-                x += 1
-    
-    for _ in range(q):
-        l, r = GMI()
-
-        if r - l >= 62:
-            print("Yes")
-        else:
-            XB = XorBase()
-            flag = False
-
-            for x in range(l, r + 1):
-                if XB.add(masks[A[x]]):
-                    continue
-                flag = True
             
-            print("Yes" if flag else "No")
 
-for testcase in range(II()):
+            # print('ok', l, r - 1)
+            ret += r - l
+    
+    print(ret)
+
+
+
+for testcase in range(1):
     solve(testcase)
