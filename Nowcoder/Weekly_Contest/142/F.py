@@ -396,7 +396,7 @@ def solve(testcase):
                 c = 1
         
         D[u] = D[u] * F.f[c] % mod * F.g[m] % mod
-        for v in B[u]:
+        for v in E:
             D[u] = D[u] * D[v] % mod
         yield
     
