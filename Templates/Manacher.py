@@ -24,6 +24,14 @@ def manacher(string):
                     D[i] += 1
                 l, r = i - D[i] + 1, i + D[i] - 1
     
+    res = []
+    for i in range(2, len(D) - 1):
+        d = D[i]
+        if i & 1:
+            res.append(d >> 1 << 1)
+        else:
+            res.append(((d + 1) >> 1) * 2 - 1)
+    
     '''
     if i & 1:
         LEN = (v + 1 >> 1) * 2 - 1
@@ -31,4 +39,4 @@ def manacher(string):
         LEN = v >> 1 << 1    
     '''
 
-    return D
+    return res
