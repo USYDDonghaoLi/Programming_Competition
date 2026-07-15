@@ -120,7 +120,15 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    s = I()
+    res = 0
 
-for testcase in range(II()):
+    for c in s.split('_'):
+        m = len(c)
+        if c and c[0] == '|' and c[-1] == '|' and c.count('=') == m - 2:
+            res += 1
+    
+    print(res)
+
+for testcase in range(1):
     solve(testcase)

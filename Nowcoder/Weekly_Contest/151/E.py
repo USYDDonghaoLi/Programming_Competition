@@ -122,41 +122,25 @@ fmax = lambda x, y: x if x > y else y
 def solve(testcase):
     n, l, W = MI()
     A = []
-    sw = 0
-    sxw = 0
 
     for _ in range(n):
         x, w = MI()
         A.append((x, w))
+    
+    sw = 0
+    swx = 0
+
+    for x, w in A:
         sw += w
-        sxw += x * w
+        swx += w * x
 
-    if n == 2:
-        print(2)
-        return
-    
-    A.sort()
-    
     res = 0
-    lw = 0
-    lxw = 0
-    
-    for i in range(1, n - 1):
-        x, w = A[i]
-        xw = x * w
 
-        lw += A[i - 1][1]
-        lxw += A[i - 1][1] * A[i - 1][0]
+    for x, w in A:
+        up = (swx - w * x) * 2 + W * l
+        down = 2 * (sw - w + W)
 
-        rw = sw - lw - w
-        rxw = sxw - lxw - xw
-
-        left = (lw * x - lxw) * 2 * l + w * x * x
-        right = (rxw - rw * x) * 2 * l + w * (l - x) * (l - x)
-
-        
-
-        if left == right:
+        if up % down == 0:
             res += 1
     
     print(res)
