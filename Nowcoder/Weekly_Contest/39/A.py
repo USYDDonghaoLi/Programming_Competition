@@ -1,6 +1,6 @@
 '''
 Hala Madrid!
-https://github.com/USYDDonghaoLi/Programming_Competition
+https://www.zhihu.com/people/li-dong-hao-78-74
 '''
 
 import sys
@@ -58,8 +58,6 @@ def LII():
     return list(map(int, input().split()))
 def GMI():
     return map(lambda x: int(x) - 1, input().split())
-def LGMI():
-    return list(map(lambda x: int(x) - 1, input().split()))
 
 #------------------------------FastIO---------------------------------
 
@@ -72,6 +70,11 @@ from time import *
 from random import *
 from math import log, gcd, sqrt, ceil
 
+# '''
+# 手写栈防止recursion limit
+# 注意要用yield 不要用return
+# 函数结尾要写yield None
+# '''
 # from types import GeneratorType
 # def bootstrap(f, stack=[]):
 #     def wrappedfunc(*args, **kwargs):
@@ -91,8 +94,7 @@ from math import log, gcd, sqrt, ceil
 #             return to
 #     return wrappedfunc
 
-# seed(19981220)
-# RANDOM = getrandbits(64)
+# RANDOM = getrandbits(32)
  
 # class Wrapper(int):
 #     def __init__(self, x):
@@ -115,12 +117,13 @@ from math import log, gcd, sqrt, ceil
 
 inf = float('inf')
 
-fmin = lambda x, y: x if x < y else y
-fmax = lambda x, y: x if x > y else y
-
 # @TIME
 def solve(testcase):
-    pass
+    nums = LII()
+    if nums[0] * 30 < sum(nums):
+        print('Yes')
+    else:
+        print('No')
 
-for testcase in range(II()):
+for testcase in range(1):
     solve(testcase)

@@ -1,6 +1,6 @@
 '''
 Hala Madrid!
-https://github.com/USYDDonghaoLi/Programming_Competition
+https://www.zhihu.com/people/li-dong-hao-78-74
 '''
 
 import sys
@@ -72,55 +72,88 @@ from time import *
 from random import *
 from math import log, gcd, sqrt, ceil
 
-# from types import GeneratorType
-# def bootstrap(f, stack=[]):
-#     def wrappedfunc(*args, **kwargs):
-#         if stack:
-#             return f(*args, **kwargs)
-#         else:
-#             to = f(*args, **kwargs)
-#             while True:
-#                 if type(to) is GeneratorType:
-#                     stack.append(to)
-#                     to = next(to)
-#                 else:
-#                     stack.pop()
-#                     if not stack:
-#                         break
-#                     to = stack[-1].send(to)
-#             return to
-#     return wrappedfunc
-
-# seed(19981220)
-# RANDOM = getrandbits(64)
- 
-# class Wrapper(int):
-#     def __init__(self, x):
-#         int.__init__(x)
-
-#     def __hash__(self):
-#         return super(Wrapper, self).__hash__() ^ RANDOM
-
-# def TIME(f):
-
-#     def wrap(*args, **kwargs):
-#         s = perf_counter()
-#         ret = f(*args, **kwargs)
-#         e = perf_counter()
-
-#         print(e - s, 'sec')
-#         return ret
-    
-#     return wrap
-
 inf = float('inf')
 
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
-# @TIME
 def solve(testcase):
-    pass
+    n = II()
+    A = LII()
 
-for testcase in range(II()):
+    if n == 1:
+        print(1)
+        return
+
+    if A[0] < A[1]:
+        flag = True
+    else:
+        flag = False
+    
+    B = []
+    
+    l, r = 0, 1
+    while r < n:
+        if flag:
+            while r < n and A[r] > A[r - 1]:
+                r += 1
+        else:
+            while r < n and A[r] < A[r - 1]:
+                r += 1
+        
+        B.append((l, r - 1, flag))
+            
+        l = r - 1
+        flag = not flag
+    
+    m = len(B)
+
+    res = 0
+    for i in range(m):
+        l, r, f = B[i]
+        LEN = r - l + 1
+        res += LEN * (LEN + 1) // 2
+    res -= m - 1
+
+
+    for i in range(1, m):
+        l1, r1, f1 = B[i - 1]
+        l2, r2, f2 = B[i]
+        LEN1 = r1 - l1 + 1
+        LEN2 = r2 - l2 + 1
+
+        if f1 and not f2:
+            left_val = A[r1 - 1]
+            cnt = 0
+            for e in range(r1 + 1, r2 + 1):
+                if A[e] > left_val:
+                    cnt += 1
+                else:
+                    break
+            res += (LEN1 - 1) * cnt
+
+        if not f1 and f2:
+            right_val = A[l2 + 1]
+            cnt = 0
+            for s in range(r1 - 1, l1 - 1, -1):
+                if A[s] < right_val:
+                    cnt += 1
+                else:
+                    break
+            res += cnt * (LEN2 - 1)
+
+    for i in range(2, m):
+        l1, r1, f1 = B[i - 2]
+        l2, r2, f2 = B[i - 1]
+        l3, r3, f3 = B[i]
+        LEN1 = r1 - l1 + 1
+        LEN3 = r3 - l3 + 1
+
+        if f1 and not f2 and f3:
+            if A[r2] > A[r1 - 1] and A[l2] < A[l3 + 1]:
+                res += (LEN1 - 1) * (LEN3 - 1)
+    
+    print(res)
+
+for testcase in range(1):
     solve(testcase)
