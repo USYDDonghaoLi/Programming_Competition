@@ -118,17 +118,79 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+from bisect import *
+from heapq import *
+from collections import *
+from functools import *
+from itertools import *
+
+class UnionFind:
+    def __init__(self, n: int, A):
+        self.parent = [x for x in range(n)]
+        self.size = [1 for _ in range(n)]
+        self.g = [a for a in A]
+        self.n = n
+        self.setCount = n
+    
+    def Find(self, a: int) -> int:
+        a = self.parent[a]
+        acopy = a
+        while a != self.parent[a]:
+            a = self.parent[a]
+        while acopy != a:
+            self.parent[acopy], acopy = a, self.parent[acopy]
+        return a
+    
+    def Union(self, x: int, y: int) -> bool:
+        root_x = self.Find(x)
+        root_y = self.Find(y)
+        gx = self.g[root_x]
+        gy = self.g[root_y]
+        if root_x == root_y:
+            return False
+        if self.size[root_x] > self.size[root_y]:
+            root_x, root_y = root_y, root_x
+        self.parent[root_x] = root_y
+        self.size[root_y] += self.size[root_x]
+        self.setCount -= 1
+        self.g = gcd(gx, gy)
+        return True
+
+    def connected(self, x: int, y: int) -> bool:
+        return self.Find(x) == self.Find(y)
+
+    def members(self, x):
+        root = self.Find(x)
+        return [i for i in range(self.n) if self.Find(i) == root]
+    
+    def roots(self):
+        return [i for i, x in enumerate(self.parent) if i == x]
+    
+    def group_count(self):
+        return len(self.roots())
+    
+    def all_group_members(self):
+        mp = defaultdict(list)
+        for member in range(self.n):
+            mp[self.Find(member)].append(member)
+        return mp
+
 # @TIME
 def solve(testcase):
     n = II()
     A = LII()
 
-    res = A[0]
-    for i in range(1, n):
-        if A[i - 1] < A[i]:
-            res += A[i] - A[i - 1]
+    uf = UnionFind(n, A)
+    idxs = sorted(range(n), key = lambda x: -A[x])
+    vis = [False for _ in range(n)]
 
-    print(res) 
+    for i in idxs:
+        idx, val = i, A[i]
+        if i > 0 and vis[i - 1]:
+            rt = uf.Find(i - 1)
+            
 
-for testcase in range(1):
+    
+
+for testcase in range(II()):
     solve(testcase)

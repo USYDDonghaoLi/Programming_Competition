@@ -120,15 +120,27 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    n = II()
-    A = LII()
+    a, b, c, d = MI()
+    res = 0
 
-    res = A[0]
-    for i in range(1, n):
-        if A[i - 1] < A[i]:
-            res += A[i] - A[i - 1]
+    for ax in range(a + 1):
+        if ax * 2 > a or ax * 3 > d:
+            break
+        ay = a - ax * 2
+        dy = d - ax * 3
+        
+        res = fmax(res, ax * 12 + fmin(ay, c) * 6 + fmin(dy, b) * 4)
+    
+    for cx in range(c + 1):
+        if cx * 2 > c or cx * 3 > b:
+            break
+        cy = c - cx * 2
+        by = b - cx * 3
 
-    print(res) 
+        res = fmax(res, cx * 12 + fmin(cy, a) * 6 + fmin(by, d) * 4)
+    
+    print(res)
 
-for testcase in range(1):
+
+for testcase in range(II()):
     solve(testcase)

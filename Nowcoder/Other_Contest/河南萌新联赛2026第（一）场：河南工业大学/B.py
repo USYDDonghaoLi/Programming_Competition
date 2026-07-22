@@ -123,12 +123,22 @@ def solve(testcase):
     n = II()
     A = LII()
 
-    res = A[0]
+    d = A[1] - A[0]
+    B = []
+    flag = True
     for i in range(1, n):
-        if A[i - 1] < A[i]:
-            res += A[i] - A[i - 1]
-
-    print(res) 
+        diff = A[i] - A[i - 1]
+        if d != diff:
+            flag = False
+        B.append(diff)   
+    
+    if flag:
+        print(-1)
+    else:
+        g = 0
+        for i in range(1, n - 1):
+            g = gcd(g, B[i] - B[i - 1])
+        print(g)
 
 for testcase in range(1):
     solve(testcase)

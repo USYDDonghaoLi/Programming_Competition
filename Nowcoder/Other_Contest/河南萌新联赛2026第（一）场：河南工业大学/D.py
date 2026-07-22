@@ -118,17 +118,66 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+d = ((1, 0), (0, 1), (-1, 0), (0, -1))
+
 # @TIME
 def solve(testcase):
-    n = II()
-    A = LII()
+    n, m = MI()
+    A = [list(I()) for _ in range(n)]
 
-    res = A[0]
-    for i in range(1, n):
-        if A[i - 1] < A[i]:
-            res += A[i] - A[i - 1]
+    sx, sy, tx, ty = -1, -1, -1, -1
+    for i in range(n):
+        for j in range(m):
+            if A[i][j] == 'S':
+                sx, sy = i, j
+                A[i][j] = '.'
+            if A[i][j] == 'T':
+                tx, ty = i, j
+                A[i][j] = '.'
+    
+    def f(state, x, y):
+        return (state * n + x) * m + y
+    
+    def g(s):
+        y = s % m
+        state //= m
+        x = s % n
+        return s, x, y 
 
-    print(res) 
+    # vis = [[[False for _ in range(m)] for _ in range(n)] for _ in range(2)]
+    vis = [False for _ in range(2 * n * m)]
+
+    step = 0
+    q = deque()
+    q.append((0, sx, sy))
+    # vis[0][sx][sy] = True
+    vis[f(0, sx, sy)] = True
+
+    while q:
+        k = len(q)
+        for _ in range(k):
+            state, x, y = q.popleft()
+            if x == tx and y == ty:
+                print(step)
+                return
+            
+            for dx, dy in d:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < n and 0 <= ny < m:
+                    # if A[nx][ny] == '.' and not vis[state][nx][ny]:
+                    if A[nx][ny] == '.' and not vis[f(state, nx, ny)]:
+                        # vis[state][nx][ny] = True
+                        vis[f(state, nx, ny)] = True
+                        q.append((state, nx, ny))
+                    # if A[nx][ny] == '#' and state == 0 and not vis[1][nx][ny]:
+                    if A[nx][ny] == '#' and state == 0 and not vis[f(1, nx, ny)]:
+                        vis[f(1, nx, ny)] = True
+                        q.append((1, nx, ny))
+
+
+        step += 1
+    
+    print(-1)
 
 for testcase in range(1):
     solve(testcase)

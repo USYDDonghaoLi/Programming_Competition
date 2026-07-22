@@ -123,12 +123,59 @@ def solve(testcase):
     n = II()
     A = LII()
 
-    res = A[0]
-    for i in range(1, n):
-        if A[i - 1] < A[i]:
-            res += A[i] - A[i - 1]
+    if n == 1:
+        print(1)
+        return
 
-    print(res) 
+    for i in range(n):
+        A[i] &= 1
+    
+    def f(match):
+        L = [False for _ in range(n - 1)]
+        R = [False for _ in range(n - 1)]
+        for i in range(n - 1):
+            if A[i] == match[i]:
+                L[i] = True
+            else:
+                break
+        for i in range(n - 2, -1, -1):
+            if A[i + 1] == match[i]:
+                R[i] = True
+            else:
+                break
+        
+        # print(match)
+        # print(A)
+        # print(L)
+        # print(R)
+        
+        res = 0
 
-for testcase in range(1):
+        for i in range(n):
+            l = i - 1
+            r = i
+            LE = (l < 0) or (l >= 0 and L[l])
+            RI = (r >= n - 1) or (r < n and R[r])
+            res += LE and RI
+        
+        # print(res)
+        # print("\n\n\n")
+        
+        return res
+
+
+    match1 = []
+    match2 = []
+
+    for i in range(n - 1):
+        if i & 1:
+            match1.append(1)
+            match2.append(0)
+        else:
+            match1.append(0)
+            match2.append(1)
+    
+    print(f(match1) + f(match2))
+
+for testcase in range(II()):
     solve(testcase)

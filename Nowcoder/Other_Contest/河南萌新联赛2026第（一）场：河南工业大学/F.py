@@ -120,15 +120,35 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    n = II()
-    A = LII()
+    n, m = MI()
 
-    res = A[0]
-    for i in range(1, n):
-        if A[i - 1] < A[i]:
-            res += A[i] - A[i - 1]
+    A = [[] for _ in range(n)]
+    indeg = [0 for _ in range(n)]
+    for _ in range(m):
+        u, v = GMI()
+        A[u].append(v)
+        indeg[v] += 1
+    
+    pq = []
+    res = []
+    for i in range(n):
+        if not indeg[i]:
+            heappush(pq, i)
+    
+    while pq:
+        u = heappop(pq)
+        res.append(u + 1)
+        for v in A[u]:
+            indeg[v] -= 1
+            if indeg[v] == 0:
+                heappush(pq, v)
+    
+    if len(res) == n:
+        print("Yes")
+        print(*res)
+    else:
+        print("No")
 
-    print(res) 
 
-for testcase in range(1):
+for testcase in range(II()):
     solve(testcase)
