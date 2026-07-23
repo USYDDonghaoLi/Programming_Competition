@@ -1,4 +1,7 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <array>
+#include <vector>
+
 using namespace std;
 
 #define int long long
