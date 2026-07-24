@@ -120,12 +120,35 @@ fmax = lambda x, y: x if x > y else y
 def solve(testcase):
     n = II()
     A = LII()
-    res = 0
-    cur = 1
 
-    for a in A:
-        cur = cur * a % 10
-        res += cur == 6
+    mod = 10 ** 9 + 7
+
+    pw = [1 for _ in range(n + 10)]
+    for i in range(1, n + 10):
+        pw[i] = pw[i - 1] * 2 % mod
+
+    dp = [0 for _ in range(10)]
+    dp[1] = 1
+    res = 0
+
+    for i, a in enumerate(A):
+        newdp = [0 for _ in range(10)]
+        # newdp[a] += 1
+        for j in range(10):
+            newdp[j * a % 10] += dp[j]
+        
+        for j in range(10):
+            dp[j] = (dp[j] + newdp[j]) % mod
+        
+        res += newdp[6] * pw[n - i - 1]
+        # print(dp[6], pw[n - i - 1])
+        res %= mod
+    #     for i in range(10):
+    #         dp[i] += newdp[i]
+    #         dp[i] %= mod
+        
+        # print('dp', dp)
+    #     res = (res + dp[6]) % mod
     
     print(res)
 

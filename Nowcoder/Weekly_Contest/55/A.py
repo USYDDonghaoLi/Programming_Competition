@@ -118,7 +118,9 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    print(I().count('o'))
+    s = I()
+    c = Counter(s)
+    print(3 - max(c.values()))
 
 for testcase in range(1):
     solve(testcase)
