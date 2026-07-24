@@ -118,9 +118,392 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+import math
+from typing import List, Optional
+
+eps = 1e-9
+
+class Point:
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
+
+    def __eq__(self, other) -> bool:
+        return abs(self.x - other.x) <= eps and abs(self.y - other.y) <= eps
+
+    def __add__(self, other):
+        return Point(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other):
+        return Point(self.x - other.x, self.y - other.y)
+
+    def __neg__(self):
+        return Point(-self.x, -self.y)
+
+    def __mul__(self, other):
+        """支持数乘和点积"""
+        if isinstance(other, Point):
+            return self.x * other.x + self.y * other.y          # 点积
+        return Point(self.x * other, self.y * other)            # 数乘
+
+    def __truediv__(self, k: float):
+        return Point(self.x / k, self.y / k)
+
+    def __xor__(self, other):                                   # 叉积
+        return self.x * other.y - self.y * other.x
+
+    def dot(self, other) -> float:                              # 显式点积
+        return self.x * other.x + self.y * other.y
+
+    def cross(self, other) -> float:                            # 显式叉积
+        return self.x * other.y - self.y * other.x
+
+    def toleft(self, other) -> int:
+        """当前点相对于other的位置：1=左，-1=右，0=共线"""
+        t = self.cross(other)
+        return (t > eps) - (t < -eps)
+
+    def len2(self) -> float:
+        return self * self
+
+    def len(self) -> float:
+        return math.sqrt(self.len2())
+
+    def dis2(self, other) -> float:
+        return (other - self).len2()
+
+    def dis(self, other) -> float:
+        return math.sqrt(self.dis2(other))
+
+    def rotate(self, alpha: float):
+        """逆时针旋转 alpha 弧度"""
+        return Point(
+            self.x * math.cos(alpha) - self.y * math.sin(alpha),
+            self.x * math.sin(alpha) + self.y * math.cos(alpha),
+        )
+
+    def normalize(self):
+        """单位向量"""
+        length = self.len()
+        return self / length if length > eps else Point(0, 0)
+
+    def perpendicular(self):
+        """垂直向量（逆时针 90 度）"""
+        return Point(-self.y, self.x)
+
+    def angle(self) -> float:
+        """极角（atan2）"""
+        return math.atan2(self.y, self.x)
+
+
+class Line:
+    def __init__(self, p: Point, v: Point):
+        self.p = p
+        self.v = v
+
+    def toleft(self, a: Point) -> int:
+        return self.v.toleft(a - self.p)
+
+    def inter(self, l) -> Optional[Point]:
+        """两条直线交点，平行返回 None"""
+        d = self.v.cross(l.v)
+        if abs(d) < eps:
+            return None
+        u = self.p - l.p
+        t = (l.v.cross(u)) / d
+        return self.p + self.v * t
+
+    def projection(self, a: Point) -> Point:
+        """点 a 在直线上的投影"""
+        t = ((a - self.p) * self.v) / (self.v * self.v)
+        return self.p + self.v * t
+
+    def dis(self, a: Point) -> float:
+        """点到直线距离"""
+        return abs((self.p - a).cross(self.v)) / self.v.len()
+
+
+class Segment:
+    def __init__(self, a: Point, b: Point):
+        self.a = a
+        self.b = b
+
+    def is_on(self, p: Point) -> bool:
+        if self.a == p or self.b == p:
+            return True
+        return abs((p - self.a).cross(p - self.b)) < eps and (p - self.a) * (p - self.b) < 0
+
+    def is_inter_line(self, l: Line) -> bool:
+        if abs(l.toleft(self.a)) == 0 or abs(l.toleft(self.b)) == 0:
+            return True
+        return l.toleft(self.a) * l.toleft(self.b) == -1
+
+    def is_inter_segment(self, s) -> bool:
+        if self.is_on(s.a) or self.is_on(s.b) or s.is_on(self.a) or s.is_on(self.b):
+            return True
+        l1 = Line(self.a, self.b - self.a)
+        l2 = Line(s.a, s.b - s.a)
+        return l1.toleft(s.a) * l1.toleft(s.b) == -1 and l2.toleft(self.a) * l2.toleft(self.b) == -1
+
+    def dis_point(self, p: Point) -> float:
+        if (p - self.a) * (self.b - self.a) < -eps or (p - self.b) * (self.a - self.b) < -eps:
+            return min(p.dis(self.a), p.dis(self.b))
+        l = Line(self.a, self.b - self.a)
+        return l.dis(p)
+
+    def dis_segment(self, s) -> float:
+        if self.is_inter_segment(s):
+            return 0
+        return min(self.dis_point(s.a), self.dis_point(s.b),
+                   s.dis_point(self.a), s.dis_point(self.b))
+
+
+class Polygon:
+    def __init__(self, points: List[Point] = None):
+        self.points = points or []
+
+    def nxt(self, i: int) -> int:
+        return 0 if i == len(self.points) - 1 else i + 1
+
+    def pre(self, i: int) -> int:
+        return len(self.points) - 1 if i == 0 else i - 1
+
+    def area(self) -> float:
+        res = 0.0
+        for i in range(len(self.points)):
+            res += self.points[i].cross(self.points[self.nxt(i)])
+        return res / 2.0
+
+    def is_convex(self) -> bool:
+        for i in range(len(self.points)):
+            if (self.points[self.nxt(i)] - self.points[i]).cross(
+                    self.points[self.pre(i)] - self.points[i]) < -eps:
+                return False
+        return True
+
+    def is_in(self, a: Point) -> int:
+        """
+        返回值说明：
+            0 : 严格在多边形外部
+            1 : 在边界上
+            2 : 严格在多边形内部
+        """
+        if not self.points:
+            return 0
+        x = 0
+        for i in range(len(self.points)):
+            s = Segment(self.points[i], self.points[self.nxt(i)])
+            if s.is_on(a):
+                return 1
+            p1 = self.points[i] - a
+            p2 = self.points[self.nxt(i)] - a
+            if p1.y > p2.y:
+                p1, p2 = p2, p1
+            if p1.y < eps < p2.y and p1.cross(p2) > eps:
+                x ^= 1
+        return 2 if x else 0
+
+    def winding(self, a: Point) -> float:
+        """Winding number（可用于有向多边形）"""
+        x = 0
+        for i in range(len(self.points)):
+            s = Segment(self.points[i], self.points[self.nxt(i)])
+            if s.is_on(a):
+                return -1e9
+            p1 = self.points[i] - a
+            p2 = self.points[self.nxt(i)] - a
+            flag = False
+            if p1.y > p2.y:
+                p1, p2 = p2, p1
+                flag = True
+            if p1.y < eps < p2.y and p1.cross(p2) > eps:
+                x += -1 if flag else 1
+        return x
+
+
+# ====================== 常用辅助函数 ======================
+
+def convex_hull(points: List[Point]) -> Polygon:
+    """Andrew 单调栈求凸包（O(n log n)）"""
+    if len(points) <= 1:
+        return Polygon(points[:])
+    points = sorted(points, key=lambda p: (p.x, p.y))
+    lower, upper = [], []
+    for p in points:
+        while len(lower) >= 2 and (lower[-1] - lower[-2]).cross(p - lower[-2]) <= 0:
+            lower.pop()
+        lower.append(p)
+    for p in reversed(points):
+        while len(upper) >= 2 and (upper[-1] - upper[-2]).cross(p - upper[-2]) <= 0:
+            upper.pop()
+        upper.append(p)
+    hull = lower[:-1] + upper[:-1]
+    return Polygon(hull)
+
+
+def polar_sort(points: List[Point], origin: Point = None) -> List[Point]:
+    """以 origin 为极点按极角排序（默认取最左下点）"""
+    if origin is None:
+        origin = min(points, key=lambda p: (p.y, p.x))
+    def key(p):
+        return (p - origin).angle(), (p - origin).len2()
+    return sorted(points, key=key)
+
+
+class Circle:
+    def __init__(self, center: Point, radius: float):
+        self.c = center
+        self.r = radius
+
+    def area(self) -> float:
+        return math.pi * self.r * self.r
+
+    def contain_point(self, p: Point) -> int:
+        """0=外部, 1=边界, 2=内部"""
+        d = p.dis(self.c)
+        if abs(d - self.r) < eps:
+            return 1
+        return 2 if d < self.r else 0
+
+    # ------------------- 两圆相关 -------------------
+    def relation(self, other: 'Circle') -> int:
+        """
+        两圆相对位置
+        0 : 外离
+        1 : 外切
+        2 : 相交
+        3 : 内切
+        4 : 内含
+        """
+        d = self.c.dis(other.c)
+        r1, r2 = self.r, other.r
+        if d > r1 + r2 + eps:
+            return 0
+        if abs(d - (r1 + r2)) <= eps:
+            return 1
+        if abs(d - abs(r1 - r2)) <= eps:
+            return 3
+        if d < abs(r1 - r2) - eps:
+            return 4
+        return 2
+
+    def inter(self, other: 'Circle') -> List[Point]:
+        """两圆交点（0/1/2个）"""
+        rel = self.relation(other)
+        if rel == 0 or rel == 4:
+            return []
+        d = self.c.dis(other.c)
+        if d < eps:  # 同心
+            return []
+        a = (self.r * self.r - other.r * other.r + d * d) / (2 * d)
+        h2 = self.r * self.r - a * a
+        if h2 < -eps:
+            return []
+        h = math.sqrt(max(h2, 0.0))
+        mid = self.c + (other.c - self.c) * (a / d)
+        if h < eps:  # 相切
+            return [mid]
+        perp = (other.c - self.c).perpendicular().normalize() * h
+        return [mid + perp, mid - perp]
+
+    # ------------------- 直线与圆 -------------------
+    def line_relation(self, l: Line) -> int:
+        """
+        直线与圆相对位置
+        0 : 相离
+        1 : 相切
+        2 : 相交
+        """
+        d = l.dis(self.c)
+        if d > self.r + eps:
+            return 0
+        if abs(d - self.r) <= eps:
+            return 1
+        return 2
+
+    def line_inter(self, l: Line) -> List[Point]:
+        """直线与圆的交点（0/1/2个）"""
+        d = l.dis(self.c)
+        if d > self.r + eps:
+            return []
+        proj = l.projection(self.c)
+        if abs(d - self.r) <= eps:  # 相切
+            return [proj]
+        h = math.sqrt(max(self.r * self.r - d * d, 0.0))
+        dir_unit = l.v.normalize()
+        return [proj + dir_unit * h, proj - dir_unit * h]
+
+    # ------------------- 射线与圆 -------------------
+    def ray_inter(self, origin: Point, direction: Point) -> List[Point]:
+        """
+        射线（origin + t * direction, t >= 0）与圆的交点
+        返回按到 origin 距离从近到远排序的交点
+        """
+        line = Line(origin, direction)
+        inters = self.line_inter(line)
+        res = []
+        for p in inters:
+            if (p - origin) * direction >= -eps:  # 在射线上
+                res.append(p)
+        res.sort(key=lambda p: p.dis2(origin))
+        return res
+
+    # ------------------- 线段与圆 -------------------
+    def segment_inter(self, s: Segment) -> List[Point]:
+        """线段与圆的交点（只返回在线段上的）"""
+        line = Line(s.a, s.b - s.a)
+        inters = self.line_inter(line)
+        res = []
+        for p in inters:
+            if s.is_on(p):
+                res.append(p)
+        return res
+
 # @TIME
 def solve(testcase):
     x0, y0, r = MI()
+    O = Point(x0, y0)
+    A = Circle(O, r)
 
-for testcase in range(II()):
+    n, x = MI()
+    B = []
+
+    for _ in range(n):
+        us, vs, ue, ve, s = map(float, input().split())
+        origin = Point(us, vs)
+        direction = Point(ue - us, ve - vs)
+
+        C = A.ray_inter(origin, direction)
+
+        if len(C) == 0:
+            pass
+        elif len(C) == 1:
+            t = origin.dis(C[0]) / s
+            B.append((t, t + x))
+        elif len(C) == 2:
+            t1 = origin.dis(C[0]) / s
+            t2 = origin.dis(C[1]) / s
+            B.append((t1, t2 + x))
+
+    B.sort()
+    D = []
+    l, r = 0, 0
+    while r < len(B):
+        last = B[l][1]
+        while r < len(B) and B[r][0] <= last + eps:
+            last = fmax(last, B[r][1])
+            r += 1
+        D.append((B[l][0], last))
+        l = r
+    
+    # print("BCD", B, C, D)
+
+    res = 0
+    for l, r in D:
+        res += r - l
+
+    print(res)
+
+
+for testcase in range(1):
     solve(testcase)
