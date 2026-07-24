@@ -239,7 +239,102 @@ class Circle:
         return math.pi * self.r * self.r
 
     def contain_point(self, p: Point) -> int:
+        """0=外部, 1=边界, 2=内部"""
         d = p.dis(self.c)
         if abs(d - self.r) < eps:
-            return 1  # 边界
-        return 2 if d < self.r else 0  # 内部 / 外部
+            return 1
+        return 2 if d < self.r else 0
+
+    # ------------------- 两圆相关 -------------------
+    def relation(self, other: 'Circle') -> int:
+        """
+        两圆相对位置
+        0 : 外离
+        1 : 外切
+        2 : 相交
+        3 : 内切
+        4 : 内含
+        """
+        d = self.c.dis(other.c)
+        r1, r2 = self.r, other.r
+        if d > r1 + r2 + eps:
+            return 0
+        if abs(d - (r1 + r2)) <= eps:
+            return 1
+        if abs(d - abs(r1 - r2)) <= eps:
+            return 3
+        if d < abs(r1 - r2) - eps:
+            return 4
+        return 2
+
+    def inter(self, other: 'Circle') -> List[Point]:
+        """两圆交点（0/1/2个）"""
+        rel = self.relation(other)
+        if rel == 0 or rel == 4:
+            return []
+        d = self.c.dis(other.c)
+        if d < eps:  # 同心
+            return []
+        a = (self.r * self.r - other.r * other.r + d * d) / (2 * d)
+        h2 = self.r * self.r - a * a
+        if h2 < -eps:
+            return []
+        h = math.sqrt(max(h2, 0.0))
+        mid = self.c + (other.c - self.c) * (a / d)
+        if h < eps:  # 相切
+            return [mid]
+        perp = (other.c - self.c).perpendicular().normalize() * h
+        return [mid + perp, mid - perp]
+
+    # ------------------- 直线与圆 -------------------
+    def line_relation(self, l: Line) -> int:
+        """
+        直线与圆相对位置
+        0 : 相离
+        1 : 相切
+        2 : 相交
+        """
+        d = l.dis(self.c)
+        if d > self.r + eps:
+            return 0
+        if abs(d - self.r) <= eps:
+            return 1
+        return 2
+
+    def line_inter(self, l: Line) -> List[Point]:
+        """直线与圆的交点（0/1/2个）"""
+        d = l.dis(self.c)
+        if d > self.r + eps:
+            return []
+        proj = l.projection(self.c)
+        if abs(d - self.r) <= eps:  # 相切
+            return [proj]
+        h = math.sqrt(max(self.r * self.r - d * d, 0.0))
+        dir_unit = l.v.normalize()
+        return [proj + dir_unit * h, proj - dir_unit * h]
+
+    # ------------------- 射线与圆 -------------------
+    def ray_inter(self, origin: Point, direction: Point) -> List[Point]:
+        """
+        射线（origin + t * direction, t >= 0）与圆的交点
+        返回按到 origin 距离从近到远排序的交点
+        """
+        line = Line(origin, direction)
+        inters = self.line_inter(line)
+        res = []
+        for p in inters:
+            if (p - origin) * direction >= -eps:  # 在射线上
+                res.append(p)
+        res.sort(key=lambda p: p.dis2(origin))
+        return res
+
+    # ------------------- 线段与圆 -------------------
+    def segment_inter(self, s: Segment) -> List[Point]:
+        """线段与圆的交点（只返回在线段上的）"""
+        line = Line(s.a, s.b - s.a)
+        inters = self.line_inter(line)
+        res = []
+        for p in inters:
+            if s.is_on(p):
+                res.append(p)
+        return res
