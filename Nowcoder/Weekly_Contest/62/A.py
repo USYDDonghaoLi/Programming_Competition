@@ -58,8 +58,6 @@ def LII():
     return list(map(int, input().split()))
 def GMI():
     return map(lambda x: int(x) - 1, input().split())
-def LGMI():
-    return list(map(lambda x: int(x) - 1, input().split()))
 
 #------------------------------FastIO---------------------------------
 
@@ -120,18 +118,8 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    n = II()
-    m = int(sqrt(n))
-    
-    while (m + 1) * (m + 1) <= n:
-        m += 1
-    while m * m > n:
-        m -= 1
-    
-    if m * m == n:
-        print(0)
-    else:
-        print(3)
+    s = I()
+    print(s[1] + s[0] + s[2:])
 
-for testcase in range(II()):
+for testcase in range(1):
     solve(testcase)

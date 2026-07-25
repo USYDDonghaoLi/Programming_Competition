@@ -1,6 +1,6 @@
 '''
 Hala Madrid!
-https://github.com/USYDDonghaoLi/Programming_Competition
+https://www.zhihu.com/people/li-dong-hao-78-74
 '''
 
 import sys
@@ -58,8 +58,6 @@ def LII():
     return list(map(int, input().split()))
 def GMI():
     return map(lambda x: int(x) - 1, input().split())
-def LGMI():
-    return list(map(lambda x: int(x) - 1, input().split()))
 
 #------------------------------FastIO---------------------------------
 
@@ -72,24 +70,24 @@ from time import *
 from random import *
 from math import log, gcd, sqrt, ceil
 
-# from types import GeneratorType
-# def bootstrap(f, stack=[]):
-#     def wrappedfunc(*args, **kwargs):
-#         if stack:
-#             return f(*args, **kwargs)
-#         else:
-#             to = f(*args, **kwargs)
-#             while True:
-#                 if type(to) is GeneratorType:
-#                     stack.append(to)
-#                     to = next(to)
-#                 else:
-#                     stack.pop()
-#                     if not stack:
-#                         break
-#                     to = stack[-1].send(to)
-#             return to
-#     return wrappedfunc
+from types import GeneratorType
+def bootstrap(f, stack=[]):
+    def wrappedfunc(*args, **kwargs):
+        if stack:
+            return f(*args, **kwargs)
+        else:
+            to = f(*args, **kwargs)
+            while True:
+                if type(to) is GeneratorType:
+                    stack.append(to)
+                    to = next(to)
+                else:
+                    stack.pop()
+                    if not stack:
+                        break
+                    to = stack[-1].send(to)
+            return to
+    return wrappedfunc
 
 # seed(19981220)
 # RANDOM = getrandbits(64)
@@ -118,21 +116,49 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+mod = 10 ** 9 + 7
+
 # @TIME
 def solve(testcase):
-    n, l = MI()
-    if l >= n:
-        med = n + 1 >> 1
-        x = med - l
-        y = med
-        s = n * n // 4
-    else:
-        m = n - l
-        x = m + 1 >> 1
-        y = x + l
-        s = (m * m // 4) + (l * l // 4)
-    
-    print(x, y, s)
+    n = II()
+    adj = [[] for _ in range(n)]
 
-for testcase in range(II()):
+    for _ in range(n - 1):
+        u, v = MI()
+        u -= 1
+        v -= 1
+        adj[u].append(v)
+        adj[v].append(u)
+    
+    child = [[] for _ in range(n)]
+
+    q = deque()
+    q.append((0, -1))
+
+    while q:
+        cur, fa = q.popleft()
+        for o in adj[cur]:
+            if o != fa:
+                child[cur].append(o)
+                q.append((o, cur))
+    
+    # print(child)
+    
+    res = [1 for _ in range(n)]
+
+    @bootstrap
+    def dfs(node):
+        prob = pow(len(child[node]), mod - 2, mod)
+        for o in child[node]:
+            yield dfs(o)
+            res[node] += prob * res[o]
+        res[node] %= mod
+        yield
+    
+    dfs(0)
+
+    # print(*res)
+    print(res[0])
+
+for testcase in range(1):
     solve(testcase)

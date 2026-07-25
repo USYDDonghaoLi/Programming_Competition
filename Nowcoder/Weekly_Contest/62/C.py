@@ -1,6 +1,6 @@
 '''
 Hala Madrid!
-https://github.com/USYDDonghaoLi/Programming_Competition
+https://www.zhihu.com/people/li-dong-hao-78-74
 '''
 
 import sys
@@ -58,8 +58,6 @@ def LII():
     return list(map(int, input().split()))
 def GMI():
     return map(lambda x: int(x) - 1, input().split())
-def LGMI():
-    return list(map(lambda x: int(x) - 1, input().split()))
 
 #------------------------------FastIO---------------------------------
 
@@ -70,7 +68,7 @@ from functools import *
 from itertools import *
 from time import *
 from random import *
-from math import log, gcd, sqrt, ceil
+from math import log, gcd, sqrt, ceil, pi
 
 # from types import GeneratorType
 # def bootstrap(f, stack=[]):
@@ -118,305 +116,29 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
-from math import gcd
-
-class Factorial:
-    def __init__(self, N, mod) -> None:
-        self.mod = mod
-        self.f = [1 for _ in range(N)]
-        self.g = [1 for _ in range(N)]
-        for i in range(1, N):
-            self.f[i] = self.f[i - 1] * i % self.mod
-        self.g[-1] = pow(self.f[-1], mod - 2, mod)
-        for i in range(N - 2, -1, -1):
-            self.g[i] = self.g[i + 1] * (i + 1) % self.mod
-        
-        self.inv = [1 for _ in range(N)]
-        self.inv[0] = self.inv[1] = 1
-        for i in range(2, N):
-            self.inv[i] = (mod - mod // i) * self.inv[mod % i] % mod
-            assert self.inv[i] * i % mod == 1
-        
-        for i in range(1, N):
-            self.inv[i] *= self.inv[i - 1]
-            self.inv[i] %= self.mod
-    
-    def comb(self, n, m):
-        if n < m or n < 0 or m < 0:
-            return 0
-        return self.f[n] * self.g[m] % self.mod * self.g[n - m] % self.mod
-    
-    def perm(self, n, m):
-        if n < m or n < 0 or m < 0:
-            return 0
-        return self.f[n] * self.g[n - m] % self.mod
-
-    def catalan(self, n):
-        #TODO: check 2 * n < N#
-        return (self.comb(2 * n, n) - self.comb(2 * n, n - 1)) % self.mod
-    
-class Lucas:
-    def __init__(self, p) -> None:
-        self.p = p
-        self.f = [1 for _ in range(self.p)]
-        self.g = [1 for _ in range(self.p)]
-        for i in range(1, self.p):
-            self.f[i] = self.f[i - 1] * i % self.p
-        self.g[self.p - 1] = pow(self.f[self.p - 1], self.p - 2, self.p)
-        for i in range(self.p - 2, -1, -1):
-            self.g[i] = self.g[i + 1] * (i + 1) % self.p
-    
-    def comb(self, n, m):
-        if n < m:
-            return 0
-        else:
-            return self.f[n] * self.g[m] % self.p * self.g[n - m] % self.p
-
-    def lucas(self, n, m):
-        if m == 0:
-            return 1 % self.p
-        else:
-            return self.lucas(n // self.p, m // self.p) * self.comb(n % self.p, m % self.p) % self.p
-
-class Crt:
-    # ax + by = gcd(a, b), q是gcd#
-    def exgcd(self, a, b):
-        if b == 0:
-            return 1, 0, a
-        else:
-            x, y, q = self.exgcd(b, a % b)
-            x, y = y, x - (a // b) * y
-            return x, y, q
-
-    # 同余方程组，A数组是mod数组，B数组是residue数组，M是所有mod的乘积#
-    # TODO: 检查mod数组中的数是否两两互质，如果不是就要用excrt。    
-    def crt(self, A, B, M):
-        res = 0
-        for a, b in zip(A, B):
-            Mi = M // a
-            x, _, _ = self.exgcd(Mi, a)
-            res += b * Mi * x
-            res %= M
-        return res
-
-    # 同余方程组，A数组是mod数组，B数组是residue数组
-    # 可能有无解的情况
-    def excrt(self, A, B):
-        res, M = 0, 1
-        for a, b in zip(A, B):
-            rhs = (b - res) % a
-            #g, l代表最大公约数，最小公倍数#
-            g = gcd(M, a)
-            l = M * a // g
-            
-            if rhs % g:
-                return -1, -1
-            x, y, q = self.exgcd(M, a)
-            res += x * rhs // g * M
-            res %= l
-            M = l
-        return res, M
-
-    def lcm(self, a, b):
-        return a * b // gcd(a, b)
-
-    #wx = b(mod a)的同余方程组，记得重写lcm#
-    def excrt_with_weight(self, W, A, B):
-        res, M = 0, 1
-        for w, a, b in zip(W, A, B):
-            rhs = (b - w * res) % a
-            x, _, g = self.exgcd(w * M % a, a)
-            if rhs % g:
-                return -1, -1
-            res += x * (rhs // g) % (a // g) * M
-            M = self.lcm(M, a // gcd(a, w))
-            res %= M
-        return res, M
-
-class Prime:
-    def prime_sieve(self, n):
-        """returns a sieve of primes >= 5 and < n"""
-        flag = n % 6 == 2
-        sieve = bytearray((n // 3 + flag >> 3) + 1)
-        for i in range(1, int(n**0.5) // 3 + 1):
-            if not (sieve[i >> 3] >> (i & 7)) & 1:
-                k = (3 * i + 1) | 1
-                for j in range(k * k // 3, n // 3 + flag, 2 * k):
-                    sieve[j >> 3] |= 1 << (j & 7)
-                for j in range(k * (k - 2 * (i & 1) + 4) // 3, n // 3 + flag, 2 * k):
-                    sieve[j >> 3] |= 1 << (j & 7)
-        return sieve
-
-    def prime_list(self, n):
-        """returns a list of primes <= n"""
-        res = []
-        if n > 1:
-            res.append(2)
-        if n > 2:
-            res.append(3)
-        if n > 4:
-            sieve = self.prime_sieve(n + 1)
-            res.extend(3 * i + 1 | 1 for i in range(1, (n + 1) // 3 + (n % 6 == 1)) if not (sieve[i >> 3] >> (i & 7)) & 1)
-        return res
-    
-    def __init__(self, n) -> None:
-        self.primes = self.prime_list(n)
-    
-    def dissolve(self, num):
-        '''prime factor decomposition of num'''
-        lst = []
-        idx = -1
-        for prime in self.primes:
-            if prime > num:
-                break
-
-            if num % prime == 0:
-                lst.append([prime, 0])
-                idx += 1
-                
-            while num % prime == 0:
-                lst[idx][1] += 1
-                num //= prime
-                
-        if num != 1:
-            lst.append([num, 1])
-            
-        return lst
-
-class Ex_Lucas:
-        
-    def __init__(self, p) -> None:
-        #TODO: 把CRT, Prime板子也带上
-        self.CRT = Crt()
-        self.PRIME = Prime(10 ** 5 + 10)
-
-        #分解质因子
-        self.p = p
-        self.dissolved = self.PRIME.dissolve(p)
-        
-        self.piset = []
-        self.m = []
-        self.num = 0
-        for pr, pw in self.dissolved:
-            self.m.append(pr ** pw)
-            self.piset.append(pr)
-            self.num += 1
-    
-    #找循环节#
-    def multi(self, n, pi, pk):
-        if not n:
-            return 1
-        ans = 1
-        for i in range(2, pk + 1):
-            if i % pi:
-                ans = ans * i % pk
-        ans = pow(ans, n // pk, pk)
-        for i in range(2, n % pk + 1):
-            if i % pi:
-                ans = ans * i % pk
-        return ans * self.multi(n // pi, pi, pk) % pk
-
-    def count(self, num, p):
-        ret = 0
-        while num:
-            ret += num // p
-            num //= p
-        return ret
-    
-    def inv(self, num, p):
-        return self.CRT.exgcd(num, p)[0]
-    
-    #pi是质因数pr，pk是质因数pr的pw次方#
-    def exlucas(self, n, m, pi, pk):
-        if m > n:
-            return 0
-        a = self.multi(n, pi, pk)
-        b = self.multi(m, pi, pk)
-        c = self.multi(n - m, pi, pk)
-        k = self.count(n, pi) - self.count(m, pi) - self.count(n - m, pi)
-        return a * self.inv(b, pk) % pk * self.inv(c, pk) % pk * pow(pi, k, pk) % pk
-    
-    def comb(self, n, m):
-        self.r = [-1 for _ in range(self.num)]
-        for i in range(self.num):
-            self.r[i] = self.exlucas(n, m, self.piset[i], self.m[i])
-        return self.CRT.crt(self.m, self.r, self.p)
-
-
-mod = 10 ** 9 + 7
-F = Factorial(100010, mod)
-
 # @TIME
 def solve(testcase):
-    n, x, y = MI()
-    s = I()
+    n, k = MI()
+    A = []
+    cnt = 0
 
-    cx, uc, dc = 0, 0, 0
-    cy, lc, rc = 0, 0, 0
-
-    for c in s:
-        if c == 'U':
-            cx += 1
-            uc += 1
-        elif c == 'D':
-            cx -= 1
-            dc += 1
-        elif c == 'L':
-            cy -= 1
-            lc += 1
-        else:
-            cy += 1
-            rc += 1
+    for _ in range(n):
+        x, y, r = MI()
+        dist = x * x + y * y
+        if dist <= r * r:
+            cnt += 1
+            A.append((r - sqrt(dist)) * pi * r * r)
     
-    if -dc <= x <= uc and -lc <= y <= rc:
-        
-        wayx = 0
-
-        for u in range(uc + 1):
-            d = u - x
-            if d < 0:
-                continue
-            elif d > dc:
-                break
-            else:
-                wayx += F.comb(uc, u) * F.comb(dc, d) % mod
-                wayx %= mod
-        
-        wayy = 0
-
-        for l in range(lc + 1):
-            r = l + y
-            if r < 0:
-                continue
-            elif r > rc:
-                break
-            else:
-                wayy += F.comb(lc, l) * F.comb(rc, r) % mod
-                wayy %= mod
-        
-        res = []
-        cx, cy = 0, 0
-
-        for c in s:
-            if c == 'U' and cx < x:
-                res.append(c)
-                cx += 1
-            if c == 'D' and cx > x:
-                res.append(c)
-                cx -= 1
-            if c == 'L' and cy > y:
-                res.append(c)
-                cy -= 1
-            if c == 'R' and cy < y:
-                res.append(c)
-                cy += 1
+    A.sort()
+    res = 0
+    idx = 0
+    while cnt > k:
+        res += A[idx]
+        idx += 1
+        cnt -= 1
     
-        
-        print("YES", ''.join(res), wayx * wayy % mod)
-            
+    print(res)
 
-    else:
-        print("NO")
 
-for testcase in range(II()):
+for testcase in range(1):
     solve(testcase)

@@ -1,6 +1,6 @@
 '''
 Hala Madrid!
-https://www.zhihu.com/people/li-dong-hao-78-74
+https://github.com/USYDDonghaoLi/Programming_Competition
 '''
 
 import sys
@@ -58,6 +58,8 @@ def LII():
     return list(map(int, input().split()))
 def GMI():
     return map(lambda x: int(x) - 1, input().split())
+def LGMI():
+    return list(map(lambda x: int(x) - 1, input().split()))
 
 #------------------------------FastIO---------------------------------
 
@@ -120,20 +122,75 @@ fmax = lambda x, y: x if x > y else y
 def solve(testcase):
     n, x = MI()
     A = LII()
-    res = 0
+    
+    B = [[] for _ in range(201)]
 
-    for a in A:
-        if x > 0:
-            x -= a
-            res += a
-        elif x < 0:
-            x += a
-            res += a
-        else:
-            break
+    for i in range(100):
+        for j, a in enumerate(A):
+            B[i].append((i + a, a, j))
+    
+    for i in range(101, 201):
+        for j, a in enumerate(A):
+            B[i].append((i - a, a, j))
+    
+    dist = [inf for _ in range(201)]
+    dist[x + 100] = 0
+
+    pq = []
+    heappush(pq, [0, x + 100, [False for _ in range(201)]])
+
+    res = inf
+    prev = [(-1, -1) for _ in range(201)]
+    last = -1
+
+    while pq:
+        # print('pq', [(c, u) for c, u, s in pq])
+        cost, u, state = heappop(pq)
+        if cost > dist[u]:
+            continue
+        if all(s for s in state):
+            if cost < res:
+                res = cost
+                last = u
+            continue
+
+        if u == 100:
+            if cost < res:
+                res = cost
+                last = u
+            continue
+        
+        for v, val, idx in B[u]:
+            if state[idx]:
+                continue
+            ncost = cost + val
+            if ncost < dist[v]:
+                prev[v] = (u, idx)
+                dist[v] = ncost
+                nstate = state[:]
+                nstate[idx] = True
+                heappush(pq, (ncost, v, nstate))
     
     print(res)
     
+    vis = [False for _ in range(n)]
+    ans = []
+    
+    while True:
+        val, idx = prev[last]
+        if val == -1:
+            break
+        else:
+            vis[idx] = True
+            last = val
+            ans.append(idx)
+
+    for i in range(n):
+        if not vis[i]:
+            ans.append(i)
+
+    ret = [A[i] for i in ans]
+    print(*ret)
 
 for testcase in range(1):
     solve(testcase)
