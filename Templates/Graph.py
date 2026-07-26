@@ -2,13 +2,17 @@ import sys
 import os
 from io import BytesIO, IOBase
 BUFSIZE = 8192
+
+
 class FastIO(IOBase):
     newlines = 0
+
     def __init__(self, file):
         self._fd = file.fileno()
         self.buffer = BytesIO()
         self.writable = "x" in file.mode or "r" not in file.mode
         self.write = self.buffer.write if self.writable else None
+
     def read(self):
         while True:
             b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
@@ -18,6 +22,7 @@ class FastIO(IOBase):
             self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
         self.newlines = 0
         return self.buffer.read()
+
     def readline(self):
         while self.newlines == 0:
             b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
@@ -26,10 +31,13 @@ class FastIO(IOBase):
             self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
         self.newlines -= 1
         return self.buffer.readline()
+
     def flush(self):
         if self.writable:
             os.write(self._fd, self.buffer.getvalue())
             self.buffer.truncate(0), self.buffer.seek(0)
+
+
 class IOWrapper(IOBase):
     def __init__(self, file):
         self.buffer = FastIO(file)
@@ -38,23 +46,37 @@ class IOWrapper(IOBase):
         self.write = lambda s: self.buffer.write(s.encode("ascii"))
         self.read = lambda: self.buffer.read().decode("ascii")
         self.readline = lambda: self.buffer.readline().decode("ascii")
+
+
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
+
 def I():
     return input()
+
+
 def II():
     return int(input())
+
+
 def MI():
     return map(int, input().split())
+
+
 def LI():
     return list(input().split())
+
+
 def LII():
     return list(map(int, input().split()))
+
+
 def GMI():
     return map(lambda x: int(x) - 1, input().split())
 
-#------------------------------FastIO---------------------------------
+
+# ------------------------------FastIO---------------------------------
 
 from bisect import *
 from heapq import *
@@ -64,15 +86,17 @@ from itertools import *
 from time import *
 from random import *
 from math import log
-#dfs - stack#
-#check top!#
 
-'''
-手写栈防止recursion limit
-注意要用yield 不要用return
-函数结尾要写yield None
-'''
+# dfs - stack
+# check top!
+
+"""
+手写栈防止 recursion limit。
+注意：这里保留 bootstrap 方案，并保持生成器式写法。
+"""
 from types import GeneratorType
+
+
 def bootstrap(f, stack=[]):
     def wrappedfunc(*args, **kwargs):
         if stack:
@@ -89,47 +113,48 @@ def bootstrap(f, stack=[]):
                         break
                     to = stack[-1].send(to)
             return to
+
     return wrappedfunc
 
-class Spfa:
+
+class SPFA:
+    """无负权图上的最短路，适合做单源最短路径的通用模板。"""
+
     def __init__(self, n) -> None:
         self.n = n
         self.graph = defaultdict(list)
         self.prev = [-1 for _ in range(self.n)]
         self.distance = [float('inf') for _ in range(self.n)]
-    
-    def addegde(self, e1, e2, weight = 1):
-        self.graph[e1].append((e2, weight))
-        self.graph[e2].append((e1, weight))
-    
-    def sol(self, start):
-        '''
-        用很多次的话就初始化一下
-        '''
+
+    def add_edge(self, u, v, weight=1):
+        self.graph[u].append((v, weight))
+        self.graph[v].append((u, weight))
+
+    def shortest_path(self, start):
+        """从 start 出发求所有点的最短路。"""
         for i in range(self.n):
             self.distance[i] = float('inf')
-        
+
         q = deque()
         q.append(start)
         self.distance[start] = 0
         while q:
             cur = q.popleft()
-            for e, w in self.graph[cur]:
-                weight = self.distance[cur] + w
-                if weight < self.distance[e]:
-                    self.distance[e] = weight
-                    q.append(e)
-                    self.prev[e] = cur
-        
+            for nxt, w in self.graph[cur]:
+                new_dist = self.distance[cur] + w
+                if new_dist < self.distance[nxt]:
+                    self.distance[nxt] = new_dist
+                    q.append(nxt)
+                    self.prev[nxt] = cur
 
-    def check(self, start, end, flag = False):
-        self.sol(start)
+    def query(self, start, end, need_path=False):
+        self.shortest_path(start)
         routes = []
-        if flag:
-            routes = self.checkroute(end)
+        if need_path:
+            routes = self.get_path(end)
         return self.distance[end], routes
-    
-    def checkroute(self, end):
+
+    def get_path(self, end):
         cur = end
         routes = []
         while cur != -1:
@@ -137,45 +162,47 @@ class Spfa:
             cur = self.prev[cur]
         return routes[::-1]
 
+
 class Dijkstra:
+    """有权图上的单源最短路模板，适合边权非负的情况。"""
+
     def __init__(self, n) -> None:
         self.n = n
         self.graph = defaultdict(list)
-    
-    
-    def addedge(self, e1, e2, weight = 1):
-        self.graph[e1].append((e2, weight))
-        # self.graph[e2].append((e1, weight))
-    
-    def f(self, u, v):
-        return u << 20 ^ v
-    
-    def sol(self, src):
+
+    def add_edge(self, u, v, weight=1):
+        self.graph[u].append((v, weight))
+
+    def _pack(self, dist, node):
+        return (dist << 20) ^ node
+
+    def shortest_path(self, src):
         self.prev = [-1 for _ in range(self.n)]
         self.distance = [float('inf') for _ in range(self.n)]
         pq = []
         self.distance[src] = 0
-        heappush(pq, self.f(0, src))
-        
+        heappush(pq, self._pack(0, src))
+
         while pq:
-            z = heappop(pq)
-            cost, cur = z >> 20, z & 0xfffff
+            packed = heappop(pq)
+            cost, cur = packed >> 20, packed & 0xfffff
             if cost > self.distance[cur]:
                 continue
-            for o, c in self.graph[cur]:
-                if cost + c < self.distance[o]:
-                    heappush(pq, self.f(cost + c, o))
-                    self.distance[o] = cost + c
-                    self.prev[o] = cur
+            for nxt, w in self.graph[cur]:
+                new_cost = cost + w
+                if new_cost < self.distance[nxt]:
+                    heappush(pq, self._pack(new_cost, nxt))
+                    self.distance[nxt] = new_cost
+                    self.prev[nxt] = cur
 
-    def check(self, start, end, flag = False):
-        self.sol(start)
+    def query(self, start, end, need_path=False):
+        self.shortest_path(start)
         routes = []
-        if flag:
-            routes = self.checkroute(end)
+        if need_path:
+            routes = self.get_path(end)
         return self.distance[end], routes
-    
-    def checkroute(self, end):
+
+    def get_path(self, end):
         cur = end
         routes = []
         while cur != -1:
@@ -183,34 +210,43 @@ class Dijkstra:
             cur = self.prev[cur]
         return routes[::-1]
 
+
 class UnionFind:
+    """并查集模板，适合维护连通性和合并操作。"""
+
     def __init__(self, n: int):
         self.parent = [x for x in range(n)]
         self.size = [1 for _ in range(n)]
         self.n = n
-        self.setCount = n
-    
-    def Find(self, x: int) -> int:
+        self.component_count = n
+
+    def find(self, x: int) -> int:
         if self.parent[x] != x:
-            self.parent[x] = self.Find(self.parent[x])
+            self.parent[x] = self.find(self.parent[x])
         return self.parent[x]
-    
-    def Union(self, x: int, y: int) -> bool:
-        root_x = self.Find(x)
-        root_y = self.Find(y)
+
+    def union(self, x: int, y: int) -> bool:
+        root_x = self.find(x)
+        root_y = self.find(y)
         if root_x == root_y:
             return False
         if self.size[root_x] > self.size[root_y]:
             root_x, root_y = root_y, root_x
         self.parent[root_x] = root_y
         self.size[root_y] += self.size[root_x]
-        self.setCount -= 1
+        self.component_count -= 1
         return True
 
-    def connected(self, x: int, y: int) -> bool:
-        return self.Find(x) == self.Find(y)
+    def is_connected(self, x: int, y: int) -> bool:
+        return self.find(x) == self.find(y)
+
+    def count(self):
+        return self.component_count
+
 
 class LCA:
+    """倍增法 LCA 模板，适合离线预处理后快速求公共祖先。"""
+
     def __init__(self, n) -> None:
         self.n = n
         self.m = n.bit_length()
@@ -220,12 +256,11 @@ class LCA:
         self.graph = defaultdict(list)
         self.child = defaultdict(list)
 
-    
-    def addedge(self, a, b):
+    def add_edge(self, a, b):
         self.graph[a].append(b)
         self.graph[b].append(a)
-    
-    def bfs(self, root):
+
+    def build(self, root):
         self.depth[root] = 0
         q = deque()
         q.append(root)
@@ -236,33 +271,32 @@ class LCA:
             k = len(q)
             for _ in range(k):
                 cur = q.popleft()
-                for e in self.graph[cur]:
-                    if self.depth[e] > self.depth[cur] + 1:
-                        self.child[cur].append(e)
-                        self.depth[e] = self.depth[cur] + 1
-                        q.append(e)
-                        self.fa[e][0] = cur
+                for nxt in self.graph[cur]:
+                    if self.depth[nxt] > self.depth[cur] + 1:
+                        self.child[cur].append(nxt)
+                        self.depth[nxt] = self.depth[cur] + 1
+                        q.append(nxt)
+                        self.fa[nxt][0] = cur
                         for i in range(1, self.m):
-                            self.fa[e][i] = self.fa[self.fa[e][i - 1]][i - 1]
+                            self.fa[nxt][i] = self.fa[self.fa[nxt][i - 1]][i - 1]
 
-    def sol(self, a, b):
+    def query(self, a, b):
         if self.depth[a] < self.depth[b]:
             a, b = b, a
-        
+
         for k in range(self.m - 1, -1, -1):
             if self.depth[self.fa[a][k]] >= self.depth[b]:
-        
                 a = self.fa[a][k]
         if a == b:
             return a
-        else:
-            for k in range(self.m - 1, -1, -1):
-                if self.fa[a][k] != self.fa[b][k]:
-                    a, b = self.fa[a][k], self.fa[b][k]
+
+        for k in range(self.m - 1, -1, -1):
+            if self.fa[a][k] != self.fa[b][k]:
+                a, b = self.fa[a][k], self.fa[b][k]
         return self.fa[a][0]
-    
-    def routes(self, a, b):
-        p = self.sol(a, b)
+
+    def get_path(self, a, b):
+        p = self.query(a, b)
         aroute = []
         cur = a
         while cur != p:
@@ -273,10 +307,11 @@ class LCA:
         while cur != p:
             broute.append(cur)
             cur = self.fa[cur][0]
-        
         return aroute + [p] + broute
 
+
 class LCA2:
+    """DFS + 递归式 LCA 模板，适合需要时间戳/祖先判断的场景。"""
 
     def __init__(self, n) -> None:
         self.n = n
@@ -290,31 +325,32 @@ class LCA2:
         self.tin = [0 for _ in range(self.n)]
         self.tout = [0 for _ in range(self.n)]
         self.T = 0
-    
-    def addedge(self, a, b):
+
+    def add_edge(self, a, b):
         self.graph[a].append(b)
         self.graph[b].append(a)
-    
+
     @bootstrap
-    def dfs(self, node, fa = -1):
+    def dfs(self, node, fa=-1):
         self.tin[node] = self.T
         self.T += 1
         if fa == -1:
             self.fa[node][0] = 0
         else:
             self.fa[node][0] = fa
-        
+
         for i in range(1, self.m):
             self.fa[node][i] = self.fa[self.fa[node][i - 1]][i - 1]
-        for o in self.graph[node]:
-            if o == fa:
+
+        for nxt in self.graph[node]:
+            if nxt == fa:
                 continue
-            else:
-                yield self.dfs(o, fa)
+            yield from self.dfs(nxt, node)
+
         self.tout[node] = self.T
         self.T += 1
         yield None
-    
+
     def is_ancestor(self, u, v):
         return self.tin[u] <= self.tin[v] and self.tout[u] >= self.tout[v]
 

@@ -1,44 +1,103 @@
 class FenwickTree:
-    def __init__(self, n):
-        self.n = n
-        self.tree = [0 for _ in range(n)]
+    """
+    树状数组（Fenwick Tree / Binary Indexed Tree）。
+    支持单点修改和前缀和查询，都在 O(log n) 时间内完成。
+    """
     
-    def fill(self, a):
-        for i in range(self.n):
-            self.update(i, a[i])
-
-    def lowbit(self, x):
+    def __init__(self, n: int):
+        """
+        初始化树状数组。
+        Args:
+            n: 数组大小
+        """
+        self.n = n
+        self.tree = [0] * (n + 1)  # 1-indexed
+    
+    def _lowbit(self, x: int) -> int:
+        """
+        获取 x 的最低有效位（2 的幂）。
+        Args:
+            x: 正整数
+        Returns:
+            x 的最低有效位的值
+        """
         return x & (-x)
 
-    def update(self, pos, x):
-        while pos < self.n:
-            self.tree[pos] += x
-            pos += self.lowbit(pos)
+    def build(self, arr: list) -> None:
+        """
+        用数组初始化树状数组。
+        Args:
+            arr: 输入数组（0-indexed），长度为 n
+        """
+        for i in range(len(arr)):
+            self.update(i + 1, arr[i])
 
-    def query(self, pos):
-        to_ret = 0
-        while pos:
-            to_ret += self.tree[pos]
-            pos -= self.lowbit(pos)
-        return to_ret
+    def update(self, pos: int, delta: int) -> None:
+        """
+        将位置 pos（1-indexed）的值增加 delta。
+        Args:
+            pos: 位置（1-indexed）
+            delta: 增量
+        """
+        while pos <= self.n:
+            self.tree[pos] += delta
+            pos += self._lowbit(pos)
 
-    def query_sum(self, l, r):
-        return self.query(r) - self.query(l - 1)
+    def query(self, pos: int) -> int:
+        """
+        查询前 pos 个元素的和（1-indexed）。
+        Args:
+            pos: 位置（1-indexed），查询 [1, pos] 的和
+        Returns:
+            前 pos 个元素的和
+        """
+        result = 0
+        while pos > 0:
+            result += self.tree[pos]
+            pos -= self._lowbit(pos)
+        return result
 
-    def lower_bound(self, val):
-        ret, su = 0, 0
-        for i in reversed(range(self.n.bit_length())):
-            ix = ret + (1 << i)
-            if ix < self.n and su + self.tree[ix] < val:
-                su += self.tree[ix]
-                ret += 1 << i
-        return ret
+    def range_query(self, left: int, right: int) -> int:
+        """
+        查询区间 [left, right] 的和（1-indexed）。
+        Args:
+            left: 左端点（1-indexed）
+            right: 右端点（1-indexed）
+        Returns:
+            区间和
+        """
+        return self.query(right) - self.query(left - 1)
+
+    def lower_bound(self, target: int) -> int:
+        """
+        在树状数组中进行二分查找，找最小的 pos 使得 query(pos) >= target。
+        前提：所有元素非负且累积和单调递增。
+        Args:
+            target: 目标值
+        Returns:
+            满足条件的最小位置（1-indexed），若不存在返回 n+1
+        """
+        pos, cum_sum = 0, 0
+        for i in range(self.n.bit_length() - 1, -1, -1):
+            next_pos = pos + (1 << i)
+            if next_pos <= self.n and cum_sum + self.tree[next_pos] < target:
+                cum_sum += self.tree[next_pos]
+                pos = next_pos
+        return pos + 1
     
-    def upper_bound(self, val):
-        ret, su = 0, 0
-        for i in reversed(range(self.n.bit_length())):
-            ix = ret + (1 << i)
-            if ix < self.n and su + self.tree[ix] <= val:
-                su += self.tree[ix]
-                ret += 1 << i
-        return ret
+    def upper_bound(self, target: int) -> int:
+        """
+        在树状数组中进行二分查找，找最小的 pos 使得 query(pos) > target。
+        前提：所有元素非负且累积和单调递增。
+        Args:
+            target: 目标值
+        Returns:
+            满足条件的最小位置（1-indexed），若不存在返回 n+1
+        """
+        pos, cum_sum = 0, 0
+        for i in range(self.n.bit_length() - 1, -1, -1):
+            next_pos = pos + (1 << i)
+            if next_pos <= self.n and cum_sum + self.tree[next_pos] <= target:
+                cum_sum += self.tree[next_pos]
+                pos = next_pos
+        return pos + 1

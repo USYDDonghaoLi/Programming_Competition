@@ -1,108 +1,82 @@
-import sys
-import os
-from io import BytesIO, IOBase
-BUFSIZE = 8192
-class FastIO(IOBase):
-    newlines = 0
-    def __init__(self, file):
-        self._fd = file.fileno()
-        self.buffer = BytesIO()
-        self.writable = "x" in file.mode or "r" not in file.mode
-        self.write = self.buffer.write if self.writable else None
-    def read(self):
-        while True:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            if not b:
-                break
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines = 0
-        return self.buffer.read()
-    def readline(self):
-        while self.newlines == 0:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            self.newlines = b.count(b"\n") + (not b)
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines -= 1
-        return self.buffer.readline()
-    def flush(self):
-        if self.writable:
-            os.write(self._fd, self.buffer.getvalue())
-            self.buffer.truncate(0), self.buffer.seek(0)
-class IOWrapper(IOBase):
-    def __init__(self, file):
-        self.buffer = FastIO(file)
-        self.flush = self.buffer.flush
-        self.writable = self.buffer.writable
-        self.write = lambda s: self.buffer.write(s.encode("ascii"))
-        self.read = lambda: self.buffer.read().decode("ascii")
-        self.readline = lambda: self.buffer.readline().decode("ascii")
-sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
-input = lambda: sys.stdin.readline().rstrip("\r\n")
-
-def I():
-    return input()
-def II():
-    return int(input())
-def MI():
-    return map(int, input().split())
-def LI():
-    return list(input().split())
-def LII():
-    return list(map(int, input().split()))
-def GMI():
-    return map(lambda x: int(x) - 1, input().split())
-
-#------------------------------FastIO---------------------------------
-
-from bisect import *
-from heapq import *
-from collections import *
-from functools import *
-from itertools import *
-
 class KMP:
-    def __init__(self, s, p):
-        self.n, self.m = len(s), len(p)
-        self.s = ' ' + s
-        self.p = ' ' + p
-
-        #最大公共前后缀长度#
-        self.nxt = [0 for _ in range(self.m + 1)]
-        #匹配到的最大长度#
-        self.f = [0 for _ in range(self.n + 1)]
+    """
+    KMP（Knuth-Morris-Pratt）字符串匹配算法。
+    用于在文本中查找模式串，时间复杂度 O(n + m)。
+    """
     
-    def NEXT(self):
+    def __init__(self, text: str, pattern: str):
+        """
+        初始化 KMP 匹配器。
+        Args:
+            text: 文本串（待搜索）
+            pattern: 模式串（待查找）
+        """
+        self.text = ' ' + text  # 添加哨兵以使用 1-indexed
+        self.pattern = ' ' + pattern  # 添加哨兵
+        self.n = len(text)
+        self.m = len(pattern)
+        
+        # failure[i] = pattern[1..i] 的最长真前缀后缀长度
+        self.failure = [0] * (self.m + 1)
+        # matched_len[i] = text[1..i] 匹配 pattern 的长度
+        self.matched_len = [0] * (self.n + 1)
+
+    def _build_failure_function(self) -> None:
+        """
+        构建失败函数（也称为 next 数组或前缀函数）。
+        failure[i] 表示 pattern[1..i] 的最长真前缀后缀长度。
+        时间复杂度：O(m)
+        """
         j = 0
         for i in range(2, self.m + 1):
-            while j > 0 and self.p[j + 1] != self.p[i]:
-                j = self.nxt[j]
-            if self.p[j + 1] == self.p[i]:
+            # 当不匹配时，向后跳转
+            while j > 0 and self.pattern[j + 1] != self.pattern[i]:
+                j = self.failure[j]
+            # 匹配则增加长度
+            if self.pattern[j + 1] == self.pattern[i]:
                 j += 1
-            self.nxt[i] = j
-    
-    def sol(self):
-        self.NEXT()
+            self.failure[i] = j
+
+    def search(self) -> list:
+        """
+        在文本中搜索所有模式串出现的位置。
+        时间复杂度：O(n + m)
+        Returns:
+            模式串出现位置的列表（1-indexed 位置）
+        """
+        self._build_failure_function()
         j = 0
+        matches = []
+        
         for i in range(1, self.n + 1):
-            while j == self.m or (j > 0 and self.p[j + 1] != self.s[i]):
-                j = self.nxt[j]
-            if self.p[j + 1] == self.s[i]:
+            # 当不匹配时，向后跳转
+            while j == self.m or (j > 0 and self.pattern[j + 1] != self.text[i]):
+                j = self.failure[j]
+            # 匹配则增加长度
+            if self.pattern[j + 1] == self.text[i]:
                 j += 1
-            self.f[i] = j
+            self.matched_len[i] = j
+            
+            # 找到完全匹配
+            if j == self.m:
+                matches.append(i - self.m + 1)
+        
+        return matches
 
-def solve():
-    s = I()
-    p = I()
-    n, m = len(s), len(p)
-    kmp = KMP(s, p)
-    kmp.sol()
-    
-    for i, v in enumerate(kmp.f):
-        if v == m:
-            print(i - m + 1)
-    
-    print(*kmp.nxt[1:])
+    def get_failure_function(self) -> list:
+        """
+        获取失败函数数组（不包括哨兵）。
+        Returns:
+            failure[1:] 的列表
+        """
+        self._build_failure_function()
+        return self.failure[1:]
 
-for _ in range(1):solve()
+    def get_matched_lengths(self) -> list:
+        """
+        获取每个位置的匹配长度数组。
+        Returns:
+            matched_len[1:] 的列表
+        """
+        self.search()
+        return self.matched_len[1:]
