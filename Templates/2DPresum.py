@@ -1,3 +1,22 @@
+"""
+2D 前缀和
+
+二维数组的前缀和（累积和）算法。
+
+原理：
+- presum[i][j] = sum of A[0..i-1][0..j-1]
+- 矩形区域和 = presum[x2][y2] - presum[x1][y2] - presum[x2][y1] + presum[x1][y1]
+
+复杂度：
+- 预处理：O(n*m)
+- 单次查询：O(1)
+
+应用：
+- 二维数组区间和查询
+- 图像处理中的积分图
+- 动态规划加速
+"""
+
 class Presum2D:
     
     def __init__(self, grid) -> None:

@@ -470,3 +470,20 @@ def solve():
     pass
 
 for _ in range(II()):solve()
+
+
+def test_graph():
+    """测试 Graph 类"""
+    g = Graph(5)
+    g.add_edge(0, 1, 4)
+    g.add_edge(1, 2, 2)
+    g.add_edge(0, 2, 1)
+    
+    # 检查邻接表
+    assert len(g.graph[0]) > 0, "Graph should have edges from node 0"
+    print("✓ test_graph_edges passed")
+
+
+if __name__ == "__main__":
+    test_graph()
+    print("\n所有 Graph 测试通过！✓")

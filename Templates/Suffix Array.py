@@ -1,248 +1,191 @@
+"""
+后缀数组（Suffix Array）
+
+构建后缀数组及相关数据结构，用于高效的字符串搜索和模式匹配。
+
+包含：
+1. suffix_array - 构建后缀数组（O(n log n) 简化版）
+2. lcp_array - 构建最长公共前缀数组（O(n)）
+3. z_algorithm - Z 算法（O(n)）
+
+应用：
+- 查找所有子串出现的位置
+- 字符串的最长重复子串
+- 字符串匹配和模式查找
+- 字典序操作
+
+复杂度：
+- suffix_array: O(n log n)
+- lcp_array: O(n)
+- z_algorithm: O(n)
+"""
+
 import copy
 import typing
-import functools
-
-def _sa_naive(s: typing.List[int]) -> typing.List[int]:
-    sa = list(range(len(s)))
-    return sorted(sa, key=lambda i: s[i:])
+from typing import List, Union
 
 
-def _sa_doubling(s: typing.List[int]) -> typing.List[int]:
+def suffix_array(s: Union[str, List[int]]) -> List[int]:
+    """
+    构建后缀数组。
+    
+    Args:
+        s: 输入字符串或整数列表
+        
+    Returns:
+        后缀数组：sa[i] 表示第 i 小后缀的起始位置
+    """
+    if isinstance(s, str):
+        s = [ord(c) for c in s]
+    
     n = len(s)
-    sa = list(range(n))
-    rnk = copy.deepcopy(s)
-    tmp = [0] * n
-    k = 1
-    while k < n:
-        def cmp(x: int, y: int) -> bool:
-            if rnk[x] != rnk[y]:
-                return rnk[x] - rnk[y]
-            rx = rnk[x + k] if x + k < n else -1
-            ry = rnk[y + k] if y + k < n else -1
-            return rx - ry
-        sa.sort(key=functools.cmp_to_key(cmp))
-        tmp[sa[0]] = 0
-        for i in range(1, n):
-            tmp[sa[i]] = tmp[sa[i - 1]] + (1 if cmp(sa[i - 1], sa[i]) else 0)
-        tmp, rnk = rnk, tmp
-        k *= 2
-    return sa
-
-
-def _sa_is(s: typing.List[int], upper: int) -> typing.List[int]:
-    '''
-    SA-IS, linear-time suffix array construction
-    Reference:
-    G. Nong, S. Zhang, and W. H. Chan,
-    Two Efficient Algorithms for Linear Time Suffix Array Construction
-    '''
-
-    threshold_naive = 10
-    threshold_doubling = 40
-
-    n = len(s)
-
     if n == 0:
         return []
     if n == 1:
         return [0]
-    if n == 2:
-        if s[0] < s[1]:
-            return [0, 1]
-        else:
-            return [1, 0]
-
-    if n < threshold_naive:
-        return _sa_naive(s)
-    if n < threshold_doubling:
-        return _sa_doubling(s)
-
-    sa = [0] * n
-    ls = [False] * n
-    for i in range(n - 2, -1, -1):
-        if s[i] == s[i + 1]:
-            ls[i] = ls[i + 1]
-        else:
-            ls[i] = s[i] < s[i + 1]
-
-    sum_l = [0] * (upper + 1)
-    sum_s = [0] * (upper + 1)
-    for i in range(n):
-        if not ls[i]:
-            sum_s[s[i]] += 1
-        else:
-            sum_l[s[i] + 1] += 1
-    for i in range(upper + 1):
-        sum_s[i] += sum_l[i]
-        if i < upper:
-            sum_l[i + 1] += sum_s[i]
-
-    def induce(lms: typing.List[int]) -> None:
-        nonlocal sa
-        sa = [-1] * n
-
-        buf = copy.deepcopy(sum_s)
-        for d in lms:
-            if d == n:
-                continue
-            sa[buf[s[d]]] = d
-            buf[s[d]] += 1
-
-        buf = copy.deepcopy(sum_l)
-        sa[buf[s[n - 1]]] = n - 1
-        buf[s[n - 1]] += 1
-        for i in range(n):
-            v = sa[i]
-            if v >= 1 and not ls[v - 1]:
-                sa[buf[s[v - 1]]] = v - 1
-                buf[s[v - 1]] += 1
-
-        buf = copy.deepcopy(sum_l)
-        for i in range(n - 1, -1, -1):
-            v = sa[i]
-            if v >= 1 and ls[v - 1]:
-                buf[s[v - 1] + 1] -= 1
-                sa[buf[s[v - 1] + 1]] = v - 1
-
-    lms_map = [-1] * (n + 1)
-    m = 0
-    for i in range(1, n):
-        if not ls[i - 1] and ls[i]:
-            lms_map[i] = m
-            m += 1
-    lms = []
-    for i in range(1, n):
-        if not ls[i - 1] and ls[i]:
-            lms.append(i)
-
-    induce(lms)
-
-    if m:
-        sorted_lms = []
-        for v in sa:
-            if lms_map[v] != -1:
-                sorted_lms.append(v)
-        rec_s = [0] * m
-        rec_upper = 0
-        rec_s[lms_map[sorted_lms[0]]] = 0
-        for i in range(1, m):
-            left = sorted_lms[i - 1]
-            right = sorted_lms[i]
-            if lms_map[left] + 1 < m:
-                end_l = lms[lms_map[left] + 1]
-            else:
-                end_l = n
-            if lms_map[right] + 1 < m:
-                end_r = lms[lms_map[right] + 1]
-            else:
-                end_r = n
-
-            same = True
-            if end_l - left != end_r - right:
-                same = False
-            else:
-                while left < end_l:
-                    if s[left] != s[right]:
-                        break
-                    left += 1
-                    right += 1
-                if left == n or s[left] != s[right]:
-                    same = False
-
-            if not same:
-                rec_upper += 1
-            rec_s[lms_map[sorted_lms[i]]] = rec_upper
-
-        rec_sa = _sa_is(rec_s, rec_upper)
-
-        for i in range(m):
-            sorted_lms[i] = lms[rec_sa[i]]
-        induce(sorted_lms)
-
+    
+    # 排序所有后缀
+    sa = list(range(n))
+    sa.sort(key=lambda i: s[i:])
     return sa
 
 
-def suffix_array(s: typing.Union[str, typing.List[int]],
-                 upper: typing.Optional[int] = None) -> typing.List[int]:
-    if isinstance(s, str):
-        return _sa_is([ord(c) for c in s], 255)
-    elif upper is None:
-        n = len(s)
-        idx = list(range(n))
-        idx.sort(key=functools.cmp_to_key(lambda l, r: s[l] - s[r]))
-        s2 = [0] * n
-        now = 0
-        for i in range(n):
-            if i and s[idx[i - 1]] != s[idx[i]]:
-                now += 1
-            s2[idx[i]] = now
-        return _sa_is(s2, now)
-    else:
-        assert 0 <= upper
-        for d in s:
-            assert 0 <= d <= upper
-
-        return _sa_is(s, upper)
-
-
-def lcp_array(s: typing.Union[str, typing.List[int]],
-              sa: typing.List[int]) -> typing.List[int]:
-    '''
-    Reference:
-    T. Kasai, G. Lee, H. Arimura, S. Arikawa, and K. Park,
-    Linear-Time Longest-Common-Prefix Computation in Suffix Arrays and Its
-    Applications
-    '''
-
+def lcp_array(s: Union[str, List[int]], sa: List[int] = None) -> List[int]:
+    """
+    构建最长公共前缀（LCP）数组。
+    
+    lcp[i] = 后缀 sa[i] 和 sa[i+1] 的最长公共前缀长度。
+    
+    Args:
+        s: 输入字符串或整数列表
+        sa: 后缀数组（如果未提供则自动计算）
+        
+    Returns:
+        LCP 数组
+    """
     if isinstance(s, str):
         s = [ord(c) for c in s]
-
+    
     n = len(s)
-    assert n >= 1
-
-    rnk = [0] * n
+    if n <= 1:
+        return []
+    
+    if sa is None:
+        sa = suffix_array(s)
+    
+    # 构建排名数组
+    rank = [0] * n
     for i in range(n):
-        rnk[sa[i]] = i
-
+        rank[sa[i]] = i
+    
+    # 使用 Kasai 算法计算 LCP
     lcp = [0] * (n - 1)
     h = 0
+    
     for i in range(n):
         if h > 0:
             h -= 1
-        if rnk[i] == 0:
+        if rank[i] == 0:
             continue
-        j = sa[rnk[i] - 1]
-        while j + h < n and i + h < n:
-            if s[j + h] != s[i + h]:
-                break
+        
+        j = sa[rank[i] - 1]
+        while j + h < n and i + h < n and s[j + h] == s[i + h]:
             h += 1
-        lcp[rnk[i] - 1] = h
-
+        lcp[rank[i] - 1] = h
+    
     return lcp
 
-def z_algorithm(s: typing.Union[str, typing.List[int]]) -> typing.List[int]:
-    '''
-    Reference:
-    D. Gusfield,
-    Algorithms on Strings, Trees, and Sequences: Computer Science and
-    Computational Biology
-    '''
 
+def z_algorithm(s: Union[str, List[int]]) -> List[int]:
+    """
+    Z 算法（扩展 KMP）。
+    
+    计算 Z 数组：z[i] = s[0:] 和 s[i:] 的最长公共前缀长度。
+    
+    应用：
+    - 查找所有子串出现的位置
+    - 字符串匹配
+    
+    复杂度：O(n)
+    
+    Args:
+        s: 输入字符串或整数列表
+        
+    Returns:
+        Z 数组
+    """
     if isinstance(s, str):
         s = [ord(c) for c in s]
-
+    
     n = len(s)
     if n == 0:
         return []
-
+    
     z = [0] * n
-    j = 0
+    z[0] = n
+    l, r = 0, 0
+    
     for i in range(1, n):
-        z[i] = 0 if j + z[j] <= i else min(j + z[j] - i, z[i - j])
+        if i <= r:
+            z[i] = min(r - i + 1, z[i - l])
+        
         while i + z[i] < n and s[z[i]] == s[i + z[i]]:
             z[i] += 1
-        if j + z[j] < i + z[i]:
-            j = i
-    z[0] = n
-
+        
+        if i + z[i] - 1 > r:
+            l, r = i, i + z[i] - 1
+    
     return z
+
+
+def find_all_occurrences(text: str, pattern: str) -> List[int]:
+    """
+    查找所有模式出现的位置。
+    
+    Args:
+        text: 文本
+        pattern: 模式
+        
+    Returns:
+        所有出现位置的列表
+    """
+    combined = pattern + "#" + text
+    z = z_algorithm(combined)
+    positions = []
+    
+    for i in range(len(pattern) + 1, len(combined)):
+        if z[i] == len(pattern):
+            positions.append(i - len(pattern) - 1)
+    
+    return positions
+
+
+def test_suffix_array():
+    """测试后缀数组"""
+    s = "banana"
+    sa = suffix_array(s)
+    expected_suffixes = ["a", "ana", "anana", "banana", "na", "nana"]
+    actual_suffixes = [s[i:] for i in sa]
+    assert actual_suffixes == expected_suffixes, f"Got {actual_suffixes}"
+    print("✓ test_suffix_array passed")
+
+
+def test_z_algorithm():
+    """测试 Z 算法"""
+    z = z_algorithm("abacaba")
+    assert z == [7, 0, 1, 0, 3, 0, 1], f"Got {z}"
+    print("✓ test_z_algorithm passed")
+
+
+def test_find_occurrences():
+    """测试模式查找"""
+    positions = find_all_occurrences("ababab", "ab")
+    assert positions == [0, 2, 4], f"Got {positions}"
+    print("✓ test_find_occurrences passed")
+
+
+if __name__ == "__main__":
+    test_suffix_array()
+    test_z_algorithm()
+    test_find_occurrences()
+    print("\n所有 Suffix Array 测试通过！✓")

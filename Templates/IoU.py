@@ -1,3 +1,18 @@
+"""
+IoU（Intersection over Union）
+
+计算两个矩形区域的 IoU（交并比）。
+
+公式：IoU = |A ∩ B| / |A ∪ B|
+
+应用：
+- 目标检测评估指标
+- 计算机视觉中的区域相似度
+- 物体追踪
+
+时间复杂度：O(1)
+"""
+
 def IoU(box1, box2) -> float:
     """
     IOU, Intersection over Union

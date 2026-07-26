@@ -1,3 +1,26 @@
+"""
+SortedList（有序列表）
+
+使用块分解 (Block Decomposition) 实现的有序列表。
+
+特点：
+- 插入/删除/查询 O(√n) 均摊
+- 支持二分查找和第 k 小查询
+- 块大小 = sqrt(n)，使用 Fenwick 树加速
+
+操作：
+- add(x): 插入元素
+- discard(x): 删除元素
+- pop(index): 删除指定位置
+- bisect_left/right: 二分查找
+- index(x): 查询元素排名
+
+应用：
+- 维护有序数据
+- 排序和排名问题
+- 时间复杂度优化（避免树结构）
+"""
+
 class SortedList:
     def __init__(self, iterable=[], _load=200):
         """Initialize sorted list instance."""

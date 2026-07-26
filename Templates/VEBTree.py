@@ -1,128 +1,158 @@
-#lg = {1 << i : i for i in range(32)}
+"""
+Van Emde Boas 树（VEB Tree）
 
-class VebTree:
+一种数据结构，用于高效的集合操作和范围查询。
 
-    __slots__ = {'summary', 'MIN', 'MAX', 'size', 'u', 'divisor'}
+支持的操作：
+- insert: 插入元素
+- delete: 删除元素
+- member: 查询元素是否存在
+- minimum/maximum: 查询最小/最大元素
+- successor/predecessor: 查询后继/前驱元素
 
+时间复杂度：所有操作均为 O(log log U)，其中 U 是值域大小
+
+应用：
+- 整数集合的高效管理
+- 范围查询和排序
+- 与哈希表相比，在最坏情况下提供更好的性能保证
+"""
+
+from typing import List, Optional
+
+
+class VEBTree:
+    """
+    Van Emde Boas 树。
+    
+    将递归分解的思想应用于集合操作。
+    """
+    
+    __slots__ = {'summary', 'MIN', 'MAX', 'size', 'u', 'divisor', 'cluster'}
+    
     def __init__(self) -> None:
+        """初始化空的 VEB 树。"""
         self.summary = None
         self.MIN = -1
         self.MAX = -1
     
-    def build(self, size):
+    def build(self, size: int) -> None:
+        """
+        构建 VEB 树。
+        
+        Args:
+            size: 树的大小为 2^size
+        """
         self.size = size
-
-        if (self.size <= 1):
+        
+        if self.size <= 1:
             self.u = 2
             self.divisor = 1
             return
         
         self.u = 1 << size
         self.divisor = 1 << (size >> 1)
-        '''
-        cluster_size = ceil(log(u) / 2)
-        '''
+        
+        # 递归构建聚类
         cluster_size = (size >> 1) + (size & 1)
-        self.cluster = [VebTree() for _ in range(1 << cluster_size)]
-        self.summary = VebTree()
+        self.cluster = [VEBTree() for _ in range(1 << cluster_size)]
+        self.summary = VEBTree()
         self.summary.build(cluster_size)
-
+        
         for i in range(1 << cluster_size):
             self.cluster[i].build(size >> 1)
     
-    def high(self, x):
+    def _high(self, x: int) -> int:
+        """获取高位。"""
         return x // self.divisor
     
-    def low(self, x):
+    def _low(self, x: int) -> int:
+        """获取低位。"""
         return x % self.divisor
-
-    def index(self, x, y):
+    
+    def _index(self, x: int, y: int) -> int:
+        """由高位和低位构造值。"""
         return x * self.divisor + y
     
-    def Tree_Minimum(self):
+    def minimum(self) -> int:
+        """获取最小元素（-1 如果为空）。"""
         return self.MIN
     
-    def Tree_Maximum(self):
+    def maximum(self) -> int:
+        """获取最大元素（-1 如果为空）。"""
         return self.MAX
     
-    def Tree_Member(self, x):
-        if (x == self.MIN or x == self.MAX):
+    def member(self, x: int) -> bool:
+        """查询元素是否在树中。"""
+        if x == self.MIN or x == self.MAX:
             return True
         if self.u == 2:
             return False
-        return self.cluster[self.high(x)].Tree_Member(self.low(x))
+        return self.cluster[self._high(x)].member(self._low(x))
     
-    def Tree_Successor(self, x):
+    def successor(self, x: int) -> int:
+        """查询 x 的后继（-1 如果不存在）。"""
         if self.u == 2:
-            if (x == 0 and self.MAX == 1):
-                return 1
-            return -1
+            return 1 if x == 0 and self.MAX == 1 else -1
         
-        if (self.MIN != -1 and x < self.MIN):
+        if self.MIN != -1 and x < self.MIN:
             return self.MIN
         
-        MAX_LOW = self.cluster[self.high(x)].Tree_Maximum()
-        if (MAX_LOW != -1 and self.low(x) < MAX_LOW):
-            offset = self.cluster[self.high(x)].Tree_Successor(self.low(x))
-            return self.index(self.high(x), offset)
-
-        succ_cluster = self.summary.Tree_Successor(self.high(x))
+        max_low = self.cluster[self._high(x)].maximum()
+        if max_low != -1 and self._low(x) < max_low:
+            offset = self.cluster[self._high(x)].successor(self._low(x))
+            return self._index(self._high(x), offset)
+        
+        succ_cluster = self.summary.successor(self._high(x))
         if succ_cluster == -1:
             return -1
-        offset = self.cluster[succ_cluster].Tree_Minimum()
-        return self.index(succ_cluster, offset)
-    
-    def Tree_Predecessor(self, x):
-        # print('x_info', x, self.high(x), self.low(x))
-        # print('nowx=', x, ' MIN= ', self.MIN, ' MAX= ', self.MAX, ' u= ', self.u)
-        if self.u == 2:
-            if (x == 1 and self.MIN == 0):
-                return 0
-            return -1
         
-        if (self.MAX != -1 and x > self.MAX):
+        offset = self.cluster[succ_cluster].minimum()
+        return self._index(succ_cluster, offset)
+    
+    def predecessor(self, x: int) -> int:
+        """查询 x 的前驱（-1 如果不存在）。"""
+        if self.u == 2:
+            return 0 if x == 1 and self.MIN == 0 else -1
+        
+        if self.MAX != -1 and x > self.MAX:
             return self.MAX
         
-        MIN_LOW = self.cluster[self.high(x)].Tree_Minimum()
-        # print('nowx=', x, ' MIN= ', self.cluster[self.high(x)].MIN, ' MAX= ', self.cluster[self.high(x)].MAX, ' u= ', self.cluster[self.high(x)].u, 'minlow= ', MIN_LOW)
-        if (MIN_LOW != -1 and self.low(x) > MIN_LOW):
-            offset = self.cluster[self.high(x)].Tree_Predecessor(self.low(x))
-            return self.index(self.high(x), offset)
-
-        pred_cluster = self.summary.Tree_Predecessor(self.high(x))
-        # print('nowx=', x, ' MIN= ', self.cluster[self.high(x)].MIN, ' MAX= ', self.cluster[self.high(x)].MAX, ' u= ', self.cluster[self.high(x)].u, 'minlow= ', MIN_LOW)
-        # print('pred', pred_cluster)
+        min_low = self.cluster[self._high(x)].minimum()
+        if min_low != -1 and self._low(x) > min_low:
+            offset = self.cluster[self._high(x)].predecessor(self._low(x))
+            return self._index(self._high(x), offset)
+        
+        pred_cluster = self.summary.predecessor(self._high(x))
         if pred_cluster == -1:
-            if (self.MIN != -1 and x > self.MIN):
-                return self.MIN
-            return -1
-        offset = self.cluster[pred_cluster].Tree_Maximum()
-        return self.index(pred_cluster, offset)
+            return self.MIN if self.MIN != -1 and x > self.MIN else -1
+        
+        offset = self.cluster[pred_cluster].maximum()
+        return self._index(pred_cluster, offset)
     
-    def Empty_Tree_Insert(self, x):
-        self.MIN = x
-        self.MAX = x
-    
-    def Tree_Insert(self, x):
+    def insert(self, x: int) -> None:
+        """插入元素。"""
         if self.MIN == -1:
-            self.Empty_Tree_Insert(x)
+            self.MIN = self.MAX = x
             return
         
         if x < self.MIN:
             self.MIN, x = x, self.MIN
         
         if self.u > 2:
-            if (self.cluster[self.high(x)].Tree_Minimum() == -1):
-                self.summary.Tree_Insert(self.high(x))
-                self.cluster[self.high(x)].Empty_Tree_Insert(self.low(x))
+            if self.cluster[self._high(x)].minimum() == -1:
+                self.summary.insert(self._high(x))
+                self.cluster[self._high(x)].MIN = self._low(x)
+                self.cluster[self._high(x)].MAX = self._low(x)
             else:
-                self.cluster[self.high(x)].Tree_Insert(self.low(x))
+                self.cluster[self._high(x)].insert(self._low(x))
         
         if x > self.MAX:
             self.MAX = x
-
-    def Tree_Delete(self, x):
-        if (self.MIN == self.MAX):
+    
+    def delete(self, x: int) -> None:
+        """删除元素。"""
+        if self.MIN == self.MAX:
             self.MIN = self.MAX = -1
             return
         
@@ -134,19 +164,60 @@ class VebTree:
             return
         
         if self.MIN == x:
-            first_cluster = self.summary.Tree_Minimum()
-            assert first_cluster != -1
-            x = self.index(first_cluster, self.cluster[first_cluster].Tree_Minimum())
-            self.MIN = x
+            first_cluster = self.summary.minimum()
+            if first_cluster != -1:
+                x = self._index(first_cluster, self.cluster[first_cluster].minimum())
+                self.MIN = x
         
-        self.cluster[self.high(x)].Tree_Delete(self.low(x))
-        if (self.cluster[self.high(x)].Tree_Minimum() == -1):
-            self.summary.Tree_Delete(self.high(x))
-            if (x == self.MAX):
-                summary_max = self.summary.Tree_Maximum()
-                if (summary_max == -1):
+        self.cluster[self._high(x)].delete(self._low(x))
+        if self.cluster[self._high(x)].minimum() == -1:
+            self.summary.delete(self._high(x))
+            if x == self.MAX:
+                summary_max = self.summary.maximum()
+                if summary_max == -1:
                     self.MAX = self.MIN
                 else:
-                    self.MAX = self.index(summary_max, self.cluster[summary_max].Tree_Maximum())
-        elif (x == self.MAX):
-            self.MAX = self.index(self.high(x), self.cluster[self.high(x)].Tree_Maximum())
+                    self.MAX = self._index(summary_max, self.cluster[summary_max].maximum())
+        elif x == self.MAX:
+            self.MAX = self._index(self._high(x), self.cluster[self._high(x)].maximum())
+
+
+def test_basic_operations():
+    """测试基本操作"""
+    veb = VEBTree()
+    veb.build(4)  # 范围 0-15
+    
+    veb.insert(3)
+    veb.insert(7)
+    veb.insert(12)
+    
+    assert veb.member(3), "3 should be in tree"
+    assert veb.member(7), "7 should be in tree"
+    assert not veb.member(5), "5 should not be in tree"
+    assert veb.minimum() == 3, "Minimum should be 3"
+    assert veb.maximum() == 12, "Maximum should be 12"
+    
+    print("✓ test_basic_operations passed")
+
+
+def test_successor_predecessor():
+    """测试后继和前驱"""
+    veb = VEBTree()
+    veb.build(4)
+    
+    veb.insert(1)
+    veb.insert(5)
+    veb.insert(10)
+    
+    assert veb.successor(1) == 5, "Successor of 1 should be 5"
+    assert veb.successor(5) == 10, "Successor of 5 should be 10"
+    assert veb.predecessor(10) == 5, "Predecessor of 10 should be 5"
+    assert veb.predecessor(5) == 1, "Predecessor of 5 should be 1"
+    
+    print("✓ test_successor_predecessor passed")
+
+
+if __name__ == "__main__":
+    test_basic_operations()
+    test_successor_predecessor()
+    print("\n所有 VEB 树测试通过！✓")

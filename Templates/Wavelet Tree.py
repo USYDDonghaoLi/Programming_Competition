@@ -1,3 +1,26 @@
+"""
+Wavelet Tree（小波树）
+
+一种递归的二叉树数据结构，用于处理区间查询和范围统计问题。
+
+支持的操作：
+- rank: 查询值小于等于 x 的元素个数
+- select: 查询第 k 小的值
+- range_freq: 区间内特定值的个数
+- range_sum: 区间内值的总和
+
+时间复杂度：
+- rank/select: O(log U)，其中 U 是值域大小
+- 空间：O(n log U)
+
+应用：
+- 区间第 k 小问题
+- 区间查询和统计
+- 多维查询优化
+
+参考：https://tiramister.net/blog/posts/bitvector/
+"""
+
 class BitVector:
     # reference: https://tiramister.net/blog/posts/bitvector/
  

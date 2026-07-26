@@ -1,155 +1,196 @@
-'''
-Hala Madrid!
-https://www.zhihu.com/people/li-dong-hao-78-74
-'''
+"""
+扩展中国剩余定理（Extended Chinese Remainder Theorem）
 
-import sys
-import os
-from io import BytesIO, IOBase
-BUFSIZE = 8192
-class FastIO(IOBase):
-    newlines = 0
-    def __init__(self, file):
-        self._fd = file.fileno()
-        self.buffer = BytesIO()
-        self.writable = "x" in file.mode or "r" not in file.mode
-        self.write = self.buffer.write if self.writable else None
-    def read(self):
-        while True:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            if not b:
-                break
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines = 0
-        return self.buffer.read()
-    def readline(self):
-        while self.newlines == 0:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            self.newlines = b.count(b"\n") + (not b)
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines -= 1
-        return self.buffer.readline()
-    def flush(self):
-        if self.writable:
-            os.write(self._fd, self.buffer.getvalue())
-            self.buffer.truncate(0), self.buffer.seek(0)
-class IOWrapper(IOBase):
-    def __init__(self, file):
-        self.buffer = FastIO(file)
-        self.flush = self.buffer.flush
-        self.writable = self.buffer.writable
-        self.write = lambda s: self.buffer.write(s.encode("ascii"))
-        self.read = lambda: self.buffer.read().decode("ascii")
-        self.readline = lambda: self.buffer.readline().decode("ascii")
-sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
-input = lambda: sys.stdin.readline().rstrip("\r\n")
+求解同余方程组，模数可以不互质。
 
-def I():
-    return input()
-def II():
-    return int(input())
-def MI():
-    return map(int, input().split())
-def LI():
-    return list(input().split())
-def LII():
-    return list(map(int, input().split()))
-def GMI():
-    return map(lambda x: int(x) - 1, input().split())
+应用：
+- 求解任意模数的同余方程组
+- 模数不互质时的线性同余求解
 
-#------------------------------FastIO---------------------------------
+复杂度：O(n log m)，其中 n 是方程个数，m 是模数大小
+"""
 
-from bisect import *
-from heapq import *
-from collections import *
-from functools import *
-from itertools import *
-from time import *
-from random import *
-from math import log, gcd, sqrt, ceil
+from typing import List, Tuple
+from math import gcd
 
-'''
-手写栈防止recursion limit
-注意要用yield 不要用return
-函数结尾要写yield None
-'''
-from types import GeneratorType
-def bootstrap(f, stack=[]):
-    def wrappedfunc(*args, **kwargs):
-        if stack:
-            return f(*args, **kwargs)
-        else:
-            to = f(*args, **kwargs)
-            while True:
-                if type(to) is GeneratorType:
-                    stack.append(to)
-                    to = next(to)
-                else:
-                    stack.pop()
-                    if not stack:
-                        break
-                    to = stack[-1].send(to)
-            return to
-    return wrappedfunc
 
-class Crt:
-    # ax + by = gcd(a, b), q是gcd#
-    def exgcd(self, a, b):
+class ExtendedCRT:
+    """扩展中国剩余定理。"""
+    
+    @staticmethod
+    def exgcd(a: int, b: int) -> Tuple[int, int, int]:
+        """
+        扩展欧几里得算法。
+        
+        求 x, y 使得 ax + by = gcd(a, b)
+        
+        Args:
+            a, b: 输入数
+            
+        Returns:
+            (x, y, gcd(a, b))
+        """
         if b == 0:
             return 1, 0, a
-        else:
-            x, y, q = self.exgcd(b, a % b)
-            x, y = y, x - (a // b) * y
-            return x, y, q
-
-    # 同余方程组，A数组是mod数组，B数组是residue数组，M是所有mod的乘积#
-    # TODO: 检查mod数组中的数是否两两互质，如果不是就要用excrt。    
-    def crt(self, A, B, M):
-        res = 0
-        for a, b in zip(A, B):
-            Mi = M // a
-            x, _, _ = self.exgcd(Mi, a)
-            res += b * Mi * x
-            res %= M
-        return res
-
-    # 同余方程组，A数组是mod数组，B数组是residue数组
-    # 可能有无解的情况
-    def excrt(self, A, B):
-        res, M = 0, 1
-        for a, b in zip(A, B):
-            rhs = (b - res) % a
-            #g, l代表最大公约数，最小公倍数#
-            g = gcd(M, a)
-            l = M * a // g
-            
-            if rhs % g:
-                return -1, -1
-            x, y, q = self.exgcd(M, a)
-            res += x * rhs // g * M
-            res %= l
-            M = l
-        return res, M
-
-    def lcm(self, a, b):
-        return a * b // gcd(a, b)
-
-    #wx = b(mod a)的同余方程组，记得重写lcm#
-    def excrt_with_weight(self, W, A, B):
-        res, M = 0, 1
-        for w, a, b in zip(W, A, B):
-            rhs = (b - w * res) % a
-            x, _, g = self.exgcd(w * M % a, a)
-            if rhs % g:
-                return -1, -1
-            res += x * (rhs // g) % (a // g) * M
-            M = self.lcm(M, a // gcd(a, w))
-            res %= M
-        return res, M
-
-def solve():
-    pass
+        x, y, g = ExtendedCRT.exgcd(b, a % b)
+        return y, x - (a // b) * y, g
     
-for _ in range(1):solve()
+    @staticmethod
+    def lcm(a: int, b: int) -> int:
+        """求最小公倍数。"""
+        return a * b // gcd(a, b)
+    
+    @staticmethod
+    def crt(moduli: List[int], residues: List[int]) -> int:
+        """
+        中国剩余定理（模数两两互质）。
+        
+        求解同余方程组：
+            x ≡ residues[i] (mod moduli[i])
+        
+        Args:
+            moduli: 模数列表（必须两两互质）
+            residues: 余数列表
+            
+        Returns:
+            解 x（在 [0, 乘积) 内）
+        """
+        M = 1
+        for m in moduli:
+            M *= m
+        
+        res = 0
+        for m, r in zip(moduli, residues):
+            Mi = M // m
+            x, _, _ = ExtendedCRT.exgcd(Mi, m)
+            res += r * Mi * x
+            res %= M
+        
+        return res
+    
+    @staticmethod
+    def excrt(moduli: List[int], residues: List[int]) -> Tuple[int, int]:
+        """
+        扩展中国剩余定理（模数可以不互质）。
+        
+        求解同余方程组：
+            x ≡ residues[i] (mod moduli[i])
+        
+        可能无解，此时返回 (-1, -1)。
+        
+        Args:
+            moduli: 模数列表
+            residues: 余数列表
+            
+        Returns:
+            (解, 模数乘积) 或 (-1, -1) 如果无解
+        """
+        res, M = 0, 1
+        
+        for m, r in zip(moduli, residues):
+            # 需要解：x ≡ res (mod M), x ≡ r (mod m)
+            # 即：M*t + res ≡ r (mod m)
+            # 即：M*t ≡ (r - res) (mod m)
+            
+            rhs = (r - res) % m
+            g = gcd(M, m)
+            
+            # 检查无解条件
+            if rhs % g != 0:
+                return -1, -1
+            
+            # 使用扩展欧几里得算法求解
+            x, y, _ = ExtendedCRT.exgcd(M, m)
+            
+            # 合并两个同余方程
+            res += x * (rhs // g) % (m // g) * M
+            M = ExtendedCRT.lcm(M, m)
+            res %= M
+        
+        return res, M
+    
+    @staticmethod
+    def excrt_weighted(weights: List[int], moduli: List[int], residues: List[int]) -> Tuple[int, int]:
+        """
+        带权重的扩展中国剩余定理。
+        
+        求解同余方程组：
+            weights[i] * x ≡ residues[i] (mod moduli[i])
+        
+        Args:
+            weights: 系数列表
+            moduli: 模数列表
+            residues: 余数列表
+            
+        Returns:
+            (解, 模数) 或 (-1, -1) 如果无解
+        """
+        res, M = 0, 1
+        
+        for w, m, r in zip(weights, moduli, residues):
+            # 需要解：w*x ≡ r (mod m)
+            # 在已有约束 x ≡ res (mod M) 下
+            
+            rhs = (r - w * res) % m
+            x, _, g = ExtendedCRT.exgcd((w * M) % m, m)
+            
+            if rhs % g != 0:
+                return -1, -1
+            
+            res += x * (rhs // g) % (m // g) * M
+            M = ExtendedCRT.lcm(M, m // gcd(m, w))
+            res %= M
+        
+        return res, M
+
+
+# 别名
+CRT = ExtendedCRT
+
+
+def test_basic_crt():
+    """测试基本 CRT：x ≡ 2 (mod 3), x ≡ 3 (mod 5)"""
+    # x = 8
+    result = CRT.crt([3, 5], [2, 3])
+    assert result == 8, f"Expected 8, got {result}"
+    print("✓ test_basic_crt passed")
+
+
+def test_basic_excrt():
+    """测试 EXCRT：x ≡ 1 (mod 2), x ≡ 2 (mod 3)"""
+    # x = 5 (mod 6)
+    result, M = CRT.excrt([2, 3], [1, 2])
+    assert result == 5 and M == 6, f"Expected (5, 6), got ({result}, {M})"
+    print("✓ test_basic_excrt passed")
+
+
+def test_excrt_non_coprime():
+    """测试非互质模数：x ≡ 1 (mod 6), x ≡ 7 (mod 9)"""
+    # x = 7 (mod 18)
+    result, M = CRT.excrt([6, 9], [1, 7])
+    assert result == 7 and M == 18, f"Expected (7, 18), got ({result}, {M})"
+    print("✓ test_excrt_non_coprime passed")
+
+
+def test_excrt_no_solution():
+    """测试无解情况：x ≡ 1 (mod 4), x ≡ 2 (mod 4)"""
+    result, M = CRT.excrt([4, 4], [1, 2])
+    assert result == -1 and M == -1, f"Expected (-1, -1), got ({result}, {M})"
+    print("✓ test_excrt_no_solution passed")
+
+
+def test_weighted_excrt():
+    """测试带权：2x ≡ 3 (mod 5)"""
+    # 2x ≡ 3 (mod 5) => x ≡ 4 (mod 5)
+    result, M = CRT.excrt_weighted([2], [5], [3])
+    assert result == 4 and M == 5, f"Expected (4, 5), got ({result}, {M})"
+    print("✓ test_weighted_excrt passed")
+
+
+if __name__ == "__main__":
+    test_basic_crt()
+    test_basic_excrt()
+    test_excrt_non_coprime()
+    test_excrt_no_solution()
+    test_weighted_excrt()
+    print("\n所有 EXCRT 测试通过！✓")

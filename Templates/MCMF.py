@@ -1,207 +1,262 @@
-'''
-Hala Madrid!
-https://www.zhihu.com/people/li-dong-hao-78-74
-'''
+"""
+最小费用最大流（Minimum Cost Maximum Flow）。
 
-import sys
-import os
-from io import BytesIO, IOBase
-BUFSIZE = 8192
-class FastIO(IOBase):
-    newlines = 0
-    def __init__(self, file):
-        self._fd = file.fileno()
-        self.buffer = BytesIO()
-        self.writable = "x" in file.mode or "r" not in file.mode
-        self.write = self.buffer.write if self.writable else None
-    def read(self):
-        while True:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            if not b:
-                break
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines = 0
-        return self.buffer.read()
-    def readline(self):
-        while self.newlines == 0:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            self.newlines = b.count(b"\n") + (not b)
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines -= 1
-        return self.buffer.readline()
-    def flush(self):
-        if self.writable:
-            os.write(self._fd, self.buffer.getvalue())
-            self.buffer.truncate(0), self.buffer.seek(0)
-class IOWrapper(IOBase):
-    def __init__(self, file):
-        self.buffer = FastIO(file)
-        self.flush = self.buffer.flush
-        self.writable = self.buffer.writable
-        self.write = lambda s: self.buffer.write(s.encode("ascii"))
-        self.read = lambda: self.buffer.read().decode("ascii")
-        self.readline = lambda: self.buffer.readline().decode("ascii")
-sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
-input = lambda: sys.stdin.readline().rstrip("\r\n")
+使用势函数（Potential Function）优化的 SPFA + Dijkstra 混合算法。
 
-def I():
-    return input()
-def II():
-    return int(input())
-def MI():
-    return map(int, input().split())
-def LI():
-    return list(input().split())
-def LII():
-    return list(map(int, input().split()))
-def GMI():
-    return map(lambda x: int(x) - 1, input().split())
+特点：
+- 支持获取流量随费用变化的曲线（slope）
+- 时间复杂度：O(F * E * log V)，其中 F 是最大流
+- 空间复杂度：O(V + E)
 
-#------------------------------FastIO---------------------------------
+应用场景：
+- 运输问题（运输最少费用）
+- 路由问题（寻找最低成本路径）
+- 匹配问题（最优分配）
+"""
 
-from bisect import *
-from heapq import *
-from collections import *
-from functools import *
-from itertools import *
-from time import *
-from random import *
-from math import log, gcd, sqrt, ceil
+from heapq import heappush, heappop
+from typing import List, Dict, Any, Tuple
 
-class mcf_graph:
-    n = 1
-    pos = []
-    g = [[]]
 
-    def __init__(self, N):
-        self.n = N
-        self.pos = []
-        self.g = [[] for _ in range(N)]
-
-    def add_edge(self, From, To, cap, cost):
-        assert 0 <= From and From < self.n
-        assert 0 <= To and To < self.n
-        m = len(self.pos)
-        self.pos.append((From ,len(self.g[From])))
-        self.g[From].append({"to": To, "rev": len(self.g[To]), "cap": cap, "cost": cost})
-        self.g[To].append({"to": From,"rev": len(self.g[From]) - 1,"cap": 0, "cost": -cost})
-
-    def get_edge(self,i):
-        m = len(self.pos)
-        assert 0 <= i and i < m
-        _e = self.g[self.pos[i][0]][self.pos[i][1]]
-        _re = self.g[_e["to"]][_e["rev"]]
-        return {"from": self.pos[i][0], "to": _e["to"], "cap": _e["cap"] + _re["cap"], "flow" : _re["cap"], "cost" : _e["cost"]}
-
-    def edges(self):
-        m = len(self.pos)
-        result=[{} for _ in range(m)]
-        for i in range(m):
-            tmp = self.get_edge(i)
-            result[i]["from"] = tmp["from"]
-            result[i]["to"] = tmp["to"]
-            result[i]["cap"] = tmp["cap"]
-            result[i]["flow"] = tmp["flow"]
-            result[i]["cost"] = tmp["cost"]
-        return result
-
-    #here we get the result
-    def flow(self, s, t, flow_limit = (1 << 63) - 1):
-        return self.slope(s,t,flow_limit)[-1]
-
-    def slope(self, s, t, flow_limit = (1 << 63) - 1):
-        assert 0 <= s and s < self.n
-        assert 0 <= t and t < self.n
-        assert s != t
-        '''
-         variants (C = maxcost):
-         -(n-1)C <= dual[s] <= dual[i] <= dual[t] = 0
-         reduced cost (= e.cost + dual[e.from] - dual[e.to]) >= 0 for all edge
-        '''
-        dual = [0 for _ in range(self.n)]
-        dist = [0 for __ in range(self.n)]
-        pv = [0 for _ in range(self.n)]
-        pe = [0 for _ in range(self.n)]
-        vis = [False for _ in range(self.n)]
-        def dual_ref():
-            for i in range(self.n):
-                dist[i] = (1 << 63) - 1
-                pv[i] = -1
-                pe[i] = -1
-                vis[i] = False
-            que = []
-            heappush(que, (0 ,s))
-            dist[s] = 0
-            while(que):
-                v = heappop(que)[1]
-                if vis[v]:
-                    continue
-                vis[v] = True
-                if v == t:
-                    break
-                '''
-                 dist[v] = shortest(s, v) + dual[s] - dual[v]
-                 dist[v] >= 0 (all reduced cost are positive)
-                 dist[v] <= (n-1)C
-                '''
-                for i in range(len(self.g[v])):
-                    e = self.g[v][i]
-                    if vis[e["to"]] or (not(e["cap"])):
-                        continue
-                    '''
-                     |-dual[e.to]+dual[v]| <= (n-1)C
-                     cost <= C - -(n-1)C + 0 = nC
-                    '''
-                    cost = e["cost"] - dual[e["to"]] + dual[v]
-                    if dist[e["to"]] - dist[v] > cost:
-                        dist[e["to"]] = dist[v] + cost
-                        pv[e["to"]] = v
-                        pe[e["to"]] = i
-                        heappush(que, (dist[e["to"]] ,e["to"]))
-            if not(vis[t]):
-                return False
-            for v in range(self.n):
-                if not (vis[v]):
-                    continue
-                dual[v] -= dist[t] - dist[v]
-            return True
-
-        flow = 0
-        cost = 0
-        prev_cost = -1
-        result=[(flow, cost)]
-        while flow < flow_limit:
-            if not dual_ref():
-                break
-            c = flow_limit - flow
-            v = t
-            while(v != s):
-                c = min(c, self.g[pv[v]][pe[v]]["cap"])
-                v = pv[v]
-            v = t
-            while(v != s):
-                self.g[pv[v]][pe[v]]["cap"] -= c
-                self.g[v][self.g[pv[v]][pe[v]]["rev"]]["cap"] += c
-                v = pv[v]
-            d = -dual[s]
-            flow += c
-            cost += c*d
-            if(prev_cost == d):
-                result.pop()
-            result.append((flow, cost))
-            prev_cost = cost
-        return result
-
-def solve():
-    n, m, s, t = MI()
-    mcmf = mcf_graph(n)
-
-    for _ in range(m):
-        u, v, w, c = MI()
-        mcmf.add_edge(u - 1, v - 1, w, c)
+class MCMFEdge:
+    """最小费用最大流中的边。"""
     
-    print(*mcmf.flow(s - 1, t - 1))
+    def __init__(self, to: int, rev: int, cap: int, cost: int):
+        self.to = to
+        self.rev = rev
+        self.cap = cap
+        self.cost = cost
 
-for _ in range(1):solve()
+
+class MinCostMaxFlow:
+    """
+    最小费用最大流类。
+    
+    核心算法：
+    1. 使用势函数维护可行性条件
+    2. 用 Dijkstra 找新的增广路（所有边权都非负）
+    3. 更新势函数
+    4. 重复直到达到流量限制或无法增广
+    """
+    
+    def __init__(self, n: int):
+        """
+        初始化。
+        
+        Args:
+            n: 顶点个数
+        """
+        self.n = n
+        self.graph: List[List[MCMFEdge]] = [[] for _ in range(n)]
+        self.edge_list: List[Tuple[int, int]] = []
+    
+    def add_edge(self, from_: int, to: int, cap: int, cost: int) -> int:
+        """
+        添加一条边。
+        
+        Args:
+            from_: 边的起点
+            to: 边的终点
+            cap: 边的容量
+            cost: 边的费用（权重）
+            
+        Returns:
+            边的编号（用于查询）
+        """
+        edge_id = len(self.edge_list)
+        self.edge_list.append((from_, len(self.graph[from_])))
+        
+        self.graph[from_].append(MCMFEdge(to, len(self.graph[to]), cap, cost))
+        self.graph[to].append(MCMFEdge(from_, len(self.graph[from_]) - 1, 0, -cost))
+        
+        return edge_id
+    
+    def get_edge(self, edge_id: int) -> Dict[str, Any]:
+        """
+        获取边的信息。
+        
+        Args:
+            edge_id: 边的编号
+            
+        Returns:
+            包含 from, to, cap, flow, cost 的字典
+        """
+        from_, idx = self.edge_list[edge_id]
+        edge = self.graph[from_][idx]
+        reverse_edge = self.graph[edge.to][edge.rev]
+        
+        return {
+            'from': from_,
+            'to': edge.to,
+            'cap': edge.cap + reverse_edge.cap,
+            'flow': reverse_edge.cap,
+            'cost': edge.cost
+        }
+    
+    def all_edges(self) -> List[Dict[str, Any]]:
+        """获取所有边的信息。"""
+        return [self.get_edge(i) for i in range(len(self.edge_list))]
+    
+    def max_flow(self, s: int, t: int, flow_limit: int = float('inf')) -> Tuple[int, int]:
+        """
+        计算最小费用最大流（完整版本）。
+        
+        Args:
+            s: 源点
+            t: 汇点
+            flow_limit: 流量限制
+            
+        Returns:
+            (最大流的值, 对应的最小费用)
+        """
+        result = self.slope(s, t, flow_limit)
+        if result:
+            return result[-1]
+        return (0, 0)
+    
+    def slope(self, s: int, t: int, flow_limit: int = float('inf')) -> List[Tuple[int, int]]:
+        """
+        计算流量-费用曲线（Pareto 前沿）。
+        
+        返回一系列 (flow, cost) 的点，表示在达到该流量时的最小费用。
+        
+        Args:
+            s: 源点
+            t: 汇点
+            flow_limit: 流量限制
+            
+        Returns:
+            [(flow, cost), ...] 按流量递增排列，费用也递增
+        """
+        assert 0 <= s < self.n
+        assert 0 <= t < self.n
+        assert s != t
+        
+        INF = 10**18
+        
+        # 势函数：维持所有边的约化费用非负
+        # 约化费用 = cost + potential[from] - potential[to]
+        potential = [0] * self.n
+        
+        total_flow = 0
+        total_cost = 0
+        result = [(0, 0)]
+        
+        while total_flow < flow_limit:
+            # Dijkstra：在所有约化费用非负的条件下找最短路
+            dist = [INF] * self.n
+            pv = [-1] * self.n  # 前驱顶点
+            pe = [-1] * self.n  # 前驱边的索引
+            
+            dist[s] = 0
+            heap = [(0, s)]
+            
+            while heap:
+                d, v = heappop(heap)
+                
+                if d > dist[v]:
+                    continue
+                
+                for i, edge in enumerate(self.graph[v]):
+                    if edge.cap > 0:
+                        # 约化费用
+                        reduced_cost = edge.cost + potential[v] - potential[edge.to]
+                        new_dist = dist[v] + reduced_cost
+                        
+                        if new_dist < dist[edge.to]:
+                            dist[edge.to] = new_dist
+                            pv[edge.to] = v
+                            pe[edge.to] = i
+                            heappush(heap, (new_dist, edge.to))
+            
+            # 无法到达汇点
+            if dist[t] == INF:
+                break
+            
+            # 更新势函数
+            for v in range(self.n):
+                if dist[v] < INF:
+                    potential[v] += dist[v]
+            
+            # 沿增广路推送流量
+            push_flow = flow_limit - total_flow
+            v = t
+            while v != s:
+                push_flow = min(push_flow, self.graph[pv[v]][pe[v]].cap)
+                v = pv[v]
+            
+            # 更新边的容量和流量
+            v = t
+            while v != s:
+                pv_node = pv[v]
+                pe_idx = pe[v]
+                edge = self.graph[pv_node][pe_idx]
+                rev_edge = self.graph[v][edge.rev]
+                
+                edge.cap -= push_flow
+                rev_edge.cap += push_flow
+                v = pv_node
+            
+            # 更新流量和费用
+            total_flow += push_flow
+            total_cost += push_flow * potential[t]
+            
+            # 避免重复的 (flow, cost) 对
+            if result[-1][1] != total_cost:
+                result.append((total_flow, total_cost))
+        
+        return result
+
+
+# ==================== 测试用例 ====================
+
+def test_simple_mcmf():
+    """测试简单的最小费用最大流。"""
+    mcmf = MinCostMaxFlow(3)
+    mcmf.add_edge(0, 1, 10, 1)  # 容量 10，费用 1
+    mcmf.add_edge(1, 2, 10, 2)  # 容量 10，费用 2
+    
+    flow, cost = mcmf.max_flow(0, 2, 10)
+    assert flow == 10, f"Expected flow 10, got {flow}"
+    assert cost == 30, f"Expected cost 30, got {cost}"  # 10 * (1 + 2)
+    print("✓ test_simple_mcmf passed")
+
+
+def test_multiple_paths():
+    """测试多条路径的最小费用。"""
+    mcmf = MinCostMaxFlow(4)
+    
+    # 路径 1: 0 -> 1 -> 3，费用 = 1 + 1 = 2
+    mcmf.add_edge(0, 1, 5, 1)
+    mcmf.add_edge(1, 3, 5, 1)
+    
+    # 路径 2: 0 -> 2 -> 3，费用 = 2 + 2 = 4
+    mcmf.add_edge(0, 2, 5, 2)
+    mcmf.add_edge(2, 3, 5, 2)
+    
+    flow, cost = mcmf.max_flow(0, 3, 10)
+    # 应该先用路径1（费用2/单位）送5单位，再用路径2（费用4/单位）送5单位
+    # 总费用 = 5*2 + 5*4 = 30
+    assert flow == 10, f"Expected flow 10, got {flow}"
+    assert cost == 30, f"Expected cost 30, got {cost}"
+    print("✓ test_multiple_paths passed")
+
+
+def test_capacity_limit():
+    """测试容量限制。"""
+    mcmf = MinCostMaxFlow(3)
+    mcmf.add_edge(0, 1, 5, 1)
+    mcmf.add_edge(1, 2, 10, 1)
+    
+    flow, cost = mcmf.max_flow(0, 2, 100)
+    # 容量瓶颈是 0->1，只能流 5 单位
+    assert flow == 5, f"Expected flow 5, got {flow}"
+    assert cost == 10, f"Expected cost 10, got {cost}"
+    print("✓ test_capacity_limit passed")
+
+
+if __name__ == "__main__":
+    test_simple_mcmf()
+    test_multiple_paths()
+    test_capacity_limit()
+    print("\n所有 MCMF 测试通过! ✓")

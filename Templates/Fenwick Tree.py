@@ -101,3 +101,27 @@ class FenwickTree:
                 cum_sum += self.tree[next_pos]
                 pos = next_pos
         return pos + 1
+
+def test_fenwick_tree():
+    """测试树状数组"""
+    # 基本测试
+    ft = FenwickTree(5)
+    ft.build([1, 2, 3, 4, 5])
+    assert ft.query(3) == 6, "query(3) should be 1+2+3=6"
+    print("✓ test_build_query passed")
+    
+    # 更新测试
+    ft.update(2, 5)  # arr[2] += 5，即变成 2+5=7
+    assert ft.query(3) == 11, "After update, query(3) should be 1+7+3=11"
+    print("✓ test_update passed")
+    
+    # 区间查询
+    ft2 = FenwickTree(5)
+    ft2.build([1, 2, 3, 4, 5])
+    assert ft2.range_query(2, 4) == 9, "range_query(2,4) should be 2+3+4=9"
+    print("✓ test_range_query passed")
+
+
+if __name__ == "__main__":
+    test_fenwick_tree()
+    print("\n所有 Fenwick Tree 测试通过！✓")

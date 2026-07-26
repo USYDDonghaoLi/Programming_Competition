@@ -1,142 +1,87 @@
-'''
-Hala Madrid!
-https://www.zhihu.com/people/li-dong-hao-78-74
-'''
+"""
+地板函数求和（Floor Sum）
 
-import sys
-import os
-from io import BytesIO, IOBase
-BUFSIZE = 8192
-class FastIO(IOBase):
-    newlines = 0
-    def __init__(self, file):
-        self._fd = file.fileno()
-        self.buffer = BytesIO()
-        self.writable = "x" in file.mode or "r" not in file.mode
-        self.write = self.buffer.write if self.writable else None
-    def read(self):
-        while True:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            if not b:
-                break
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines = 0
-        return self.buffer.read()
-    def readline(self):
-        while self.newlines == 0:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            self.newlines = b.count(b"\n") + (not b)
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines -= 1
-        return self.buffer.readline()
-    def flush(self):
-        if self.writable:
-            os.write(self._fd, self.buffer.getvalue())
-            self.buffer.truncate(0), self.buffer.seek(0)
-class IOWrapper(IOBase):
-    def __init__(self, file):
-        self.buffer = FastIO(file)
-        self.flush = self.buffer.flush
-        self.writable = self.buffer.writable
-        self.write = lambda s: self.buffer.write(s.encode("ascii"))
-        self.read = lambda: self.buffer.read().decode("ascii")
-        self.readline = lambda: self.buffer.readline().decode("ascii")
-sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
-input = lambda: sys.stdin.readline().rstrip("\r\n")
+快速计算 sum_{i=0}^{n-1} floor((a*i + b) / m)，时间复杂度 O(log m)。
 
-def I():
-    return input()
-def II():
-    return int(input())
-def MI():
-    return map(int, input().split())
-def LI():
-    return list(input().split())
-def LII():
-    return list(map(int, input().split()))
-def GMI():
-    return map(lambda x: int(x) - 1, input().split())
+应用：多项式乘法、大整数乘法、卷积计算。
 
-#------------------------------FastIO---------------------------------
+复杂度：O(log(m))
+"""
 
-from bisect import *
-from heapq import *
-from collections import *
-from functools import *
-from itertools import *
-from time import *
-from random import *
-from math import log, gcd, sqrt, ceil
+from typing import Tuple
 
-'''
-手写栈防止recursion limit
-注意要用yield 不要用return
-函数结尾要写yield None
-'''
-from types import GeneratorType
-def bootstrap(f, stack=[]):
-    def wrappedfunc(*args, **kwargs):
-        if stack:
-            return f(*args, **kwargs)
-        else:
-            to = f(*args, **kwargs)
-            while True:
-                if type(to) is GeneratorType:
-                    stack.append(to)
-                    to = next(to)
-                else:
-                    stack.pop()
-                    if not stack:
-                        break
-                    to = stack[-1].send(to)
-            return to
-    return wrappedfunc
 
-pw = [1 << i for i in range(31)]
-
-def ask():
-    pass
-
-def answer():
-    pass
-
-def floor_sum(a, b, m, n):
-    '''
-    sum_{i = 0} ^ {n - 1} floor((a * i + b) / m)
-    '''
+def floor_sum(a: int, b: int, m: int, n: int) -> int:
+    """
+    计算 sum_{i=0}^{n-1} floor((a*i + b) / m)。
+    
+    Args:
+        a: 系数 a
+        b: 常数项 b
+        m: 模数 m
+        n: 项数 n（从 i=0 到 i=n-1）
+        
+    Returns:
+        求和结果
+    """
     ret = 0
+    
     while True:
+        # 处理 a >= m
         if a >= m:
             ret += (n - 1) * n * (a // m) // 2
             a %= m
         
+        # 处理 b >= m
         if b >= m:
             ret += n * (b // m)
             b %= m
         
+        # 递推计算
         y = (a * n + b) // m
-        x = b - y * m
-
+        
+        # 终止条件
         if y == 0:
             return ret
         
+        # 避免除以零
+        if a == 0:
+            return ret
+        
+        # 关键递推
+        x = b - y * m
         ret += (n + x // a) * y
+        
+        # 更新参数进行下一次迭代
         a, b, m, n = m, x % a, a, y
 
-def solve(testcase):
-    n, m, r = MI()
-    n = (n - r) // m
-    if n < 0:
-        print(0)
-        return
 
-    res = 0
-    for i in range(30):
-        res += floor_sum(m, r + pw[i], pw[i + 1], n + 1) - floor_sum(m, r, pw[i + 1], n + 1)
-    
-    print(res)
+def test_simple():
+    """测试：floor_sum(1, 0, 1, 3)"""
+    result = floor_sum(1, 0, 1, 3)
+    assert result == 3, f"Expected 3, got {result}"
+    print("✓ test_simple passed")
 
-for testcase in range(II()):
-    solve(testcase)
+
+def test_case_2():
+    """测试：floor_sum(2, 3, 4, 5)"""
+    result = floor_sum(2, 3, 4, 5)
+    expected = sum((2*i + 3) // 4 for i in range(5))
+    assert result == expected, f"Expected {expected}, got {result}"
+    print("✓ test_case_2 passed")
+
+
+def test_case_3():
+    """测试：floor_sum(100, 50, 7, 10)"""
+    result = floor_sum(100, 50, 7, 10)
+    expected = sum((100*i + 50) // 7 for i in range(10))
+    assert result == expected, f"Expected {expected}, got {result}"
+    print("✓ test_case_3 passed")
+
+
+if __name__ == "__main__":
+    print("Running Floor Sum tests...")
+    test_simple()
+    test_case_2()
+    test_case_3()
+    print("\n所有 Floor Sum 测试通过！✓")

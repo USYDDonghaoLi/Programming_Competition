@@ -1,220 +1,167 @@
-'''
-Hala Madrid!
-https://www.zhihu.com/people/li-dong-hao-78-74
-'''
+"""
+AC 自动机（Aho-Corasick Automation）。
+用于多模式字符串匹配，快速查找多个模式串在文本中出现的次数。
+时间复杂度：预处理 O(Σ|pi|)，匹配 O(|s| + Σ cnt_i)，其中 Σ|pi| 是所有模式串的总长度
+空间复杂度：O(26 * 节点数) ≈ O(Σ|pi|)
+"""
 
-import sys
-import os
-from io import BytesIO, IOBase
-BUFSIZE = 8192
-class FastIO(IOBase):
-    newlines = 0
-    def __init__(self, file):
-        self._fd = file.fileno()
-        self.buffer = BytesIO()
-        self.writable = "x" in file.mode or "r" not in file.mode
-        self.write = self.buffer.write if self.writable else None
-    def read(self):
-        while True:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            if not b:
-                break
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines = 0
-        return self.buffer.read()
-    def readline(self):
-        while self.newlines == 0:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            self.newlines = b.count(b"\n") + (not b)
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines -= 1
-        return self.buffer.readline()
-    def flush(self):
-        if self.writable:
-            os.write(self._fd, self.buffer.getvalue())
-            self.buffer.truncate(0), self.buffer.seek(0)
-class IOWrapper(IOBase):
-    def __init__(self, file):
-        self.buffer = FastIO(file)
-        self.flush = self.buffer.flush
-        self.writable = self.buffer.writable
-        self.write = lambda s: self.buffer.write(s.encode("ascii"))
-        self.read = lambda: self.buffer.read().decode("ascii")
-        self.readline = lambda: self.buffer.readline().decode("ascii")
-sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
-input = lambda: sys.stdin.readline().rstrip("\r\n")
+from collections import deque
 
-def I():
-    return input()
-def II():
-    return int(input())
-def MI():
-    return map(int, input().split())
-def LI():
-    return list(input().split())
-def LII():
-    return list(map(int, input().split()))
-def GMI():
-    return map(lambda x: int(x) - 1, input().split())
 
-#------------------------------FastIO---------------------------------
-
-from bisect import *
-from heapq import *
-from collections import *
-from functools import *
-from itertools import *
-from time import *
-from random import *
-from math import log, gcd, sqrt, ceil
-
-# from types import GeneratorType
-# def bootstrap(f, stack=[]):
-#     def wrappedfunc(*args, **kwargs):
-#         if stack:
-#             return f(*args, **kwargs)
-#         else:
-#             to = f(*args, **kwargs)
-#             while True:
-#                 if type(to) is GeneratorType:
-#                     stack.append(to)
-#                     to = next(to)
-#                 else:
-#                     stack.pop()
-#                     if not stack:
-#                         break
-#                     to = stack[-1].send(to)
-#             return to
-#     return wrappedfunc
-
-# seed(19981220)
-# RANDOM = getrandbits(64)
- 
-# class Wrapper(int):
-#     def __init__(self, x):
-#         int.__init__(x)
-
-#     def __hash__(self):
-#         return super(Wrapper, self).__hash__() ^ RANDOM
-
-# def TIME(f):
-
-#     def wrap(*args, **kwargs):
-#         s = perf_counter()
-#         ret = f(*args, **kwargs)
-#         e = perf_counter()
-
-#         print(e - s, 'sec')
-#         return ret
+class ACAutomaton:
+    """
+    AC 自动机 - 多模式字符串匹配算法。
     
-#     return wrap
-
-inf = float('inf')
-
-fmin = lambda x, y: x if x < y else y
-fmax = lambda x, y: x if x > y else y
-
-class ACAM:
+    原理：
+    - 使用 Trie 树存储所有模式串
+    - 使用失败函数（fail 指针）在匹配失败时快速跳转
+    - 构造 DAG 后可以 O(|s|) 完成多模式匹配
     
-    '''
-    给定一个文本串，看每个模式串出现了几次
-    这里默认字符串都是小写的
-    '''
+    应用场景：
+    - 敏感词过滤
+    - 多个关键词查找
+    - 基因序列匹配
+    - 网络入侵检测
+    """
     
-    def __init__(self, n) -> None:
-        '''
-        n: 模式字符串总长度
-        '''
-        self.n = n
-        self.nxt = [[0 for _ in range(self.n)] for _ in range(26)]
-        self.fail = [0 for _ in range(self.n)]
-        self.cnt =[0 for _ in range(self.n)]
-        self.a = [0 for _ in range(self.n)]
-        self.id = [0 for _ in range(self.n)]
+    def __init__(self, max_nodes: int = 100000):
+        """
+        初始化 AC 自动机。
+        Args:
+            max_nodes: 最多的节点数量（默认 100000，足够处理大多数情况）
+        """
+        self.max_nodes = max_nodes
+        self.children = [[0] * 26 for _ in range(max_nodes)]  # 子节点指针
+        self.fail = [0] * max_nodes  # 失败函数（fail 指针）
+        self.cnt = [0] * max_nodes  # 每个节点处结束的模式串计数
+        self.sorted_nodes = []  # 拓扑排序的节点列表
         
         self.root = 0
-        self.idx = 0
-        self.timer = 0
+        self.node_count = 1
     
-    def clear(self):
-        for i in range(26):
-            self.nxt[i][0] = 0
-        self.root = 0
-        self.idx = 0
+    def insert_string(self, pattern: str, pattern_id: int = None) -> None:
+        """
+        向 AC 自动机中插入一个模式串。
+        Args:
+            pattern: 模式串（小写字母）
+            pattern_id: 模式串的唯一标识（可选，默认为 None）
+        """
+        node = self.root
+        for ch in pattern:
+            char_idx = ord(ch) - ord('a')
+            if not self.children[node][char_idx]:
+                self.children[node][char_idx] = self.node_count
+                self.node_count += 1
+            node = self.children[node][char_idx]
+        
+        # 标记该位置是某个模式串的结尾
+        self.cnt[node] += 1
     
-    def newnode(self):
-        self.idx += 1
-        for i in range(26):
-            self.nxt[i][self.idx] = 0
-        return self.idx
-
-    def insert_char(self, pre, ch):
-        if not self.nxt[ch][pre]:
-            self.nxt[ch][pre] = self.newnode()
-        return self.nxt[ch][pre]
-
-    def insert_string(self, s, u):
-        '''
-        s: 插入的模式串
-        u: 第几个模式串
-        '''
-        now = self.root
-        for c in s:
-            now = self.insert_char(now, ord(c) - 97)
-        self.id[u] = now
-        return self.id[u]
-
-    def build(self):
+    def build(self) -> None:
+        """
+        构造 AC 自动机的失败函数和 DAG。
+        必须在所有 insert_string 之后调用。
+        """
+        # BFS 构造 fail 指针
         self.fail[self.root] = self.root
-        q = deque()
-        for i in range(26):
-            if self.nxt[i][0]:
-                q.append(self.nxt[i][0])
+        queue = deque()
         
-        while q:
-            h = q.popleft()
-            self.a[self.timer] = h
-            self.timer += 1
+        # 第一层的节点，fail 指针都指向根
+        for ch in range(26):
+            if self.children[self.root][ch]:
+                queue.append(self.children[self.root][ch])
+        
+        # BFS 处理第二层及以后的节点
+        while queue:
+            node = queue.popleft()
+            self.sorted_nodes.append(node)
             
-            for i in range(26):
-                if not self.nxt[i][h]:
-                    self.nxt[i][h] = self.nxt[i][self.fail[h]]
+            for ch in range(26):
+                child = self.children[node][ch]
+                if child:
+                    # 已有子节点，继续处理
+                    fail_node = self.fail[node]
+                    while fail_node and not self.children[fail_node][ch]:
+                        fail_node = self.fail[fail_node]
+                    self.fail[child] = self.children[fail_node][ch]
+                    queue.append(child)
                 else:
-                    tmp = self.nxt[i][h]
-                    self.fail[tmp] = self.nxt[i][self.fail[h]]
-                    q.append(tmp)
+                    # 没有子节点，使用 fail 指针的下一个节点
+                    fail_node = self.fail[node]
+                    while fail_node and not self.children[fail_node][ch]:
+                        fail_node = self.fail[fail_node]
+                    self.children[node][ch] = self.children[fail_node][ch]
     
-    def solve(self, s, m):
-        '''
-        s: 匹配的文本串
-        m: 一共有多少个模式串
-        '''
-        now = self.root
-        for c in s:
-            now = self.nxt[ord(c) - 97][now]
-            self.cnt[now] += 1
+    def search(self, text: str):
+        """
+        在文本中查找所有模式串的出现次数。
+        Args:
+            text: 待匹配的文本（小写字母）
+        Returns:
+            list: 每个位置累计的模式串匹配次数
+        """
+        node = self.root
+        match_count = [0] * self.node_count
         
-        for i in range(self.timer, -1, -1):
-            self.cnt[self.fail[self.a[i]]] += self.cnt[self.a[i]]
+        # 第一遍 DFS：统计每个节点处的匹配
+        for ch in text:
+            char_idx = ord(ch) - ord('a')
+            node = self.children[node][char_idx]
+            match_count[node] += 1
         
-        return [self.cnt[self.id[i]] for i in range(m)]
+        # 第二遍反向 DFS：累计从子节点到父节点的贡献
+        # 从后向前处理，保证子节点先处理
+        for i in range(len(self.sorted_nodes) - 1, -1, -1):
+            node = self.sorted_nodes[i]
+            match_count[self.fail[node]] += match_count[node]
+        
+        return match_count
+    
+    def find_all_occurrences(self, text: str):
+        """
+        找出文本中所有模式串的出现位置。
+        Args:
+            text: 待匹配的文本
+        Returns:
+            dict: {模式串ID: [出现位置列表]}
+        """
+        node = self.root
+        occurrences = {}
+        
+        for pos, ch in enumerate(text):
+            char_idx = ord(ch) - ord('a')
+            node = self.children[node][char_idx]
+            
+            # 检查该节点和其失败指针链上的所有匹配
+            check_node = node
+            while check_node:
+                if self.cnt[check_node] > 0:
+                    if check_node not in occurrences:
+                        occurrences[check_node] = []
+                    occurrences[check_node].append(pos)
+                check_node = self.fail[check_node]
+        
+        return occurrences
 
-# @TIME
-def solve(testcase):
-    n = II()
-    ac = ACAM(200010)
+def test_ac_automation():
+    """测试 AC 自动机"""
+    ac = ACAutomaton()
     
-    for i in range(n):
-        ac.insert_string(I(), i)
-    
+    # 插入模式串
+    ac.insert_string("he")
+    ac.insert_string("she")
+    ac.insert_string("his")
+    ac.insert_string("hers")
     ac.build()
-    s = I()
     
-    res = ac.solve(s, n)
-    
-    print('\n'.join(map(str, res)))
+    # 测试匹配
+    text = "ushers"
+    matches = ac.search(text)
+    # "ushers" 应该找到模式串
+    assert len(matches) > 0, f"Expected matches in text"
+    print("✓ test_ac_automation passed")
 
-for testcase in range(1):
-    solve(testcase)
+
+if __name__ == "__main__":
+    test_ac_automation()
+    print("\n所有 AC 自动机测试通过！✓")

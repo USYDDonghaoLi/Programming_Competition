@@ -80,3 +80,29 @@ class KMP:
         """
         self.search()
         return self.matched_len[1:]
+
+
+def test_kmp():
+    """测试 KMP 算法"""
+    # 基本测试
+    kmp = KMP("abcabcabc", "abc")
+    result = kmp.search()
+    assert result == [1, 4, 7], f"Expected [1, 4, 7], got {result}"
+    print("✓ test_basic passed")
+    
+    # 无匹配
+    kmp = KMP("abcdef", "xyz")
+    result = kmp.search()
+    assert result == [], f"Expected [], got {result}"
+    print("✓ test_no_match passed")
+    
+    # 重叠匹配
+    kmp = KMP("aaaa", "aa")
+    result = kmp.search()
+    assert result == [1, 2, 3], f"Expected [1, 2, 3], got {result}"
+    print("✓ test_overlapping passed")
+
+
+if __name__ == "__main__":
+    test_kmp()
+    print("\n所有 KMP 测试通过！✓")

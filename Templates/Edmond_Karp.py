@@ -1,3 +1,23 @@
+"""
+Edmonds-Karp 最大流算法
+
+Ford-Fulkerson 的优化版本，使用 BFS 寻找增广路径。
+
+特点：
+- 使用 BFS（Breadth-First Search）找增广路径
+- 保证每次选择最短增广路径
+- 复杂度 O(V * E^2)
+
+优势：
+- 比 DFS 版本更稳定
+- 不易出现特殊情况导致复杂度恶化
+
+应用：
+- 最大流问题
+- 网络设计和容量规划
+- 二部图匹配
+"""
+
 from queue import Queue
 
 #n #边的个数
