@@ -135,7 +135,12 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n = II()
+    A = [i for i in range(1, n + 1)]
+    B = A[::-1]
 
-for testcase in range(II()):
+    print(*A)
+    print(*B)
+
+for testcase in range(1):
     solve(testcase)
