@@ -1,3 +1,18 @@
+"""
+Fast IO（快速输入输出）
+
+用于竞争编程的高性能 I/O 模板。
+
+特点：
+- 使用缓冲减少系统调用
+- 快速读写整数和字符串
+- 适合输入输出量大的题目
+
+使用：
+- input() / readline() 读取
+- 自定义输出函数
+"""
+
 '''
 Hala Madrid!
 https://github.com/USYDDonghaoLi/Programming_Competition
@@ -120,7 +135,18 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n, x, y = MI()
+    A = LII()
+    t = fmin(x, y)
 
-for testcase in range(II()):
+    if t == 0:
+        print("NO")
+    else:
+        res = 0
+        for a in A:
+            res += (a + t - 1) // t
+        print("YES")
+        print(res)
+
+for testcase in range(1):
     solve(testcase)

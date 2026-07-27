@@ -118,9 +118,85 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+D1 = 669 * 4
+D2 = 669 * 2
+
+def INRANGE(x, y):
+    return 0 <= x <= 4 and -2 <= y <= 2
+
+def DAMAGE(x, y):
+    if INRANGE(x, y):
+        return D1
+    else:
+        return D2
+
+def ATTACKRANGE(x, y):
+    res = []
+
+    for dx in range(-2, 3):
+        for dy in range(-2, 3):
+            if abs(dx) + abs(dy) <= 2:
+                res.append((x + dx, y + dy))
+    
+    return res
+
+d = ((1, 0), (0, 1), (-1, 0), (0, -1))
+
 # @TIME
 def solve(testcase):
-    pass
 
-for testcase in range(II()):
+    mp = defaultdict(set)
+    mp2 = defaultdict(list)
+    mp3 = defaultdict(bool)
+
+    n = II()
+    for _ in range(n):
+        x, y = MI()
+        ar = ATTACKRANGE(x, y)
+        for xx, yy in ar:
+            mp[(xx, yy)].add((x, y))
+            mp2[(x, y)].append((xx, yy))
+        mp3[(x, y)] = True
+
+    m = II()
+    for _ in range(m):
+        x, y = MI()
+
+        if (x, y) in mp3 and mp3[(x, y)]:
+            continue
+        
+        ar = ATTACKRANGE(x, y)
+        for xx, yy in ar:
+            mp[(xx, yy)].add((x, y))
+            mp2[(x, y)].append((xx, yy))
+        mp3[(x, y)] = True
+        
+        if INRANGE(x, y):
+            for dx, dy in d:
+                nx, ny = x + dx, y + dy
+                if not (nx == 0 and ny == 0) and (nx, ny) not in mp3:
+
+                    ar2 = ATTACKRANGE(nx, ny)
+                    for xx, yy in ar2:
+                        mp[(xx, yy)].add((nx, ny))
+                        mp2[(nx, ny)].append((xx, yy))
+                    mp3[(nx, ny)] = True
+    
+        # print('mp3', mp3)
+    
+    q = II()
+    for _ in range(q):
+        x, y = MI()
+        # print('attack', x, y, mp[(x, y)])
+
+        res = 0
+        for ax, ay in mp[(x, y)]:
+            if mp3[(ax, ay)]:
+                res += DAMAGE(ax, ay)
+                mp3[(ax, ay)] = False
+        
+        print(res)
+
+
+for testcase in range(1):
     solve(testcase)

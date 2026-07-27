@@ -72,55 +72,98 @@ from time import *
 from random import *
 from math import log, gcd, sqrt, ceil
 
-# from types import GeneratorType
-# def bootstrap(f, stack=[]):
-#     def wrappedfunc(*args, **kwargs):
-#         if stack:
-#             return f(*args, **kwargs)
-#         else:
-#             to = f(*args, **kwargs)
-#             while True:
-#                 if type(to) is GeneratorType:
-#                     stack.append(to)
-#                     to = next(to)
-#                 else:
-#                     stack.pop()
-#                     if not stack:
-#                         break
-#                     to = stack[-1].send(to)
-#             return to
-#     return wrappedfunc
-
-# seed(19981220)
-# RANDOM = getrandbits(64)
- 
-# class Wrapper(int):
-#     def __init__(self, x):
-#         int.__init__(x)
-
-#     def __hash__(self):
-#         return super(Wrapper, self).__hash__() ^ RANDOM
-
-# def TIME(f):
-
-#     def wrap(*args, **kwargs):
-#         s = perf_counter()
-#         ret = f(*args, **kwargs)
-#         e = perf_counter()
-
-#         print(e - s, 'sec')
-#         return ret
-    
-#     return wrap
-
 inf = float('inf')
 
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+class TrieNode:
+
+    
+    def __init__(self):
+        self.children = [None] * 36   
+        self.is_end = 0               
+        self.cnt = 0                  
+    
+    def _idx(self, ch: str) -> int:
+        if '0' <= ch <= '9':
+            return ord(ch) - ord('0')
+        return ord(ch) - ord('a') + 10
+    
+    def insert(self, word: str) -> int:
+
+        node = self
+        node.cnt += 1
+        for ch in word:
+            idx = self._idx(ch)
+            if not node.children[idx]:
+                node.children[idx] = TrieNode()
+            node = node.children[idx]
+            node.cnt += 1
+        node.is_end += 1
+        return node.is_end
+    
+    def delete(self, word: str) -> None:
+        node = self
+        for ch in word:
+            idx = self._idx(ch)
+            if not node.children[idx] or node.children[idx].cnt == 0:
+                return
+            node = node.children[idx]
+        if node.is_end == 0:
+            return
+        
+        node = self
+        node.cnt -= 1
+        for ch in word:
+            idx = self._idx(ch)
+            node = node.children[idx]
+            node.cnt -= 1
+        node.is_end -= 1
+    
+    def search(self, word: str) -> int:
+        node = self
+        for ch in word:
+            idx = self._idx(ch)
+            if not node.children[idx]:
+                return 0
+            if node.children[idx].cnt == 0:
+                return 0
+            node = node.children[idx]
+        return node.is_end
+    
+    def starts_with(self, prefix: str) -> bool:
+        node = self
+        if node.cnt == 0:
+            return False
+        for ch in prefix:
+            idx = self._idx(ch)
+            if not node.children[idx]:
+                return False
+            if node.children[idx].cnt == 0:
+                return False
+            node = node.children[idx]
+        for ch in range(36):
+            if node.children[ch] and node.children[ch].cnt > 0:
+                return True
+        return False
+
+
 # @TIME
 def solve(testcase):
-    pass
+    n = II()
+    T = TrieNode()
 
-for testcase in range(II()):
+    for _ in range(n):
+        op, s = LI()
+        if op == '1':
+            print(T.insert(s))
+        elif op == '2':
+            flag = T.starts_with(s)
+            print('YES' if flag else 'NO')
+        else:
+            T.delete(s)
+
+
+for testcase in range(1):
     solve(testcase)

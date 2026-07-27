@@ -72,24 +72,24 @@ from time import *
 from random import *
 from math import log, gcd, sqrt, ceil
 
-# from types import GeneratorType
-# def bootstrap(f, stack=[]):
-#     def wrappedfunc(*args, **kwargs):
-#         if stack:
-#             return f(*args, **kwargs)
-#         else:
-#             to = f(*args, **kwargs)
-#             while True:
-#                 if type(to) is GeneratorType:
-#                     stack.append(to)
-#                     to = next(to)
-#                 else:
-#                     stack.pop()
-#                     if not stack:
-#                         break
-#                     to = stack[-1].send(to)
-#             return to
-#     return wrappedfunc
+from types import GeneratorType
+def bootstrap(f, stack=[]):
+    def wrappedfunc(*args, **kwargs):
+        if stack:
+            return f(*args, **kwargs)
+        else:
+            to = f(*args, **kwargs)
+            while True:
+                if type(to) is GeneratorType:
+                    stack.append(to)
+                    to = next(to)
+                else:
+                    stack.pop()
+                    if not stack:
+                        break
+                    to = stack[-1].send(to)
+            return to
+    return wrappedfunc
 
 # seed(19981220)
 # RANDOM = getrandbits(64)
@@ -120,7 +120,81 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    
+    n = II()
+    A = LII()
+
+    B = [[] for _ in range(n)]
+    for _ in range(n - 1):
+        u, v = GMI()
+        B[u].append(v)
+        B[v].append(u)
+    
+    Child = [[] for _ in range(n)]
+    q = deque()
+    q.append((0, -1))
+    while q:
+        u, p = q.popleft()
+        for v in B[u]:
+            if v == p:
+                continue
+            Child[u].append(v)
+            q.append((v, u))
+    
+    def f(mid):
+        C = [A[i] - mid for i in range(n)]
+
+        D = [0 for _ in range(n)]
+
+        flag = False
+
+        @bootstrap
+        def dfs(u):
+            nonlocal flag
+            M1, M2 = -inf, -inf
+            if not Child[u]:
+                D[u] = C[u]
+                yield None
+                return
+            
+            for v in Child[u]:
+                yield dfs(v)
+                if D[v] > M1:
+                    M2 = M1
+                    M1 = D[v]
+                elif D[v] > M2:
+                    M2 = D[v]
+            
+            if M2 == -inf:
+                val = C[u] + M1
+                if val >= 0:
+                    flag = True
+                D[u] = fmax(val, C[u])
+                
+
+            else:
+                val = fmax(C[u] + M1 + M2, C[u] + M1)
+                if val >= 0:
+                    flag = True
+                D[u] = fmax(C[u] + M1, C[u])
+            yield None
+
+        dfs(0)
+
+        return flag
+
+
+    l, r = 0, 10 ** 9 + 10
+    while r - l > 2e-4:
+        mid = (l + r) / 2
+        if f(mid):
+            l = mid
+        else:
+            r = mid
+    
+    # print(f(8))
+
+    print(f"{l:.2f}")
 
 for testcase in range(II()):
     solve(testcase)

@@ -120,7 +120,54 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n = II()
+    N = 2000 * 2000
 
-for testcase in range(II()):
+    A = [[0 for _ in range(2010)] for _ in range(2010)]
+
+    B = []
+
+    for _ in range(n):
+        u, d, l, r = MI()
+        A[u][l] += 1
+        A[u][r + 1] -= 1
+        A[d + 1][l] -= 1
+        A[d + 1][r + 1] += 1
+        B.append((u, d, l, r))
+    
+    for i in range(1, 2010):
+        for j in range(1, 2010):
+            A[i][j] += A[i - 1][j] + A[i][j - 1] - A[i - 1][j - 1]
+    
+    '''
+    yes or no
+    '''
+    C = [[0 for _ in range(2010)] for _ in range(2010)]
+    tot = 0
+    for i in range(1, 2010):
+        for j in range(1, 2010):
+            if A[i][j]:
+                tot += 1
+                C[i][j] = C[i - 1][j] + C[i][j - 1] - C[i - 1][j - 1] + 1
+            else:
+                C[i][j] = C[i - 1][j] + C[i][j - 1] - C[i - 1][j - 1]
+    
+    '''
+    more than one or not
+    '''
+    D = [[0 for _ in range(2010)] for _ in range(2010)]
+    for i in range(1, 2010):
+        for j in range(1, 2010):
+            if A[i][j] > 1:
+                D[i][j] = D[i - 1][j] + D[i][j - 1] - D[i - 1][j - 1] + 1
+            else:
+                D[i][j] = D[i - 1][j] + D[i][j - 1] - D[i - 1][j - 1]
+    
+    for u, d, l, r in B:
+        inside = C[d][r] - C[u - 1][r] - C[d][l - 1] + C[u - 1][l - 1]
+        outside = tot - inside
+        more = D[d][r] - D[u - 1][r] - D[d][l - 1] + D[u - 1][l - 1]
+        print(N - outside - more)
+
+for testcase in range(1):
     solve(testcase)
