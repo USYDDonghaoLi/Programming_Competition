@@ -13,6 +13,16 @@ Dinic 算法是求解最大流问题的高效算法，时间复杂度 O(V² * E)
 - 有下界的边：add_edge_with_bound(u, v, lower_bound, upper_bound)
 
 复杂度：O(V² * E)
+
+优化版本：
+- 对于大容量网络（C > 10^5），可使用 Dinic_Optimized.py 中的 DinicScaling
+- 容量缩放版复杂度：O(VE log C)，其中 C 是最大容量
+- 对于单位容量，可优化到 O(E√V)
+
+选择指南：
+- 通用场景 → 使用本文件（标准 Dinic）
+- 大容量问题 → Dinic_Optimized.DinicScaling.max_flow_scaling()
+- 单位容量 → Dinic_Optimized.DinicScaling（不需缩放，天然快速）
 """
 
 from collections import deque
