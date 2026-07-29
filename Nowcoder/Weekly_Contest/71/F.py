@@ -118,9 +118,59 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
+mod = 10 ** 9 + 7
+
 # @TIME
 def solve(testcase):
-    pass
+    n, m, k = MI()
+    A = LII()
 
-for testcase in range(II()):
+    B = [1]
+
+    for i in range(1, fmin(30, k + 1)):
+        B.append(B[-1] * (k - i + 1) * pow(i, mod - 2, mod) % mod)
+
+    inv = pow(pow(2, k, mod), mod - 2, mod)
+
+    # print("B", B)
+
+    res = 0
+
+    for a in A:
+        tmp = [a]
+        while True:
+            val = tmp[-1]
+            nval = val + (val & m)
+
+            if val == nval:
+                break
+            else:
+                tmp.append(nval)
+
+        ex = 0
+        tot = 1
+
+        for i in range(len(tmp)):
+            if i > k:
+                tot = 0
+                break
+            else:
+                prob = B[i] * inv % mod
+                ex += prob * tmp[i] % mod
+                ex %= mod
+                tot -= prob
+                tot %= mod
+
+        nval = tmp[-1] + (tmp[-1] & m)
+        ex += tot * nval % mod
+        ex %= mod
+
+        res += ex
+        res %= mod
+
+    print(res)
+
+        
+
+for testcase in range(1):
     solve(testcase)
