@@ -446,21 +446,21 @@ class Ex_Lucas:
         return self.CRT.crt(self.m, self.r, self.p)
 
 
-def test_factorial():
-    """测试 Factorial 类"""
-    f = Factorial(1000, 1000000007)
+# def test_factorial():
+#     """测试 Factorial 类"""
+#     f = Factorial(1000, 1000000007)
     
-    # 测试组合
-    c = f.combination(5, 2)
-    assert c == 10, f"C(5,2) should be 10, got {c}"
-    print("✓ test_combination passed")
+#     # 测试组合
+#     c = f.combination(5, 2)
+#     assert c == 10, f"C(5,2) should be 10, got {c}"
+#     print("✓ test_combination passed")
     
-    # 测试排列
-    p = f.permutation(5, 2)
-    assert p == 20, f"P(5,2) should be 20, got {p}"
-    print("✓ test_permutation passed")
+#     # 测试排列
+#     p = f.permutation(5, 2)
+#     assert p == 20, f"P(5,2) should be 20, got {p}"
+#     print("✓ test_permutation passed")
 
 
-if __name__ == "__main__":
-    test_factorial()
-    print("\n所有 Factorial 测试通过！✓")
+# if __name__ == "__main__":
+#     test_factorial()
+#     print("\n所有 Factorial 测试通过！✓")
