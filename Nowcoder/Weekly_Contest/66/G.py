@@ -133,9 +133,57 @@ inf = float('inf')
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
-# @TIME
 def solve(testcase):
-    pass
+    x, k = MI()
+    L, R = x, x + k
+
+    lowers = list(map(int, str(L - 1)))
+    uppers = list(map(int, str(R)))
+
+    if len(lowers) < len(uppers):
+        lowers = [0] * (len(uppers) - len(lowers)) + lowers
+
+    def calc(num, mex):
+        if not num:
+            return 0
+        tar = (1 << mex) - 1
+        n = len(num)
+
+        @lru_cache(None)
+        def dfs(pos, limit, started, mask):
+            if pos == n:
+                if not started:
+                    mask = 1 << 0
+                has_all = (mask & tar) == tar
+                no_mex  = (mask >> mex & 1) == 0
+                return 1 if has_all and no_mex else 0
+
+            res = 0
+            up = num[pos] if limit else 9
+            for d in range(up + 1):
+                if d == mex:
+                    continue
+                nlimit = limit and (d == up)
+                if started:
+                    res += dfs(pos + 1, nlimit, True, mask | (1 << d))
+                else:
+                    if d == 0:           
+                        res += dfs(pos + 1, nlimit, False, mask)
+                    else:                
+                        res += dfs(pos + 1, nlimit, True, 1 << d)
+            return res
+
+        ans = dfs(0, True, False, 0)
+        dfs.cache_clear()
+        return ans
+
+    for m in range(10, 0, -1):
+        cnt = calc(uppers, m) - calc(lowers, m)
+        if cnt > 0:
+            print(m, cnt)
+            return
+
+    print(0, R - L + 1)
 
 for testcase in range(II()):
     solve(testcase)
