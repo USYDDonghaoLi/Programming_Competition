@@ -72,24 +72,24 @@ from time import *
 from random import *
 from math import log, gcd, sqrt, ceil
 
-# from types import GeneratorType
-# def bootstrap(f, stack=[]):
-#     def wrappedfunc(*args, **kwargs):
-#         if stack:
-#             return f(*args, **kwargs)
-#         else:
-#             to = f(*args, **kwargs)
-#             while True:
-#                 if type(to) is GeneratorType:
-#                     stack.append(to)
-#                     to = next(to)
-#                 else:
-#                     stack.pop()
-#                     if not stack:
-#                         break
-#                     to = stack[-1].send(to)
-#             return to
-#     return wrappedfunc
+from types import GeneratorType
+def bootstrap(f, stack=[]):
+    def wrappedfunc(*args, **kwargs):
+        if stack:
+            return f(*args, **kwargs)
+        else:
+            to = f(*args, **kwargs)
+            while True:
+                if type(to) is GeneratorType:
+                    stack.append(to)
+                    to = next(to)
+                else:
+                    stack.pop()
+                    if not stack:
+                        break
+                    to = stack[-1].send(to)
+            return to
+    return wrappedfunc
 
 # seed(19981220)
 # RANDOM = getrandbits(64)
@@ -120,7 +120,55 @@ fmax = lambda x, y: x if x > y else y
 
 # @TIME
 def solve(testcase):
-    pass
+    n = II()
+    A = LII()
+
+    B = [[] for _ in range(n)]
+
+    for _ in range(n - 1):
+        u, v = GMI()
+        B[u].append(v)
+        B[v].append(u)
+
+    dp = [0 for _ in range(n)]
+
+    res = 0
+
+    @bootstrap
+    def dfs(u, fa):
+        nonlocal res
+        C = []
+
+        for v in B[u]:
+            if v == fa:
+                continue
+            yield dfs(v, u)
+            C.append(dp[v])
+
+        s = A[u]
+        for c in C:
+            s += fmax(c, 0)
+
+        dp[u] = fmax(dp[u], s)
+
+        C.sort(reverse=True)
+
+        if C:
+            dp[u] = fmax(dp[u], fmax(C[0], 0))
+
+        res = fmax(res, dp[u])
+
+        if len(C) >= 2:
+            res = fmax(res, fmax(C[0], 0) + fmax(C[1], 0))
+        elif len(C):
+            res = fmax(res, fmax(C[0], 0))
+
+        yield
+
+    dfs(0, -1)
+
+    print(res)
+
 
 for testcase in range(II()):
     solve(testcase)

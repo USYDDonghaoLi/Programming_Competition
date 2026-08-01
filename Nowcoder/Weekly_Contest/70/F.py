@@ -72,78 +72,64 @@ from time import *
 from random import *
 from math import log, gcd, sqrt, ceil
 
-# from types import GeneratorType
-# def bootstrap(f, stack=[]):
-#     def wrappedfunc(*args, **kwargs):
-#         if stack:
-#             return f(*args, **kwargs)
-#         else:
-#             to = f(*args, **kwargs)
-#             while True:
-#                 if type(to) is GeneratorType:
-#                     stack.append(to)
-#                     to = next(to)
-#                 else:
-#                     stack.pop()
-#                     if not stack:
-#                         break
-#                     to = stack[-1].send(to)
-#             return to
-#     return wrappedfunc
-
-# seed(19981220)
-# RANDOM = getrandbits(64)
- 
-# class Wrapper(int):
-#     def __init__(self, x):
-#         int.__init__(x)
-
-#     def __hash__(self):
-#         return super(Wrapper, self).__hash__() ^ RANDOM
-
-# def TIME(f):
-
-#     def wrap(*args, **kwargs):
-#         s = perf_counter()
-#         ret = f(*args, **kwargs)
-#         e = perf_counter()
-
-#         print(e - s, 'sec')
-#         return ret
-    
-#     return wrap
-
 inf = float('inf')
 
 fmin = lambda x, y: x if x < y else y
 fmax = lambda x, y: x if x > y else y
 
-# @TIME
+def get_divisors(num):
+    if num <= 0:
+        return []
+    divs = []
+    i = 1
+    while i * i <= num:
+        if num % i == 0:
+            divs.append(i)
+            if i * i != num:
+                divs.append(num // i)
+        i += 1
+    return divs
+
 def solve(testcase):
     n, k = MI()
     A = LII()
 
-    if n == 1:
-        print(k, (k + 1) * k // 2)
+    if n == 1 or all(a == A[0] for a in A):
+        print(k, k * (k + 1) // 2)
         return
-    
-    A.sort()
+    min_d = inf
+    best = -1
+    for i in range(n - 1):
+        d = abs(A[i] - A[i + 1])
+        if 0 < d < min_d:
+            min_d = d
+            best = i
 
-    l, r = 0, 0
-    B = []
-    C = []
+    m = min(A[best], A[best + 1])
+    candidates = set()
+    for div in get_divisors(min_d):
+        x = div - m
+        if 1 <= x <= k:
+            candidates.add(x)
 
-    while r < n:
-        while r < n and A[r] == A[l]:
-            r += 1
-        LEN = r - l
-        B.append(A[l])
-        if LEN == 1:
-            C.append(True)
-        else:
-            C.append(False)
-        
-        
+    cnt = 0
+    res = 0
+    for x in candidates:
+        ok = True
+        for i in range(n - 1):
+            d = abs(A[i] - A[i + 1])
+            if d == 0:
+                continue
+            mi = min(A[i], A[i + 1])
+            if d % (mi + x) != 0:
+                ok = False
+                break
+        if ok:
+            cnt += 1
+            res += x
+
+    print(cnt, res)
+
 
 for testcase in range(II()):
     solve(testcase)
