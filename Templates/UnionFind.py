@@ -19,7 +19,7 @@ class UnionFind:
         self.n = n
         self.component_count = n
     
-    def find(self, x: int) -> int:
+    def Find(self, x: int) -> int:
         """
         查找元素 x 所在的集合代表（根节点）。
         使用迭代路径压缩优化，避免递归深度问题。
@@ -41,7 +41,7 @@ class UnionFind:
         
         return root
     
-    def union(self, x: int, y: int) -> bool:
+    def Union(self, x: int, y: int) -> bool:
         """
         合并包含 x 和 y 的两个集合。
         使用按大小的启发式合并（小树并入大树）。
